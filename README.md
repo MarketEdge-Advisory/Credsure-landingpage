@@ -1,3 +1,45 @@
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Open http://[localhost:3000 ](http://localhost:5173/)to view the app.
+
+
+# Tech Stack
+React + Vite - Fast development setup
+
+React Router - Client-side navigation
+
+Context API - State management
+
+Custom CSS - Styling
+
+
+# Why These Choices?
+Context API: Simple state management without external dependencies
+
+Vite: Faster builds and better dev experience than Create React App
+
+Custom CSS: Full design control and smaller bundle size
+
+React Router: Clean navigation and direct linking
+
+# Features
+Browse all countries with pagination
+
+Search and filter by region
+
+View country details with border countries
+
+Responsive design for all devices
+
+Client-side caching for performance
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
