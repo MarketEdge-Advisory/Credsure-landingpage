@@ -4,7 +4,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', '"Segoe UI"', 'sans-serif'],
+        sans: ['"DM Sans"', 'ui-sans-serif', 'system-ui'],
+      },
+       filter: {
+        'black': 'invert(0) brightness(0)',
       },
     },
   },
