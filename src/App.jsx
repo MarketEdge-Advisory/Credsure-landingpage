@@ -6,6 +6,7 @@ import Register from './pages/Register';
 import CreateAccount from './pages/CreateAccount';
 import Verification from './pages/Verification';
 import StoreSetup from './pages/StoreSetup';
+import HomePage from './pages/HomePage';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
            <Route path='/create-account' element={<CreateAccount />} />
             <Route path='/verification' element={<Verification />} />
             <Route path='/store-setup' element={<StoreSetup />} />
+            <Route path='/home' element={<HomePage />} />
            </Routes>
         </main>
   );
