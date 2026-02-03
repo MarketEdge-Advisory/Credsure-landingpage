@@ -15,6 +15,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [chartsReady, setChartsReady] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,6 +30,8 @@ const Dashboard = () => {
         setDataLoaded(true); // Still show UI with default data
       } finally {
         setLoading(false);
+        // Small delay to ensure DOM is ready for charts
+        setTimeout(() => setChartsReady(true), 100);
       }
     };
 
@@ -106,12 +109,16 @@ const Dashboard = () => {
       </div>
     </div>
         <RevenueCard selectedLocation={selected} />
-        <ResponsiveTrendChart selectedLocation={selected} />
-        <TransactionCount selectedLocation={selected} />
-        <TrendChart selectedLocation={selected} />
-        <AverageTickectCount selectedLocation={selected} />
-        <AvgTicketTrendChart selectedLocation={selected} />
-        <CustomerCaptureData selectedLocation={selected} />
+        {chartsReady && (
+          <>
+            <ResponsiveTrendChart selectedLocation={selected} />
+            <TransactionCount selectedLocation={selected} />
+            <TrendChart selectedLocation={selected} />
+            <AverageTickectCount selectedLocation={selected} />
+            <AvgTicketTrendChart selectedLocation={selected} />
+            <CustomerCaptureData selectedLocation={selected} />
+          </>
+        )}
     </div>
   )
 }
