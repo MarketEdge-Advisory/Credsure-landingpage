@@ -6,8 +6,8 @@ const TransactionCard = ({ title, actual, target, percentage, bgColor }) => {
   return (
     <div className={`p-6 rounded-lg border ${bgColor} w-full md:w-1/3`}>
       <h3 className="text-gray-600 text-sm font-medium">{title}</h3>
-      <p className="text-2xl font-bold mt-2">{actual.toLocaleString(undefined, {maximumFractionDigits: 0})} <span className="text-gray-500 font-normal">Actual</span></p>
-      <p className="text-gray-500 mt-1">{target.toLocaleString(undefined, {maximumFractionDigits: 0})} Target</p>
+      <p className="text-2xl font-bold mt-2">{actual.toLocaleString(undefined, {maximumFractionDigits: 0})} <span className="text-gray-500 font-normal text-sm">Actual</span></p>
+      <p className="text-gray-600 font-bold text-sm mt-1">₦{target.toLocaleString(undefined, {maximumFractionDigits: 0})} <span className="text-gray-500 font-normal text-sm">Target</span></p>
       <button className={`mt-4 ${percentage >= 0 ? 'bg-green-500' : 'bg-red-500'} text-white text-sm font-semibold px-3 py-1 rounded-md w-full items-center justify-center text-center`}>
         {percentage >= 0 ? '↑' : '↓'} {Math.abs(percentage).toFixed(1)}% Vs Target
       </button>
@@ -40,15 +40,15 @@ const TransactionCount = ({ selectedLocation }) => {
    const prevWeekTransactions = weeklyTransactionsActual * 0.9;
    const weekOnWeekPercentage = ((weeklyTransactionsActual - prevWeekTransactions) / prevWeekTransactions) * 100;
   return (
-    <div className="p-4 md:p-6 space-y-6 bg-white shadow-lg rounded-xl mx-4 md:mx-6">
-     <div className="flex flex-col md:flex-row w-full md:justify-between md:items-center gap-4">
+    <div className="p-6 space-y-6 bg-white shadow-lg rounded-xl mx-6">
+     <div className="flex w-full justify-between items-center">
         <div className="flex flex-col">
-        <h2 className="text-base md:text-lg font-semibold text-gray-700 mb-2">Transaction Count for {selected}</h2>
-      <p className="text-gray-500 text-xs md:text-sm mb-4">
+        <h2 className="text-lg font-semibold text-gray-700 mb-2">Transaction Count for {selected}</h2>
+      <p className="text-gray-500 text-sm mb-4">
         This shows daily and weekly actual vs target with week-on-week transaction count comparison.
       </p>
       </div>
-        <div className="relative inline-block text-left self-start md:self-auto">
+        <div className="relative inline-block text-left">
                       {/* Button */}
                       <button
                         onClick={() => setOpen(!open)}

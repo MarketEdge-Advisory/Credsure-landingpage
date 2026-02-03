@@ -6,8 +6,8 @@ const AvgTicketCard = ({ title, actual, target, percentage, bgColor }) => {
   return (
     <div className={`p-6 rounded-lg border ${bgColor} w-full md:w-1/3`}>
       <h3 className="text-gray-600 text-sm font-medium">{title}</h3>
-      <p className="text-2xl font-bold mt-2">₦{actual.toLocaleString(undefined, {maximumFractionDigits: 0})} <span className="text-gray-500 font-normal">Actual</span></p>
-      <p className="text-gray-500 mt-1">₦{target.toLocaleString(undefined, {maximumFractionDigits: 0})} Target</p>
+      <p className="text-2xl font-bold mt-2">₦{actual.toLocaleString(undefined, {maximumFractionDigits: 0})} <span className="text-gray-500 font-normal text-sm">Actual</span></p>
+      <p className="text-gray-600 font-bold text-sm mt-1">₦{target.toLocaleString(undefined, {maximumFractionDigits: 0})} <span className="text-gray-500 font-normal text-sm">Target</span></p>
       <button className={`mt-4 ${percentage >= 0 ? 'bg-green-500' : 'bg-red-500'} text-white text-sm font-semibold px-3 py-1 rounded-md w-full items-center justify-center text-center`}>
         {percentage >= 0 ? '↑' : '↓'} {Math.abs(percentage).toFixed(1)}% Vs Target
       </button>
