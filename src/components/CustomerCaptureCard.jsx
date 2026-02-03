@@ -44,14 +44,14 @@ const CustomerCaptureCard = ({ selectedLocation }) => {
      },
    ];
   return (
-    <div className="p-6 space-y-6 bg-white shadow-lg rounded-xl mx-6">
+    <div className="p-4 md:p-6 space-y-6 bg-white shadow-lg rounded-xl mx-4 md:mx-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-base md:text-lg font-semibold text-gray-900">
             Customer Capture Data for {selected}
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-xs md:text-sm text-gray-500 mt-1">
             This shows daily and weekly actual vs target with week-on-week
             average ticket value comparison.
           </p>

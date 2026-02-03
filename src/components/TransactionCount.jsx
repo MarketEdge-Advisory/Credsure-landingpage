@@ -40,15 +40,15 @@ const TransactionCount = ({ selectedLocation }) => {
    const prevWeekTransactions = weeklyTransactionsActual * 0.9;
    const weekOnWeekPercentage = ((weeklyTransactionsActual - prevWeekTransactions) / prevWeekTransactions) * 100;
   return (
-    <div className="p-6 space-y-6 bg-white shadow-lg rounded-xl mx-6">
-     <div className="flex w-full justify-between items-center">
+    <div className="p-4 md:p-6 space-y-6 bg-white shadow-lg rounded-xl mx-4 md:mx-6">
+     <div className="flex flex-col md:flex-row w-full md:justify-between md:items-center gap-4">
         <div className="flex flex-col">
-        <h2 className="text-lg font-semibold text-gray-700 mb-2">Transaction Count for {selected}</h2>
-      <p className="text-gray-500 text-sm mb-4">
+        <h2 className="text-base md:text-lg font-semibold text-gray-700 mb-2">Transaction Count for {selected}</h2>
+      <p className="text-gray-500 text-xs md:text-sm mb-4">
         This shows daily and weekly actual vs target with week-on-week transaction count comparison.
       </p>
       </div>
-        <div className="relative inline-block text-left">
+        <div className="relative inline-block text-left self-start md:self-auto">
                       {/* Button */}
                       <button
                         onClick={() => setOpen(!open)}

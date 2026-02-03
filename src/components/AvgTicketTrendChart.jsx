@@ -24,14 +24,14 @@ const AvgTicketTrendChart = ({ selectedLocation }) => {
 
    const chartData = generateAvgTicketData(selected);
   return (
-    <div className="w-full rounded-xl bg-white p-6 shadow-lg mx-6">
+    <div className="w-full rounded-xl bg-white p-4 md:p-6 shadow-lg mx-4 md:mx-6">
       {/* Header */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-base md:text-lg font-semibold text-gray-900">
             Trend Chart for {selected} (Average Ticket Value)
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-xs md:text-sm text-gray-500">
             Tracks how actual results in {selected} measure up against targets
           </p>
         </div>
@@ -75,31 +75,33 @@ const AvgTicketTrendChart = ({ selectedLocation }) => {
       </div>
 
       {/* Chart */}
-      <div className="h-[340px] w-full">
+      <div className="h-[240px] md:h-[340px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
+          <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
             <CartesianGrid stroke="#f1f5f9" vertical={false}/>
             <XAxis
               dataKey="day"
-              tick={{ fontSize: 12, fill: "#64748b" }}
+              tick={{ fontSize: 10, fill: "#64748b" }}
               axisLine={false}
               tickLine={false}
-              label={{ value: 'Days of the week', position: 'insideBottom', offset: -5, style: { fontSize: 14, fill: '#64748b' } }}
+              label={{ value: 'Days of the week', position: 'insideBottom', offset: -5, style: { fontSize: 11, fill: '#64748b' } }}
             />
             <YAxis
               tickFormatter={currencyFormatter}
-              tick={{ fontSize: 12, fill: "#64748b" }}
+              tick={{ fontSize: 10, fill: "#64748b" }}
               axisLine={false}
               tickLine={false}
-              label={{ value: 'Ticket value', angle: -90, position: 'insideLeft', style: { fontSize: 14, fill: '#64748b' } }}
+              label={{ value: 'Ticket value', angle: -90, position: 'insideLeft', style: { fontSize: 11, fill: '#64748b' } }}
             />
             <Tooltip
               formatter={(value) => currencyFormatter(value)}
+              contentStyle={{ fontSize: 12 }}
             />
             <Legend
               verticalAlign="top"
               align="center"
               iconType="circle"
+              wrapperStyle={{ fontSize: 11 }}
             />
 
             {/* Actual */}
@@ -107,7 +109,7 @@ const AvgTicketTrendChart = ({ selectedLocation }) => {
               type="monotone"
               dataKey="actual"
               stroke="#6b7280"
-              strokeWidth={2.5}
+              strokeWidth={2}
               strokeDasharray="6 6"
               dot={false}
               name="Actual"
@@ -118,7 +120,7 @@ const AvgTicketTrendChart = ({ selectedLocation }) => {
               type="monotone"
               dataKey="target"
               stroke="#facc15"
-              strokeWidth={2.5}
+              strokeWidth={2}
               strokeDasharray="6 6"
               dot={false}
               name="Target"
@@ -132,7 +134,7 @@ const AvgTicketTrendChart = ({ selectedLocation }) => {
         {["4 Weeks", "8 weeks", "3 Months", "+ custom"].map((label, idx, arr) => (
           <button
             key={label}
-            className={`px-4 py-2 text-sm font-medium
+            className={`px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium
               ${
                 label === "4 Weeks"
                   ? "bg-yellow-400 text-red-600 rounded-l-md border-yellow-400"

@@ -23,14 +23,14 @@ const RevenueTrendChart = ({ selectedLocation }) => {
 
   const chartData = generateTrendData(selected);
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mx-6">
+    <div className="bg-white rounded-xl shadow-lg p-4 md:p-6 mx-4 md:mx-6">
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-base md:text-lg font-semibold text-gray-900">
             Trend Chart for {selected} (Revenue Performance)
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-xs md:text-sm text-gray-500">
             Tracks how actual results in {selected} measure up against targets
           </p>
         </div>
@@ -74,29 +74,31 @@ const RevenueTrendChart = ({ selectedLocation }) => {
       </div>
 
       {/* Chart */}
-      <div className="h-[320px]">
+      <div className="h-[240px] md:h-[320px]">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
+          <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
             <XAxis
               dataKey="day"
-              tick={{ fill: "#6B7280", fontSize: 12 }}
+              tick={{ fill: "#6B7280", fontSize: 10 }}
               axisLine={false}
               tickLine={false}
-              label={{ value: 'Days of the week', position: 'insideBottom', offset: -5, style: { fontSize: 14, fill: '#6B7280' } }}
+              label={{ value: 'Days of the week', position: 'insideBottom', offset: -5, style: { fontSize: 11, fill: '#6B7280' } }}
             />
             <YAxis
               tickFormatter={formatCurrency}
-              tick={{ fill: "#6B7280", fontSize: 12 }}
+              tick={{ fill: "#6B7280", fontSize: 10 }}
               axisLine={false}
               tickLine={false}
-              label={{ value: 'Revenue', angle: -90, position: 'insideLeft', style: { fontSize: 14, fill: '#6B7280' } }}
+              label={{ value: 'Revenue', angle: -90, position: 'insideLeft', style: { fontSize: 11, fill: '#6B7280' } }}
             />
             <Tooltip
               formatter={(value) => formatCurrency(value)}
+              contentStyle={{ fontSize: 12 }}
             />
             <Legend verticalAlign="top"
               align="center"
-              iconType="circle"/>
+              iconType="circle"
+              wrapperStyle={{ fontSize: 11 }}/>
 
             <Line
               type="monotone"
@@ -124,7 +126,7 @@ const RevenueTrendChart = ({ selectedLocation }) => {
         {["4 Weeks", "8 Weeks", "3 Months", "+ custom"].map((label, idx, arr) => (
           <button
             key={label}
-            className={`px-4 py-2 text-sm border 
+            className={`px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm border 
               ${
                 idx === 0
                   ? "bg-yellow-400 text-black border-yellow-400 rounded-l-md"

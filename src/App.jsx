@@ -6,7 +6,7 @@ import Dashboard from './components/Dashboard';
 
 function App() {
   return (
-        <main>
+        <main className="min-h-screen w-full overflow-x-hidden">
           <Routes>
            <Route path='/' element={<Dashboard />} />
            </Routes>

@@ -46,22 +46,22 @@ const Dashboard = () => {
     );
   }
   return (
-    <div className='flex flex-col gap-10 overflow-x-hidden mb-10'>
+    <div className='flex flex-col gap-6 md:gap-10 overflow-x-hidden mb-10'>
     {error && (
-      <div className="mx-6 mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+      <div className="mx-4 md:mx-6 mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
         <p className="text-yellow-800 text-sm"> {error}</p>
       </div>
     )}
-    <div className="flex items-center justify-between px-6 py-4 bg-white">
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-4 md:px-6 py-4 bg-white">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900">
+        <h1 className="text-xl md:text-2xl font-semibold text-gray-900">
           Dashboard Overview
         </h1>
         <p className="mt-1 text-sm text-gray-500">
           A consolidated view of key metrics from the Chicken Republic pilot program.
         </p>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
 
        <div className="relative inline-block text-left">
       <button
@@ -98,9 +98,10 @@ const Dashboard = () => {
         </div>
       )}
     </div>
-        <button className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+        <button className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 whitespace-nowrap">
           <CloudDownload className="h-4 w-4" />
-          Export Report
+          <span className="hidden sm:inline">Export Report</span>
+          <span className="sm:hidden">Export</span>
         </button>
       </div>
     </div>

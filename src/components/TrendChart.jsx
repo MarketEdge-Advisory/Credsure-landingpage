@@ -24,12 +24,12 @@ const TrendChart = ({ selectedLocation, title = "Trend Chart for {location} (Tra
   const chartData = generateTransactionData(selected);
   const chartTitle = title.replace("{location}", selected);
   return (
-    <div className="w-full rounded-xl border border-gray-200 bg-white p-6 shadow-lg mx-6">
+    <div className="w-full rounded-xl border border-gray-200 bg-white p-4 md:p-6 shadow-lg mx-4 md:mx-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">{chartTitle}</h2>
-          <p className="text-sm text-gray-500">
+          <h2 className="text-base md:text-lg font-semibold text-gray-900">{chartTitle}</h2>
+          <p className="text-xs md:text-sm text-gray-500">
             Tracks how actual results in {selected} measure up against targets
           </p>
         </div>
@@ -73,35 +73,36 @@ const TrendChart = ({ selectedLocation, title = "Trend Chart for {location} (Tra
       </div>
 
       {/* Chart */}
-      <div className="h-[320px] w-full">
+      <div className="h-[240px] md:h-[320px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
+          <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false}/>
             <XAxis
               dataKey="day"
-              tick={{ fontSize: 12, fill: "#64748b" }}
+              tick={{ fontSize: 10, fill: "#64748b" }}
               axisLine={false}
               tickLine={false}
-              label={{ value: 'Days of the week', position: 'insideBottom', offset: -5, style: { fontSize: 14, fill: '#64748b' } }}
+              label={{ value: 'Days of the week', position: 'insideBottom', offset: -5, style: { fontSize: 11, fill: '#64748b' } }}
             />
             <YAxis
-              tick={{ fontSize: 12, fill: "#64748b" }}
+              tick={{ fontSize: 10, fill: "#64748b" }}
               axisLine={false}
               tickLine={false}
-              label={{ value: 'Counts', angle: -90, position: 'insideLeft', style: { fontSize: 14, fill: '#64748b' } }}
+              label={{ value: 'Counts', angle: -90, position: 'insideLeft', style: { fontSize: 11, fill: '#64748b' } }}
             />
-            <Tooltip />
+            <Tooltip contentStyle={{ fontSize: 12 }} />
             <Legend
               verticalAlign="top"
               align="center"
               iconType="circle"
+              wrapperStyle={{ fontSize: 11 }}
             />
 
             <Line
               type="monotone"
               dataKey="actual"
               stroke="#111827"
-              strokeWidth={2.5}
+              strokeWidth={2}
               dot={false}
               name="Actual"
             />
@@ -110,7 +111,7 @@ const TrendChart = ({ selectedLocation, title = "Trend Chart for {location} (Tra
               type="monotone"
               dataKey="target"
               stroke="#facc15"
-              strokeWidth={2.5}
+              strokeWidth={2}
               dot={false}
               name="Target"
             />
@@ -123,7 +124,7 @@ const TrendChart = ({ selectedLocation, title = "Trend Chart for {location} (Tra
         {["4 Weeks", "8 Weeks", "3 Months", "Custom"].map((label, idx, arr) => (
           <button
             key={label}
-            className={`px-4 py-2 text-sm font-medium
+            className={`px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium
               ${
                 label === "4 Weeks"
                   ? "bg-yellow-400 text-black rounded-l-md"
