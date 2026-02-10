@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { ArrowDown, Bookmark, ChevronDown, MoveDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowDown, ChevronDown, X, Images } from 'lucide-react';
 import { useCarContext } from '../context/CarContext';
 
 const ChooseSuzuki = () => {
   const [visibleCars, setVisibleCars] = useState(9);
+  const [selectedCarImages, setSelectedCarImages] = useState(null);
   const { selectCar } = useCarContext();
 
   const formatPrice = (price) => {
@@ -29,6 +30,7 @@ const ChooseSuzuki = () => {
       description: 'Updated design with modern features & comfort.',
       image: '/Dzire.svg',
       priceValue: 12500000,
+      images: ['/Dzire.svg', '/Dzire1.svg', '/Dzire.svg'],
     },
     {
       id: 2,
@@ -36,6 +38,7 @@ const ChooseSuzuki = () => {
       description: 'Sporty hatchback perfect for city driving.',
       image: '/Swift.svg',
       priceValue: 15000000,
+      images: ['/Swift.svg', '/Swift.svg', '/Swift.svg'],
     },
     {
       id: 3,
@@ -43,6 +46,7 @@ const ChooseSuzuki = () => {
       description: 'Affordable and reliable everyday car.',
       image: '/Alto.svg',
       priceValue: 8500000,
+      images: ['/Alto.svg', '/Alto.svg', '/Alto.svg'],
     },
     {
       id: 4,
@@ -50,6 +54,7 @@ const ChooseSuzuki = () => {
       description: 'Premium SUV with hybrid technology.',
       image: '/Grandvitara.svg',
       priceValue: 24300250,
+      images: ['/Grandvitara.svg', '/Grandvitara.svg', '/Grandvitara.svg'],
     },
     {
       id: 5,
@@ -57,6 +62,7 @@ const ChooseSuzuki = () => {
       description: 'More space with legendary off-road DNA.',
       image: '/Jimny.svg',
       priceValue: 18000000,
+      images: ['/Jimny.svg', '/Jimny.svg', '/Jimny.svg'],
     },
     {
       id: 6,
@@ -64,6 +70,7 @@ const ChooseSuzuki = () => {
       description: 'Reliable commercial vehicle for business.',
       image: '/Grandvitara.svg',
       priceValue: 22500000,
+      images: ['/Grandvitara.svg', '/Grandvitara.svg', '/Grandvitara.svg'],
     },
     {
       id: 7,
@@ -71,6 +78,7 @@ const ChooseSuzuki = () => {
       description: 'Bold design with enhanced performance.',
       image: '/presso.jpeg',
       priceValue: 9800000,
+      images: ['/presso.jpeg', '/presso.jpeg', '/presso.jpeg'],
     },
     {
       id: 8,
@@ -78,6 +86,7 @@ const ChooseSuzuki = () => {
       description: 'More space with legendary off-road DNA.',
       image: '/Ertiga.svg',
       priceValue: 16500000,
+      images: ['/Ertiga.svg', '/Ertiga1.svg', '/Ertiga.svg'],
     },
     {
       id: 9,
@@ -85,6 +94,7 @@ const ChooseSuzuki = () => {
       description: 'Reliable commercial vehicle for business.',
       image: '/Ertiga1.svg',
       priceValue: 10200000,
+      images: ['/Ertiga1.svg', '/Ertiga.svg', '/Ertiga1.svg'],
     }
   ].map(car => ({
     ...car,
@@ -96,7 +106,20 @@ const ChooseSuzuki = () => {
     setVisibleCars(cars.length);
   };
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (selectedCarImages) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedCarImages]);
+
   return (
+    <>
     <section id="vehicles" className="bg-white py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -130,9 +153,13 @@ const ChooseSuzuki = () => {
               {/* Overlay Gradient */}
               <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/20 to-transparent"></div>
 
-              {/* Bookmark Icon */}
-              <button className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10 w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md">
-                <Bookmark className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
+              {/* View Images Icon */}
+              <button 
+                className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10 w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md"
+                onClick={() => setSelectedCarImages({ name: car.name, images: car.images })}
+                title="View more images"
+              >
+                <Images className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
               </button>
 
               {/* Price Info Box */}
@@ -146,9 +173,9 @@ const ChooseSuzuki = () => {
               </div>
 
               {/* Car Info - Bottom Section */}
-              <div className="absolute bottom-0 left-0 right-0 z-10 p-3 sm:p-4 md:p-6 bg-slate-400/30 backdrop-blur-sm">
-                <h3 className="text-white text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2">{car.name}</h3>
-                <p className="text-gray-200 text-xs sm:text-sm mb-3 sm:mb-4">{car.description}</p>
+              <div className="absolute bottom-0 left-0 right-0 z-10 p-3 sm:p-4 md:p-6">
+                <h3 className="text-white text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2 drop-shadow-lg">{car.name}</h3>
+                <p className="text-white text-xs sm:text-sm mb-3 sm:mb-4 drop-shadow-lg">{car.description}</p>
 
                 {/* CTA Button */}
                 <button 
@@ -182,6 +209,71 @@ const ChooseSuzuki = () => {
         )}
       </div>
     </section>
+
+    {/* Image Popup Modal */}
+    {selectedCarImages && (
+      <div 
+        className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto"
+        onClick={() => setSelectedCarImages(null)}
+        onTouchEnd={() => setSelectedCarImages(null)}
+      >
+        <div 
+          className="bg-white rounded-lg max-w-4xl w-full p-4 sm:p-6 relative my-auto max-h-[90vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+        >
+          {/* Close Button */}
+          <button
+            onClick={() => setSelectedCarImages(null)}
+            className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 sm:w-10 sm:h-10 bg-gray-800 hover:bg-gray-700 text-white rounded-full flex items-center justify-center transition-colors z-10"
+          >
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+
+          {/* Car Name */}
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12">{selectedCarImages.name}</h3>
+
+          {/* Image Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {selectedCarImages.images.map((img, index) => (
+              <div 
+                key={index}
+                className="aspect-video bg-gray-100 rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow"
+              >
+                <img 
+                  src={img} 
+                  alt={`${selectedCarImages.name} view ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* View Details Button */}
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => {
+                const car = cars.find(c => c.name === selectedCarImages.name);
+                if (car) {
+                  selectCar(car);
+                  setSelectedCarImages(null);
+                  setTimeout(() => {
+                    const calculator = document.querySelector('#calculator');
+                    if (calculator) {
+                      calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }, 100);
+                }
+              }}
+              className="bg-cyan-500 hover:bg-cyan-600 text-white font-medium px-6 sm:px-8 py-3 rounded-full transition-all duration-300 hover:shadow-lg text-sm sm:text-base"
+            >
+              Calculate Monthly Payment
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 
