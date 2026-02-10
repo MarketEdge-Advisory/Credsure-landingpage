@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"DM Sans"', 'ui-sans-serif', 'system-ui'],
+        sans: ['"Work Sans"', 'ui-sans-serif', 'system-ui'],
       },
        filter: {
         'black': 'invert(0) brightness(0)',
