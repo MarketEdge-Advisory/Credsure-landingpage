@@ -100,27 +100,27 @@ const ChooseSuzuki = () => {
     <section id="vehicles" className="bg-white py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="mb-4 bg-[#ECF2F9] justify-center items-center rounded-full inline-flex px-4 py-2">
-            <span className="bg-white text-gray-600 text-sm md:text-base font-medium px-2 rounded-full">Step 1</span>
-            <span className="ml-4 text-cyan-500 text-sm md:text-base font-medium cursor-pointer hover:underline">
-              Browse and select vehicle <ArrowDown className="w-4 h-4 inline-block ml-1" />
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="mb-4 bg-[#ECF2F9] justify-center items-center rounded-full inline-flex px-3 sm:px-4 py-2 flex-wrap sm:flex-nowrap gap-2">
+            <span className="bg-white text-gray-600 text-xs sm:text-sm md:text-base font-medium px-2 rounded-full">Step 1</span>
+            <span className="text-cyan-500 text-xs sm:text-sm md:text-base font-medium cursor-pointer hover:underline flex items-center">
+              Browse and select vehicle <ArrowDown className="w-3 sm:w-4 h-3 sm:h-4 inline-block ml-1" />
             </span>
           </div>
-          <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 px-4">
             Choose your perfect suzuki
           </h2>
-          <p className="text-gray-600 text-base md:text-lg max-w-[620px] mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-[620px] mx-auto px-4">
             Build purchase intent through visual discovery. Each vehicle card should feel aspirational yet accessible, with clear CTAs leading to the calculator.
           </p>
         </div>
 
         {/* Car Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-12">
           {cars.slice(0, visibleCars).map((car) => (
             <div
               key={car.id}
-              className="group relative rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 h-[400px]"
+              className="group relative rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 h-[320px] sm:h-[360px] md:h-[400px]"
               style={{
                 backgroundImage: `url(${car.image})`,
                 backgroundSize: 'cover',
@@ -131,24 +131,24 @@ const ChooseSuzuki = () => {
               <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/20 to-transparent"></div>
 
               {/* Bookmark Icon */}
-              <button className="absolute top-4 left-4 z-10 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md">
-                <Bookmark className="w-5 h-5 text-gray-700" />
+              <button className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10 w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md">
+                <Bookmark className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
               </button>
 
               {/* Price Info Box */}
-              <div className="absolute top-4 right-4 z-10 bg-[#1a2942] rounded-lg px-4 py-3 shadow-lg">
-                <p className="text-white text-sm font-normal mb-1">
-                  From: <span className='text-sm font-bold text-white'>{car.price}</span>
+              <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-10 bg-[#1a2942] rounded-lg px-2 sm:px-3 md:px-4 py-2 sm:py-3 shadow-lg">
+                <p className="text-white text-xs sm:text-sm font-normal mb-1">
+                  From: <span className='text-xs sm:text-sm font-bold text-white'>{car.price}</span>
                 </p>
-                <p className="text-white text-sm font-normal">
-                  Monthly From: <span className='text-sm font-bold text-white'>{car.monthly}</span>
+                <p className="text-white text-xs sm:text-sm font-normal">
+                  Monthly From: <span className='text-xs sm:text-sm font-bold text-white'>{car.monthly}</span>
                 </p>
               </div>
 
               {/* Car Info - Bottom Section */}
-              <div className="absolute bottom-0 left-0 right-0 z-10 p-6 bg-slate-400/30 backdrop-blur-sm">
-                <h3 className="text-white text-2xl font-bold mb-2">{car.name}</h3>
-                <p className="text-gray-200 text-sm mb-4">{car.description}</p>
+              <div className="absolute bottom-0 left-0 right-0 z-10 p-3 sm:p-4 md:p-6 bg-slate-400/30 backdrop-blur-sm">
+                <h3 className="text-white text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2">{car.name}</h3>
+                <p className="text-gray-200 text-xs sm:text-sm mb-3 sm:mb-4">{car.description}</p>
 
                 {/* CTA Button */}
                 <button 
@@ -159,10 +159,10 @@ const ChooseSuzuki = () => {
                       calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                   }}
-                  className="group/btn flex items-center justify-between w-full bg-cyan-500 hover:bg-cyan-600 text-white font-medium px-6 py-3 rounded-full transition-all duration-300"
+                  className="group/btn flex items-center justify-between w-full bg-cyan-500 hover:bg-cyan-600 text-white font-medium px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-full transition-all duration-300"
                 >
-                  <span className="text-xs">Calculate Monthly Payment</span>
-                  <ChevronDown className="w-5 h-5 group-hover/btn:translate-y-1 transition-transform" />
+                  <span className="text-[10px] sm:text-xs md:text-sm">Calculate Monthly Payment</span>
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-y-1 transition-transform" />
                 </button>
               </div>
             </div>
@@ -171,10 +171,10 @@ const ChooseSuzuki = () => {
 
         {/* Load More Button */}
         {visibleCars < cars.length && (
-          <div className="text-center">
+          <div className="text-center px-4">
             <button
               onClick={handleLoadMore}
-              className="bg-cyan-500 hover:bg-cyan-600 text-white font-medium px-8 py-4 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+              className="bg-cyan-500 hover:bg-cyan-600 text-white font-medium px-6 sm:px-8 py-3 sm:py-4 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base"
             >
               Load More vehicles
             </button>

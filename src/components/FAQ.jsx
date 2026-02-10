@@ -54,20 +54,20 @@ const FAQ = () => {
   };
 
   return (
-    <section id="faqs" className="bg-white py-16 md:py-8">
-      <div className="container mx-auto px-6 md:px-12 lg:px-20">
+    <section id="faqs" className="bg-white py-12 sm:py-16 md:py-8">
+      <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-20">
         {/* Header */}
-        <div className="text-center mb-12 max-w-3xl mx-auto">
-          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-8 sm:mb-12 max-w-3xl mx-auto">
+          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">
             Frequently asked questions
           </h2>
-          <p className="text-gray-600 text-sm md:text-lg">
+          <p className="text-xs sm:text-sm md:text-lg text-gray-600 px-2">
             Everything you need to know about the product and billing.
           </p>
         </div>
 
         {/* FAQ List */}
-        <div className="max-w-4xl mx-auto mb-12">
+        <div className="max-w-4xl mx-auto mb-8 sm:mb-12">
           {faqs.map((faq, index) => (
             <div
               key={index}
@@ -75,22 +75,22 @@ const FAQ = () => {
             >
               <button
                 onClick={() => toggleFAQ(index)}
-                className="w-full flex items-center justify-between py-5 text-left hover:bg-gray-50 transition-colors duration-200 px-4 rounded-lg"
+                className="w-full flex items-center justify-between py-3 sm:py-4 md:py-5 text-left hover:bg-gray-50 transition-colors duration-200 px-2 sm:px-3 md:px-4 rounded-lg"
               >
-                <span className="text-gray-900 font-medium text-base md:text-lg pr-8">
+                <span className="text-gray-900 font-medium text-sm sm:text-base md:text-lg pr-4 sm:pr-6 md:pr-8">
                   {faq.question}
                 </span>
                 <div className="flex-shrink-0">
                   {openIndex === index ? (
-                    <Minus className="w-5 h-5 text-cyan-500" />
+                    <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
                   ) : (
-                    <CirclePlus className="w-5 h-5 text-cyan-500" />
+                    <CirclePlus className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
                   )}
                 </div>
               </button>
               
               {openIndex === index && (
-                <div className="px-4 pb-5 text-gray-600 text-sm md:text-base leading-relaxed animate-[fade-in_0.3s_ease-out]">
+                <div className="px-2 sm:px-3 md:px-4 pb-3 sm:pb-4 md:pb-5 text-gray-600 text-xs sm:text-sm md:text-base leading-relaxed animate-[fade-in_0.3s_ease-out]">
                   {faq.answer}
                 </div>
               )}
@@ -99,19 +99,19 @@ const FAQ = () => {
         </div>
 
         {/* Contact Box */}
-        <div className="max-w-4xl mx-auto bg-[#EDF5FC] rounded-none p-8 md:p-12 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 bg-gradient-to-b from-[#0FAFFF] to-[#0A2647] rounded-full flex items-center justify-center">
-              <MdQuestionMark className="w-6 h-6 text-white" />
+        <div className="max-w-4xl mx-auto bg-[#EDF5FC] rounded-none p-6 sm:p-8 md:p-12 text-center">
+          <div className="flex justify-center mb-3 sm:mb-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-b from-[#0FAFFF] to-[#0A2647] rounded-full flex items-center justify-center">
+              <MdQuestionMark className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
           </div>
-          <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2 sm:mb-3 px-2">
             Still have questions?
           </h3>
-          <p className="text-gray-600 text-base mb-6">
+          <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-4 sm:mb-6 px-2">
             Can't find the answer you're looking for? Please chat to our friendly team.
           </p>
-          <button className="bg-[#3FA9F5] hover:bg-cyan-600 text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 hover:shadow-lg">
+          <button className="bg-[#3FA9F5] hover:bg-cyan-600 text-white font-semibold px-6 sm:px-8 py-2.5 sm:py-3 rounded-full transition-all duration-300 hover:shadow-lg text-sm sm:text-base">
             Get in touch
           </button>
         </div>

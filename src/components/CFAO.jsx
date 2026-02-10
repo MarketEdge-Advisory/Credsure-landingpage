@@ -38,41 +38,41 @@ const CFAO = () => {
   ];
 
   return (
-    <section className="bg-[#0B2947] py-16 md:py-24 w-full">
+    <section className="bg-[#0B2947] py-12 sm:py-16 md:py-24 w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12 md:mb-16">
-          <p className="text-cyan-500 text-sm md:text-lg font-semibold mb-3">
+        <div className="text-center mb-8 sm:mb-12 md:mb-16">
+          <p className="text-cyan-500 text-xs sm:text-sm md:text-lg font-semibold mb-2 sm:mb-3">
             The CFAO Suzuki Advantage
           </p>
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4 px-4">
             Why buy from CFAO (Suzuki)
           </h2>
-          <p className="text-white text-base md:text-lg max-w-[720px] mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-white max-w-[720px] mx-auto px-4">
             CFAO Suzuki combines authentic Suzuki models with expert guidance and reliable after-sales service for a smooth ownership experience.
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 justify-items-start">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 justify-items-center">
           {features.map((feature, index) => (
             <div
               key={index}
               style={{ backgroundColor: feature.bgColor }}
-              className="w-full max-w-[230px] min-h-[240px] rounded-none p-4 text-start shadow-sm hover:shadow-sm transition-shadow duration-300 flex flex-col items-center"
+              className="w-full max-w-[230px] min-h-[200px] sm:min-h-[240px] rounded-none p-3 sm:p-4 text-start shadow-sm hover:shadow-sm transition-shadow duration-300 flex flex-col items-start"
             >
               {/* Icon */}
-              <div className="flex justify-flex-start w-full mb-4">
+              <div className="flex justify-start w-full mb-3 sm:mb-4">
                 {feature.icon}
               </div>
 
               {/* Title */}
-              <h3 className="text-gray-900 text-sm font-bold mb-3 text-start">
+              <h3 className="text-gray-900 text-xs sm:text-sm font-bold mb-2 sm:mb-3 text-start">
                 {feature.title}
               </h3>
 
               {/* Description */}
-              <p className="text-gray-600 text-sm leading-relaxed m-0">
+              <p className="text-gray-600 text-xs sm:text-sm leading-relaxed m-0">
                 {feature.description}
               </p>
             </div>

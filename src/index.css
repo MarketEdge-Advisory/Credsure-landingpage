@@ -72,11 +72,25 @@
 html {
   scroll-behavior: smooth;
   @apply font-sans;
+  overflow-x: hidden;
 }
 body{
   background: '#E8E8E8';
   overflow-x: hidden;
   width: 100%;
+  max-width: 100vw;
+  position: relative;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Prevent horizontal scroll on mobile */
+#root {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
 }
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.98); }

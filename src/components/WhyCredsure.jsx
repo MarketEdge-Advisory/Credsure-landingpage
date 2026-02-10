@@ -33,40 +33,40 @@ const WhyCredsure = () => {
   ];
 
   return (
-    <section id="benefits" className="bg-white py-16 md:py-24 w-full">
+    <section id="benefits" className="bg-white py-12 sm:py-16 md:py-24 w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12 md:mb-16">
-          <p className="text-cyan-500 text-sm md:text-lg font-semibold mb-3">
+        <div className="text-center mb-8 sm:mb-12 md:mb-16">
+          <p className="text-cyan-500 text-xs sm:text-sm md:text-lg font-semibold mb-2 sm:mb-3">
             Financing You Can Trust
           </p>
-          <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 px-4">
             Why finance with Credsure
           </h2>
-          <p className="text-gray-600 text-base md:text-lg max-w-[720px] mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-[720px] mx-auto px-4">
             Get a quick pre-approval, understand your repayments upfront, and move from calculation to delivery faster with Credsure's BNPL financing.
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 justify-items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 justify-items-center">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="bg-[#EDF5FCCC] w-full max-w-[230px] min-h-[240px] rounded-none p-4 text-center shadow-sm hover:shadow-sm transition-shadow duration-300 flex flex-col items-center"
+              className="bg-[#EDF5FCCC] w-full max-w-[230px] min-h-[200px] sm:min-h-[240px] rounded-none p-3 sm:p-4 text-center shadow-sm hover:shadow-sm transition-shadow duration-300 flex flex-col items-center"
             >
               {/* Icon */}
-              <div className="flex justify-center mb-4">
+              <div className="flex justify-center mb-3 sm:mb-4">
                 {feature.icon}
               </div>
 
               {/* Title */}
-              <h3 className="text-gray-900 text-sm font-bold mb-3">
+              <h3 className="text-gray-900 text-xs sm:text-sm font-bold mb-2 sm:mb-3">
                 {feature.title}
               </h3>
 
               {/* Description */}
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
                 {feature.description}
               </p>
             </div>

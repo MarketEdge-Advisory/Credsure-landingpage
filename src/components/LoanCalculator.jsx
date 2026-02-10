@@ -83,37 +83,37 @@ const LoanCalculator = () => {
     <section id="calculator" className="bg-[#0B2947] py-16 md:py-24">
       <div className="container mx-auto px-6 md:px-12 lg:px-20">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-3 bg-[#ECF2F9] rounded-full px-6 py-3 mb-6">
-            <span className="text-gray-900 font-semibold text-sm md:text-base bg-white rounded-full px-4">Step 2</span>
-            <span className="text-[#3FA9F5] font-medium text-sm md:text-base flex items-center gap-1">
-              Calculate your monthly payment <ArrowDown className="w-4 h-4" />
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="inline-flex flex-wrap sm:flex-nowrap items-center justify-center gap-2 sm:gap-3 bg-[#ECF2F9] rounded-full px-4 sm:px-6 py-2 sm:py-3 mb-4 sm:mb-6">
+            <span className="text-gray-900 font-semibold text-xs sm:text-sm md:text-base bg-white rounded-full px-3 sm:px-4">Step 2</span>
+            <span className="text-[#3FA9F5] font-medium text-xs sm:text-sm md:text-base flex items-center gap-1">
+              Calculate your monthly payment <ArrowDown className="w-3 sm:w-4 h-3 sm:h-4" />
             </span>
           </div>
           
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-3 sm:mb-4 px-4">
             Calculate your monthly payment
           </h2>
-          <p className="text-gray-300 text-base md:text-lg max-w-3xl mx-auto lg:w-[620px]">
+          <p className="text-sm sm:text-base md:text-lg text-gray-300 max-w-3xl mx-auto lg:w-[620px] px-4">
             See exactly what you'll pay each month. Adjust your down payment and loan term to find a plan that works for your budget. No commitment required.
           </p>
         </div>
 
         {/* Calculator Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 max-w-6xl mx-auto">
           {/* Left Column - Loan Calculator Form */}
-          <div className="bg-[#FFFFFF0D] rounded-none p-8 shadow-xl">
-            <h3 className="text-white text-xl font-bold mb-6 uppercase tracking-wider">
+          <div className="bg-[#FFFFFF0D] rounded-none p-4 sm:p-6 md:p-8 shadow-xl">
+            <h3 className="text-white text-lg sm:text-xl font-bold mb-4 sm:mb-6 uppercase tracking-wider">
               Loan Calculator
             </h3>
 
             {/* Vehicle Model Select */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <label className="text-gray-300 text-sm font-medium">
+            <div className="mb-4 sm:mb-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-1 sm:gap-0">
+                <label className="text-gray-300 text-xs sm:text-sm font-medium">
                   Select Vehicle Model
                 </label>
-                <span className="text-cyan-400 text-sm font-semibold">
+                <span className="text-cyan-400 text-xs sm:text-sm font-semibold">
                   Vehicle Price : ₦{formatCurrency(vehiclePrice)}
                 </span>
               </div>
@@ -142,8 +142,8 @@ const LoanCalculator = () => {
             </div>
 
             {/* Loan Tenure Select */}
-            <div className="mb-6">
-              <label className="text-gray-300 text-sm font-medium mb-2 block">
+            <div className="mb-4 sm:mb-6">
+              <label className="text-gray-300 text-xs sm:text-sm font-medium mb-2 block">
                 Loan Tenure
               </label>
               <div className="relative">
@@ -165,14 +165,14 @@ const LoanCalculator = () => {
 
             {/* Down Payment Input */}
             <div className="mb-0">
-              <label className="text-gray-300 text-sm font-medium mb-2 block">
+              <label className="text-gray-300 text-xs sm:text-sm font-medium mb-2 block">
                 Down Payment(₦)
               </label>
               <input
                 type="text"
                 value={formatCurrency(downPayment)}
                 onChange={handleDownPaymentChange}
-                className="w-full bg-gradient-to-br from-gray-200 to-gray-300 text-cyan-500 text-xl font-bold px-3 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 border-2 border-gray-700"
+                className="w-full bg-gradient-to-br from-gray-200 to-gray-300 text-cyan-500 text-base sm:text-lg md:text-xl font-bold px-3 py-2 sm:py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 border-2 border-gray-700"
               />
             </div>
 
@@ -213,27 +213,27 @@ const LoanCalculator = () => {
           </div>
 
           {/* Right Column - Payment Display */}
-          <div className="rounded-none p-8 shadow-xl flex flex-col justify-between bg-gradient-to-t from-[#0b2947] to-[#091c30]">
+          <div className="rounded-none p-4 sm:p-6 md:p-8 shadow-xl flex flex-col justify-between bg-gradient-to-t from-[#0b2947] to-[#091c30]">
             <div className="flex-1 flex flex-col items-center justify-start text-center">
-              <p className="text-gray-300 text-base mb-4">Estimated Monthly Payment</p>
-              <h3 className="text-cyan-400 text-2xl md:text-3xl lg:text-5xl font-bold mb-2">
+              <p className="text-gray-300 text-sm sm:text-base mb-3 sm:mb-4">Estimated Monthly Payment</p>
+              <h3 className="text-cyan-400 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2">
                 ₦{monthlyPayment.toLocaleString('en-NG')}
               </h3>
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-400 text-xs sm:text-sm">
                 for {loanTenure || '12'} months
               </p>
             </div>
 
             {/* Get Approved Section */}
-            <div className="mt-8 gap-0 ">
-              <div className="w-full inline-flex items-center gap-3 bg-[#ECF2F9] rounded-full px-6 py-3 mb-4">
-                <span className="text-gray-900 font-semibold text-xs bg-white rounded-full px-2 py-1">Step 3</span>
-                <span className="text-cyan-500 font-medium text-xs flex">
-                  Click the button below to get approved <ArrowDown className="w-4 h-4" />
+            <div className="mt-6 sm:mt-8 gap-0">
+              <div className="w-full inline-flex flex-wrap sm:flex-nowrap items-center justify-center gap-2 sm:gap-3 bg-[#ECF2F9] rounded-full px-3 sm:px-4 md:px-6 py-2 sm:py-3 mb-3 sm:mb-4">
+                <span className="text-gray-900 font-semibold text-[10px] sm:text-xs bg-white rounded-full px-2 py-1">Step 3</span>
+                <span className="text-cyan-500 font-medium text-[10px] sm:text-xs flex items-center">
+                  Click the button below to get approved <ArrowDown className="w-3 sm:w-4 h-3 sm:h-4" />
                 </span>
               </div>
               
-              <button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-4 rounded-full transition-all duration-300 hover:shadow-lg text-xs md:text-xs">
+              <button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 hover:shadow-lg text-xs sm:text-sm md:text-base">
                 Get pre-approved now
               </button>
             </div>
