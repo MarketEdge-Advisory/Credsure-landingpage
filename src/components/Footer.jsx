@@ -102,7 +102,7 @@ const Footer = () => {
          <div className="flex w-full items-center justify-center pt-4 sm:pt-6">
           <p className="text-[10px] sm:text-xs text-gray-400">
             {/* &copy; {new Date().getFullYear()} CFAO Motors Nigeria Limited. All rights reserved. | Powered by Credsure. */}
-            &copy; {new Date().getFullYear()} 
+            &copy; CFAO Group -{new Date().getFullYear()} 
           </p>
         </div>
       </div>
