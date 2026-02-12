@@ -6,7 +6,7 @@ import { IoFlashSharp } from "react-icons/io5";
 const WhyCredsure = () => {
   const features = [
     {
-      icon: <IoFlashSharp  className="w-12 h-12 text-blue-600"/>,
+      icon: <IoFlashSharp  className="w-12 h-12 text-[#0d5b8c]"/>,
       title: 'Fast Pre-Approval',
       description: 'Get approved in as little as 24 hours. No endless paperwork or long waiting periods.',
     },
