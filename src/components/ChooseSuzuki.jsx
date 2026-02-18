@@ -29,7 +29,7 @@ const ChooseSuzuki = () => {
       name: 'New Dzire',
       description: 'Updated design with modern features & comfort.',
       image: '/Dzire.svg',
-      priceValue: 12500000,
+      priceValue: 32000000,
       images: ['/Dzire.svg', '/Dzire1.svg', '/Dzire.svg'],
     },
     {
@@ -37,7 +37,7 @@ const ChooseSuzuki = () => {
       name: 'New Swift',
       description: 'Sporty hatchback perfect for city driving.',
       image: '/Swift.svg',
-      priceValue: 15000000,
+      priceValue: 28000000,
       images: ['/Swift.svg', '/Swift.svg', '/Swift.svg'],
     },
     {
@@ -45,7 +45,7 @@ const ChooseSuzuki = () => {
       name: 'Alto',
       description: 'Affordable and reliable everyday car.',
       image: '/Alto.svg',
-      priceValue: 8500000,
+      priceValue: 17000000,
       images: ['/Alto.svg', '/Alto.svg', '/Alto.svg'],
     },
     {
@@ -53,7 +53,7 @@ const ChooseSuzuki = () => {
       name: 'Grand Vitara',
       description: 'Premium SUV with hybrid technology.',
       image: '/Grandvitara.svg',
-      priceValue: 42000000,
+      priceValue: 36000000,
       images: ['/Grandvitara.svg', '/Grandvitara.svg', '/Grandvitara.svg'],
     },
     {
@@ -61,15 +61,15 @@ const ChooseSuzuki = () => {
       name: 'Jimny (5-Doors)',
       description: 'More space with legendary off-road DNA.',
       image: '/Jimny.svg',
-      priceValue: 18000000,
+      priceValue: 46000000,
       images: ['/Jimny.svg', '/Jimny.svg', '/Jimny.svg'],
     },
     {
       id: 6,
       name: 'Grand Vitara 1.5L',
       description: 'Reliable commercial vehicle for business.',
-      image: '/Grandvitara.svg',
-      priceValue: 52000000,
+      image: '/Grand-vitara5.1L.avif',
+      priceValue: 42000000,
       images: ['/Grandvitara.svg', '/Grandvitara.svg', '/Grandvitara.svg'],
     },
     {
@@ -77,7 +77,7 @@ const ChooseSuzuki = () => {
       name: 'S-Presso',
       description: 'Bold design with enhanced performance.',
       image: '/presso.jpeg',
-      priceValue: 9800000,
+      priceValue: 18000000,
       images: ['/presso.jpeg', '/presso.jpeg', '/presso.jpeg'],
     },
     {
@@ -85,15 +85,15 @@ const ChooseSuzuki = () => {
       name: 'Ertiga',
       description: 'More space with legendary off-road DNA.',
       image: '/Ertiga.svg',
-      priceValue: 16500000,
+      priceValue: 36000000,
       images: ['/Ertiga.svg', '/Ertiga1.svg', '/Ertiga.svg'],
     },
     {
       id: 9,
       name: 'Celerio',
       description: 'Reliable commercial vehicle for business.',
-      image: '/Ertiga1.svg',
-      priceValue: 10200000,
+      image: '/celerio-suzuki.jpg',
+      priceValue: null,
       images: ['/Ertiga1.svg', '/Ertiga.svg', '/Ertiga1.svg'],
     }
   ].map(car => ({
