@@ -53,7 +53,7 @@ const ChooseSuzuki = () => {
       name: 'Grand Vitara',
       description: 'Premium SUV with hybrid technology.',
       image: '/Grandvitara.svg',
-      priceValue: 24300250,
+      priceValue: 42000000,
       images: ['/Grandvitara.svg', '/Grandvitara.svg', '/Grandvitara.svg'],
     },
     {
@@ -69,7 +69,7 @@ const ChooseSuzuki = () => {
       name: 'Grand Vitara 1.5L',
       description: 'Reliable commercial vehicle for business.',
       image: '/Grandvitara.svg',
-      priceValue: 22500000,
+      priceValue: 52000000,
       images: ['/Grandvitara.svg', '/Grandvitara.svg', '/Grandvitara.svg'],
     },
     {
