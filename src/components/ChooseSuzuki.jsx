@@ -3,7 +3,7 @@ import { ArrowDown, ChevronDown, X, Images } from 'lucide-react';
 import { useCarContext } from '../context/CarContext';
 
 const ChooseSuzuki = () => {
-  const [visibleCars, setVisibleCars] = useState(9);
+  const [visibleCars, setVisibleCars] = useState(6);
   const [selectedCarImages, setSelectedCarImages] = useState(null);
   const { selectCar } = useCarContext();
 
@@ -31,6 +31,34 @@ const ChooseSuzuki = () => {
       image: '/Dzire.svg',
       priceValue: 32000000,
       images: ['/Dzire.svg', '/Dzire1.svg', '/Dzire.svg'],
+      variants: [
+        {
+          name: 'DZIRE – Specs : Base Model',
+          description: 'The 2025 Suzuki Dzire is a compact sedan offering sleek design, fuel efficiency, and modern features. Available in manual or automatic transmissions, it delivers reliability and comfort for daily commuting.',
+          enginePerformance: [
+            'Engine: 1.2-litre K12N Petrol Engine',
+            'Power: 89 – 91 hp',
+            'Torque: 113 Nm',
+            'Transmission: 5-speed manual, 5-speed AMT',
+            'Drivetrain: FWD',
+            'Fuel Economy: Up to 24.12 km/l'
+          ],
+          dimensionsCapacities: [
+            'Length: 3995 mm',
+            'Width: 1735 mm',
+            'Height: 1515 mm',
+            'Wheelbase: 2450 mm',
+            'Ground Clearance: 163 mm',
+            'Boot Space: 378 litres',
+            'Fuel Tank: 37 litres'
+          ],
+          keyFeatures: [
+            'Interior: 7-inch touchscreen, automatic climate control, push-button start',
+            'Safety: Dual airbags, ABS with EBD, rear parking sensors',
+            'Exterior: LED DRLs, alloy wheels, stylish front grille'
+          ]
+        }
+      ]
     },
     {
       id: 2,
@@ -39,6 +67,34 @@ const ChooseSuzuki = () => {
       image: '/Swift.svg',
       priceValue: 28000000,
       images: ['/Swift.svg', '/Swift.svg', '/Swift.svg'],
+      variants: [
+        {
+          name: 'SWIFT – Specs : Sport Model',
+          description: 'The 2025 Suzuki Swift is a sporty hatchback with dynamic styling and agile performance, perfect for city driving with its compact size and efficient engine.',
+          enginePerformance: [
+            'Engine: 1.2-litre K12N Petrol Engine',
+            'Power: 89 hp',
+            'Torque: 113 Nm',
+            'Transmission: 5-speed manual, CVT automatic',
+            'Drivetrain: FWD',
+            'Fuel Economy: Up to 23 km/l'
+          ],
+          dimensionsCapacities: [
+            'Length: 3845 mm',
+            'Width: 1735 mm',
+            'Height: 1530 mm',
+            'Wheelbase: 2450 mm',
+            'Ground Clearance: 163 mm',
+            'Boot Space: 268 litres',
+            'Fuel Tank: 37 litres'
+          ],
+          keyFeatures: [
+            'Interior: 7-inch touchscreen, smartphone connectivity, auto AC',
+            'Safety: Dual airbags, ABS, rear parking camera',
+            'Exterior: LED headlamps, sporty alloy wheels, bold grille'
+          ]
+        }
+      ]
     },
     {
       id: 3,
@@ -47,6 +103,34 @@ const ChooseSuzuki = () => {
       image: '/Alto.svg',
       priceValue: 17000000,
       images: ['/Alto.svg', '/Alto.svg', '/Alto.svg'],
+      variants: [
+        {
+          name: 'ALTO – Specs : Standard',
+          description: 'The 2025 Suzuki Alto is an affordable, fuel-efficient hatchback designed for city commutes with easy maneuverability and low running costs.',
+          enginePerformance: [
+            'Engine: 0.8-litre F8D Petrol Engine',
+            'Power: 47 hp',
+            'Torque: 69 Nm',
+            'Transmission: 5-speed manual',
+            'Drivetrain: FWD',
+            'Fuel Economy: Up to 22 km/l'
+          ],
+          dimensionsCapacities: [
+            'Length: 3445 mm',
+            'Width: 1475 mm',
+            'Height: 1490 mm',
+            'Wheelbase: 2360 mm',
+            'Ground Clearance: 160 mm',
+            'Boot Space: 177 litres',
+            'Fuel Tank: 27 litres'
+          ],
+          keyFeatures: [
+            'Interior: Basic infotainment, comfortable seating',
+            'Safety: Driver airbag, ABS with EBD',
+            'Exterior: Compact design, easy parking, stylish headlamps'
+          ]
+        }
+      ]
     },
     {
       id: 4,
@@ -55,6 +139,60 @@ const ChooseSuzuki = () => {
       image: '/Grandvitara.svg',
       priceValue: 36000000,
       images: ['/Grandvitara.svg', '/Grandvitara.svg', '/Grandvitara.svg'],
+      variants: [
+        {
+          name: 'GRAND VITARA – Specs : N42M',
+          description: 'The 2025 Suzuki Grand Vitara is a 5-seater compact SUV offering, featuring a 1.5-litre petrol engine with strong hybrid options. It delivers around fuel economy and torque, available in FWD or AWD configurations with 5-speed manual or 6-speed automatic transmissions. Key features include a panoramic sunroof, 360-degree camera, and a 9-inch touchscreen.',
+          enginePerformance: [
+            'Engine: 1.5-litre K15C Intelligent Electric Hybrid or 1.5-litre Strong Hybrid.',
+            'Power: 101 –103 hp (depending on hybrid variant).',
+            'Torque: 122–138 Nm.',
+            'Transmission: 5-speed manual, 6-speed automatic.',
+            'Drivetrain: 2WD (FWD) or AllGrip AWD.',
+            'Fuel Economy: Up to 27.97 km/l (mild-hybrid), 18.5 – 20 km/l (general)'
+          ],
+          dimensionsCapacities: [
+            'Length: 4345 mm',
+            'Width: 1795 mm',
+            'Height: 1645 mm',
+            'Wheelbase: 2600 mm',
+            'Ground Clearance: 210 mm',
+            'Boot Space: 373 litres',
+            'Fuel Tank: 45 liters'
+          ],
+          keyFeatures: [
+            'Interior: Panoramic sunroof, 9-inch HD touchscreen, heads-up display, ventilated seats, and ambient lighting.',
+            'Safety: 360-degree camera, 6 airbags (top variants), ABS with EBD, and hill descent control (AWD).',
+            'Exterior: LED DRLs, 17-inch alloy wheels, and a, bold front grille.'
+          ]
+        },
+        {
+          name: 'GRAND VITARA 1.5L – Specs – N52M',
+          description: 'The 2025 Suzuki Grand Vitara is a 5-seater compact SUV offering, featuring a 1.5-litre petrol engine with strong hybrid options. It delivers around fuel economy and torque, available in FWD or AWD configurations with 5-speed manual or 6-speed automatic transmissions. Key features include a panoramic sunroof, 360-degree camera, and a 9-inch touchscreen.',
+          enginePerformance: [
+            'Engine: 1.5-litre K15C Intelligent Electric Hybrid or 1.5-litre Strong Hybrid.',
+            'Power: 101 –103 hp (depending on hybrid variant).',
+            'Torque: 122–138 Nm.',
+            'Transmission: 5-speed manual, 6-speed automatic.',
+            'Drivetrain: 2WD (FWD) or AllGrip AWD.',
+            'Fuel Economy: Up to 27.97 km/l (mild-hybrid), 18.5 – 20 km/l (general)'
+          ],
+          dimensionsCapacities: [
+            'Length: 4345 mm',
+            'Width: 1795 mm',
+            'Height: 1645 mm',
+            'Wheelbase: 2600 mm',
+            'Ground Clearance: 210 mm',
+            'Boot Space: 373 litres',
+            'Fuel Tank: 45 liters'
+          ],
+          keyFeatures: [
+            'Interior: Panoramic sunroof, 9-inch HD touchscreen, heads-up display, ventilated seats, and ambient lighting.',
+            'Safety: 360-degree camera, 6 airbags (top variants), ABS with EBD, and hill descent control (AWD).',
+            'Exterior: LED DRLs, 17-inch alloy wheels, and a, bold front grille.'
+          ]
+        }
+      ]
     },
     {
       id: 5,
@@ -63,6 +201,34 @@ const ChooseSuzuki = () => {
       image: '/Jimny.svg',
       priceValue: 46000000,
       images: ['/Jimny.svg', '/Jimny.svg', '/Jimny.svg'],
+      variants: [
+        {
+          name: 'JIMNY 5-DOOR – Specs : Off-Road',
+          description: 'The 2025 Suzuki Jimny 5-Door is a compact off-roader with legendary 4WD capability, now with extra space and practicality for adventure seekers.',
+          enginePerformance: [
+            'Engine: 1.5-litre K15B Petrol Engine',
+            'Power: 101 hp',
+            'Torque: 130 Nm',
+            'Transmission: 5-speed manual, 4-speed automatic',
+            'Drivetrain: AllGrip Pro 4WD with low-range transfer',
+            'Fuel Economy: Up to 16.94 km/l'
+          ],
+          dimensionsCapacities: [
+            'Length: 3985 mm',
+            'Width: 1645 mm',
+            'Height: 1720 mm',
+            'Wheelbase: 2590 mm',
+            'Ground Clearance: 210 mm',
+            'Boot Space: 211 litres (332 with rear seats down)',
+            'Fuel Tank: 40 litres'
+          ],
+          keyFeatures: [
+            'Interior: 9-inch touchscreen, smartphone connectivity, cruise control',
+            'Safety: Dual airbags, ABS with EBD, hill hold control',
+            'Exterior: Rugged design, 15-inch alloy wheels, LED headlamps'
+          ]
+        }
+      ]
     },
     {
       id: 6,
@@ -71,6 +237,34 @@ const ChooseSuzuki = () => {
       image: '/Grand-vitara5.1L.avif',
       priceValue: 42000000,
       images: ['/Grandvitara.svg', '/Grandvitara.svg', '/Grandvitara.svg'],
+      variants: [
+        {
+          name: 'GRAND VITARA 1.5L – Specs : Premium',
+          description: 'The 2025 Suzuki Grand Vitara 1.5L offers premium features with efficient performance, perfect for families seeking comfort and technology.',
+          enginePerformance: [
+            'Engine: 1.5-litre K15C Petrol',
+            'Power: 103 hp',
+            'Torque: 138 Nm',
+            'Transmission: 6-speed automatic',
+            'Drivetrain: FWD',
+            'Fuel Economy: Up to 20 km/l'
+          ],
+          dimensionsCapacities: [
+            'Length: 4345 mm',
+            'Width: 1795 mm',
+            'Height: 1645 mm',
+            'Wheelbase: 2600 mm',
+            'Ground Clearance: 210 mm',
+            'Boot Space: 373 litres',
+            'Fuel Tank: 45 litres'
+          ],
+          keyFeatures: [
+            'Interior: Panoramic sunroof, 9-inch touchscreen, ventilated seats',
+            'Safety: 6 airbags, 360-degree camera, ABS with EBD',
+            'Exterior: LED DRLs, 17-inch alloy wheels, chrome accents'
+          ]
+        }
+      ]
     },
     {
       id: 7,
@@ -79,6 +273,34 @@ const ChooseSuzuki = () => {
       image: '/presso.jpeg',
       priceValue: 18000000,
       images: ['/presso.jpeg', '/presso.jpeg', '/presso.jpeg'],
+      variants: [
+        {
+          name: 'S-PRESSO – Specs : Urban',
+          description: 'The 2025 Suzuki S-Presso combines SUV-inspired styling with city car practicality, offering bold design and fuel efficiency.',
+          enginePerformance: [
+            'Engine: 1.0-litre K10B Petrol',
+            'Power: 67 hp',
+            'Torque: 90 Nm',
+            'Transmission: 5-speed manual, 5-speed AMT',
+            'Drivetrain: FWD',
+            'Fuel Economy: Up to 21.7 km/l'
+          ],
+          dimensionsCapacities: [
+            'Length: 3565 mm',
+            'Width: 1520 mm',
+            'Height: 1564 mm',
+            'Wheelbase: 2380 mm',
+            'Ground Clearance: 180 mm',
+            'Boot Space: 239 litres',
+            'Fuel Tank: 27 litres'
+          ],
+          keyFeatures: [
+            'Interior: 7-inch touchscreen, smartphone connectivity',
+            'Safety: Dual airbags, ABS with EBD, rear parking sensors',
+            'Exterior: SUV-inspired design, high ground clearance, LED DRLs'
+          ]
+        }
+      ]
     },
     {
       id: 8,
@@ -87,6 +309,34 @@ const ChooseSuzuki = () => {
       image: '/Ertiga.svg',
       priceValue: 36000000,
       images: ['/Ertiga.svg', '/Ertiga1.svg', '/Ertiga.svg'],
+      variants: [
+        {
+          name: 'ERTIGA – Specs : 7-Seater MPV',
+          description: 'The 2025 Suzuki Ertiga is a 7-seater MPV designed for families, offering spacious interiors, comfort, and fuel efficiency.',
+          enginePerformance: [
+            'Engine: 1.5-litre K15B Petrol with Mild Hybrid',
+            'Power: 103 hp',
+            'Torque: 138 Nm',
+            'Transmission: 5-speed manual, 6-speed automatic',
+            'Drivetrain: FWD',
+            'Fuel Economy: Up to 20.51 km/l'
+          ],
+          dimensionsCapacities: [
+            'Length: 4395 mm',
+            'Width: 1735 mm',
+            'Height: 1690 mm',
+            'Wheelbase: 2740 mm',
+            'Ground Clearance: 180 mm',
+            'Boot Space: 209 litres (803 with seats folded)',
+            'Fuel Tank: 45 litres'
+          ],
+          keyFeatures: [
+            'Interior: 7-inch touchscreen, captain seats (middle row), automatic AC',
+            'Safety: Dual airbags, ABS with EBD, rear parking camera',
+            'Exterior: LED projector headlamps, alloy wheels, roof rails'
+          ]
+        }
+      ]
     },
     {
       id: 9,
@@ -95,6 +345,34 @@ const ChooseSuzuki = () => {
       image: '/celerio-suzuki.jpg',
       priceValue: null,
       images: ['/Ertiga1.svg', '/Ertiga.svg', '/Ertiga1.svg'],
+      variants: [
+        {
+          name: 'CELERIO – Specs : Economy',
+          description: 'The 2025 Suzuki Celerio is a fuel-efficient hatchback perfect for budget-conscious buyers seeking reliability and low maintenance.',
+          enginePerformance: [
+            'Engine: 1.0-litre K10C Petrol',
+            'Power: 67 hp',
+            'Torque: 89 Nm',
+            'Transmission: 5-speed manual, 5-speed AMT',
+            'Drivetrain: FWD',
+            'Fuel Economy: Up to 25 km/l'
+          ],
+          dimensionsCapacities: [
+            'Length: 3695 mm',
+            'Width: 1655 mm',
+            'Height: 1555 mm',
+            'Wheelbase: 2435 mm',
+            'Ground Clearance: 170 mm',
+            'Boot Space: 295 litres',
+            'Fuel Tank: 32 litres'
+          ],
+          keyFeatures: [
+            'Interior: 7-inch touchscreen, smartphone integration',
+            'Safety: Dual airbags, ABS with EBD',
+            'Exterior: Compact design, stylish grille, halogen headlamps'
+          ]
+        }
+      ]
     }
   ].map(car => ({
     ...car,
@@ -134,7 +412,8 @@ const ChooseSuzuki = () => {
             Choose your perfect suzuki
           </h2>
           <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-[620px] mx-auto px-4">
-            Build purchase intent through visual discovery. Each vehicle card should feel aspirational yet accessible, with clear CTAs leading to the calculator.
+           Explore our range and choose the Suzuki that fits your lifestyle.
+         From sleek city cruisers to refined family sedans — start with the one that feels right.
           </p>
         </div>
 
@@ -156,7 +435,7 @@ const ChooseSuzuki = () => {
               {/* View Images Icon */}
               <button 
                 className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10 w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md"
-                onClick={() => setSelectedCarImages({ name: car.name, images: car.images })}
+                onClick={() => setSelectedCarImages({ name: car.name, images: car.images, variants: car.variants })}
                 title="View more images"
               >
                 <Images className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
@@ -186,10 +465,10 @@ const ChooseSuzuki = () => {
                       calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                   }}
-                  className="group/btn flex items-center justify-between w-full bg-cyan-500 hover:bg-cyan-600 text-white font-medium px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-full transition-all duration-300"
+                  className="group/btn flex items-center justify-between w-full bg-cyan-500 hover:bg-slate-100 hover:text-black text-white font-medium px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-full transition-all duration-300"
                 >
                   <span className="text-[10px] sm:text-xs md:text-sm">Calculate Monthly Payment</span>
-                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-y-1 transition-transform" />
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-y-1 transition-transform group-hover:text-black" />
                 </button>
               </div>
             </div>
@@ -198,47 +477,48 @@ const ChooseSuzuki = () => {
 
         {/* Load More Button */}
         {visibleCars < cars.length && (
-          <div className="text-center px-4">
+          <div className="text-center px-4 flex">
             <button
               onClick={handleLoadMore}
-              className="bg-cyan-500 hover:bg-cyan-600 text-white font-medium px-6 sm:px-8 py-3 sm:py-4 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base"
+              className="bg-cyan-500 hover:bg-slate-100 hover:text-black text-white font-normal px-8 sm:px-12 py-4 sm:py-5 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 text-base sm:text-lg flex items-center gap-3 mx-auto"
             >
               Load More vehicles
+              <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
         )}
       </div>
     </section>
 
-    {/* Image Popup Modal */}
+    {/* Specs Modal */}
     {selectedCarImages && (
       <div 
-        className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto"
+        className="fixed inset-0 bg-black/90 z-50 flex items-start justify-center overflow-y-auto"
         onClick={() => setSelectedCarImages(null)}
-        onTouchEnd={() => setSelectedCarImages(null)}
       >
         <div 
-          className="bg-white rounded-lg max-w-4xl w-full p-4 sm:p-6 relative my-auto max-h-[90vh] overflow-y-auto"
+          className="bg-white w-full min-h-screen p-4 sm:p-6 md:p-8 relative"
           onClick={(e) => e.stopPropagation()}
-          onTouchEnd={(e) => e.stopPropagation()}
         >
-          {/* Close Button */}
-          <button
-            onClick={() => setSelectedCarImages(null)}
-            className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 sm:w-10 sm:h-10 bg-gray-800 hover:bg-gray-700 text-white rounded-full flex items-center justify-center transition-colors z-10"
-          >
-            <X className="w-4 h-4 sm:w-5 sm:h-5" />
-          </button>
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+              {selectedCarImages.name}
+            </h1>
+            <button
+              onClick={() => setSelectedCarImages(null)}
+              className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-800 hover:bg-gray-700 text-white rounded-full flex items-center justify-center transition-colors flex-shrink-0"
+            >
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
+          </div>
 
-          {/* Car Name */}
-          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-12">{selectedCarImages.name}</h3>
-
-          {/* Image Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {/* Image Gallery */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-8">
             {selectedCarImages.images.map((img, index) => (
               <div 
                 key={index}
-                className="aspect-video bg-gray-100 rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow"
+                className="bg-gray-100 rounded-sm overflow-hidden aspect-video"
               >
                 <img 
                   src={img} 
@@ -249,26 +529,88 @@ const ChooseSuzuki = () => {
             ))}
           </div>
 
-          {/* View Details Button */}
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => {
-                const car = cars.find(c => c.name === selectedCarImages.name);
-                if (car) {
-                  selectCar(car);
-                  setSelectedCarImages(null);
-                  setTimeout(() => {
-                    const calculator = document.querySelector('#calculator');
-                    if (calculator) {
-                      calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          {/* Specifications Grid */}
+          <div className={`grid grid-cols-1 ${selectedCarImages.variants?.length > 1 ? 'md:grid-cols-2' : ''} gap-6 md:gap-8`}>
+            {selectedCarImages.variants?.map((variant, variantIndex) => (
+              <div key={variantIndex} className="bg-white border border-gray-200 rounded-sm p-4 sm:p-6">
+                {/* Variant Title */}
+                <div className="mb-4 pb-4 border-b border-gray-200">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 bg-cyan-100 px-3 py-2 rounded">
+                    {variant.name}
+                  </h2>
+                </div>
+
+                {/* Description */}
+                <p className="text-sm sm:text-base text-gray-700 mb-6 leading-relaxed">
+                  {variant.description}
+                </p>
+
+                {/* Engine and Performance */}
+                <div className="mb-6">
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3">
+                    Engine and Performance
+                  </h3>
+                  <ul className="space-y-2">
+                    {variant.enginePerformance.map((item, idx) => (
+                      <li key={idx} className="text-sm sm:text-base text-gray-700 flex items-start">
+                        <span className="mr-2 mt-1.5 w-1.5 h-1.5 bg-gray-900 rounded-full flex-shrink-0"></span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Dimensions and Capacities */}
+                <div className="mb-6">
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3">
+                    Dimensions and Capacities
+                  </h3>
+                  <ul className="space-y-2">
+                    {variant.dimensionsCapacities.map((item, idx) => (
+                      <li key={idx} className="text-sm sm:text-base text-gray-700 flex items-start">
+                        <span className="mr-2 mt-1.5 w-1.5 h-1.5 bg-gray-900 rounded-full flex-shrink-0"></span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Key Features */}
+                <div className="mb-6">
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3">
+                    Key Features (2025 Model)
+                  </h3>
+                  <ul className="space-y-2">
+                    {variant.keyFeatures.map((item, idx) => (
+                      <li key={idx} className="text-sm sm:text-base text-gray-700 flex items-start">
+                        <span className="mr-2 mt-1.5 w-1.5 h-1.5 bg-gray-900 rounded-full flex-shrink-0"></span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Calculate Button */}
+                <button
+                  onClick={() => {
+                    const car = cars.find(c => c.name === selectedCarImages.name);
+                    if (car) {
+                      selectCar(car);
+                      setSelectedCarImages(null);
+                      setTimeout(() => {
+                        const calculator = document.querySelector('#calculator');
+                        if (calculator) {
+                          calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }, 100);
                     }
-                  }, 100);
-                }
-              }}
-              className="bg-cyan-500 hover:bg-cyan-600 text-white font-medium px-6 sm:px-8 py-3 rounded-full transition-all duration-300 hover:shadow-lg text-sm sm:text-base"
-            >
-              Calculate Monthly Payment
-            </button>
+                  }}
+                  className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-medium px-6 py-3 sm:py-4 rounded-full transition-all duration-300 hover:shadow-lg text-sm sm:text-base"
+                >
+                  Calculate Monthly Payment
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       </div>

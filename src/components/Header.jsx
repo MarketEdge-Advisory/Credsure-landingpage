@@ -25,7 +25,7 @@ const Header = () => {
                 <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" />
               </svg>
               <span className="text-2xl font-bold text-blue-900">SUZUKI</span> */}
-              <img src='/suzuki-header-logo.svg' alt='Suzuki Logo' className='w-20 h-auto' />
+              <img src='/credsure-real-logo.svg' alt='Suzuki Logo' className='w-20 h-auto' />
             </div>
 
             {/* Credsure Logo */}
@@ -37,7 +37,7 @@ const Header = () => {
                 <span className="font-bold text-sm text-gray-900">edSure</span>
                 <span className="text-xs text-gray-600">LOANS</span>
               </div> */}
-              <img src='/credsure-header-logo.svg' alt='Credsure Logo' className='w-20 h-auto' />
+              <img src='/suzuki-by-cfao-logo.svg' alt='Credsure Logo' className='w-20 h-auto' />
             </div>
           </div>
 

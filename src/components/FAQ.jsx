@@ -1,10 +1,37 @@
 import React, { useState } from 'react';
-import { Plus, Minus, HelpCircle } from 'lucide-react';
+import { Plus, Minus, HelpCircle, X } from 'lucide-react';
 import { MdQuestionMark } from "react-icons/md";
 import { CirclePlus } from 'lucide-react';
 
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phone: '',
+    email: '',
+    message: '',
+  });
+
+  const handleFormChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Contact form submitted:', formData);
+    alert('Your inquiry has been sent to both CredSure and Suzuki. We will contact you within 24-48 hours.');
+    setShowModal(false);
+    setFormData({
+      fullName: '',
+      phone: '',
+      email: '',
+      message: '',
+    });
+  };
 
   const faqs = [
     {
@@ -111,10 +138,119 @@ const FAQ = () => {
           <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-4 sm:mb-6 px-2">
             Can't find the answer you're looking for? Please chat to our friendly team.
           </p>
-          <button className="bg-[#3FA9F5] hover:bg-cyan-600 text-white font-semibold px-6 sm:px-8 py-2.5 sm:py-3 rounded-full transition-all duration-300 hover:shadow-lg text-sm sm:text-base">
+          <button 
+            onClick={() => setShowModal(true)}
+            className="bg-[#3FA9F5] hover:bg-slate-100 hover:text-black text-white font-semibold px-6 sm:px-8 py-2.5 sm:py-3 rounded-full transition-all duration-300 hover:shadow-lg text-sm sm:text-base"
+          >
             Get in touch
           </button>
         </div>
+
+        {/* Contact Modal */}
+        {showModal && (
+          <div 
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowModal(false)}
+          >
+            <div 
+              className="bg-white rounded-lg max-w-2xl w-full relative max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setShowModal(false)}
+                className="absolute top-3 right-3 w-8 h-8 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full flex items-center justify-center transition-colors z-10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Header Section */}
+              <div className="bg-[#1a3a52] text-white px-6 py-4 flex justify-center items-center rounded-t-lg">
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold">Get in Touch</h3>
+                  <p className="text-gray-300 text-sm mt-1">We're here to help you</p>
+                </div>
+              </div>
+
+              {/* Form Section */}
+              <div className="p-6">
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="space-y-5 mt-2">
+                  {/* Full Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                      Full name*
+                    </label>
+                    <input
+                      type="text"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleFormChange}
+                      required
+                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50"
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+
+                  {/* Phone Number */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                      Phone number*
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleFormChange}
+                      required
+                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50"
+                      placeholder="Enter your phone number"
+                    />
+                  </div>
+
+                  {/* Email Address */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                      Email address*
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleFormChange}
+                      required
+                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50"
+                      placeholder="Enter your email"
+                    />
+                  </div>
+
+                  {/* Message */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                      Message (Optional)
+                    </label>
+                    <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleFormChange}
+                      rows="4"
+                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 resize-none"
+                      placeholder="How can we help you?"
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3.5 rounded-lg transition-all duration-300 hover:shadow-lg text-base mt-6"
+                  >
+                    Send Inquiry
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
