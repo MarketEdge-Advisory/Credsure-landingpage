@@ -413,7 +413,7 @@ const ChooseSuzuki = () => {
           </h2>
           <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-[620px] mx-auto px-4">
            Explore our range and choose the Suzuki that fits your lifestyle.
-         From sleek city cruisers to refined family sedans — start with the one that feels right.
+         From sleek city cruisers to refined family sedans, start with the one that feels right.
           </p>
         </div>
 
