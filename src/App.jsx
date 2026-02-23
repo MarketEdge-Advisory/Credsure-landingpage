@@ -9,6 +9,15 @@ import CalculatorInputMgt from './pages/admin/CalculatorInputMgt';
 import LoanTermManagement from './pages/admin/LoanTermManagement';
 import PlatformSettings from './pages/admin/PlatformSettings';
 import AdminLogin from './pages/admin/AdminLogin';
+import { useAuth } from './context/AuthContext';
+
+/** Redirect to login if not authenticated. Optionally restrict to a specific role. */
+const ProtectedRoute = ({ children, allowedRole }) => {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/admin/login" replace />;
+  if (allowedRole && user.role !== allowedRole) return <Navigate to="/admin/dashboard" replace />;
+  return children;
+};
 
 function App() {
   return (
@@ -17,15 +26,56 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
 
-        {/* Admin routes */}
-        <Route path="/admin" element={<AdminLayout />}>
+        {/* Admin routes – all require authentication */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Navigate to="dashboard" replace />} />
+
+          {/* Shared by both roles */}
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="car-management" element={<CarManagement />} />
-          <Route path="interest-rate" element={<InterestRateManagement />} />
-          <Route path="calculator-input" element={<CalculatorInputMgt />} />
-          <Route path="loan-term" element={<LoanTermManagement />} />
           <Route path="settings" element={<PlatformSettings />} />
+
+          {/* Suzuki admin only */}
+          <Route
+            path="car-management"
+            element={
+              <ProtectedRoute allowedRole="suzuki">
+                <CarManagement />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Credsure admin only */}
+          <Route
+            path="interest-rate"
+            element={
+              <ProtectedRoute allowedRole="credsure">
+                <InterestRateManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="calculator-input"
+            element={
+              <ProtectedRoute allowedRole="credsure">
+                <CalculatorInputMgt />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="loan-term"
+            element={
+              <ProtectedRoute allowedRole="credsure">
+                <LoanTermManagement />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
     </main>

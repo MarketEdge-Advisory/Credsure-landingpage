@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { Mail, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 /* ─── shared background wrapper ─── */
 const AuthShell = ({ title, children }) => (
@@ -100,11 +101,28 @@ const LoginStep = ({ onForgot, onSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = () => {
+    setError('');
+    if (!email || !password) {
+      setError('Please enter your email and password.');
+      return;
+    }
+    const result = onSuccess(email, password);
+    if (!result.ok) setError(result.message);
+  };
 
   return (
     <>
       <h2 className="text-2xl font-bold text-gray-900 text-center mb-1">Log In</h2>
       <p className="text-sm text-gray-500 text-center mb-7">Enter your credentials to access your account</p>
+
+      {error && (
+        <div className="mb-4 px-4 py-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+          {error}
+        </div>
+      )}
 
       <TextInput
         label="Email Address"
@@ -141,7 +159,7 @@ const LoginStep = ({ onForgot, onSuccess }) => {
         </button>
       </div>
 
-      <PrimaryBtn onClick={onSuccess}>Log into Account</PrimaryBtn>
+      <PrimaryBtn onClick={handleLogin}>Log into Account</PrimaryBtn>
     </>
   );
 };
@@ -301,18 +319,29 @@ const pageTitles = {
 export default function AdminLogin() {
   const [step, setStep] = useState(STEPS.login);
   const navigate = useNavigate();
+  const { login, user } = useAuth();
 
-  // Keep browser tab title in sync
+  // Already logged in → go straight to dashboard
+  if (user) return <Navigate to="/admin/dashboard" replace />;
+
   useEffect(() => {
     document.title = pageTitles[step];
   }, [step]);
+
+  const handleLogin = (email, password) => {
+    const result = login(email, password);
+    if (result.ok) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+    return result;
+  };
 
   return (
     <AuthShell>
       {step === STEPS.login && (
         <LoginStep
           onForgot={() => setStep(STEPS.forgot)}
-          onSuccess={() => navigate('/admin/dashboard')}
+          onSuccess={handleLogin}
         />
       )}
       {step === STEPS.forgot && (
