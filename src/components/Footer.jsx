@@ -25,7 +25,7 @@ const Footer = () => {
                             />
                         </div>
                         <p className="text-xs sm:text-sm text-gray-300">
-                            CFAO Suzuki & CredSure Loans by Afridev - partnering
+                           CredSure Loans  & CFAO Suzuki  by Afridev - partnering
                             together to make vehicle ownership accessible to
                             everyone.
                         </p>

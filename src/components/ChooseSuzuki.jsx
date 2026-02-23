@@ -5,7 +5,7 @@ import { useCarContext } from '../context/CarContext';
 const ChooseSuzuki = () => {
   const [visibleCars, setVisibleCars] = useState(6);
   const [selectedCarImages, setSelectedCarImages] = useState(null);
-  const { selectCar } = useCarContext();
+  const { selectCar, inventory } = useCarContext();
 
   const formatPrice = (price) => {
     if (price >= 1000000) {
@@ -343,7 +343,7 @@ const ChooseSuzuki = () => {
       name: 'Celerio',
       description: 'Reliable commercial vehicle for business.',
       image: '/celerio-suzuki.jpg',
-      priceValue: null,
+      priceValue: 18000000,
       images: ['/Ertiga1.svg', '/Ertiga.svg', '/Ertiga1.svg'],
       variants: [
         {
@@ -440,6 +440,16 @@ const ChooseSuzuki = () => {
               >
                 <Images className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
               </button>
+
+              {/* Inventory badge */}
+              {(() => {
+                const stock = inventory[car.id] ?? 0;
+                return (
+                  <div className="absolute top-2 sm:top-4 left-12 sm:left-16 z-10 flex items-center gap-1 bg-[#1a2942] text-white text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full shadow-md">
+                    <span>{stock === 0 ? 'Out of stock' : `${stock} left`}</span>
+                  </div>
+                );
+              })()}
 
               {/* Price Info Box */}
               <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-10 bg-[#1a2942] rounded-lg px-2 sm:px-3 md:px-4 py-2 sm:py-3 shadow-lg">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowDown, ChevronDown, X } from 'lucide-react';
 import { useCarContext } from '../context/CarContext';
+import Swal from 'sweetalert2';
 
 const LoanCalculator = () => {
   const { selectedCar } = useCarContext();
@@ -151,7 +152,14 @@ const LoanCalculator = () => {
       monthlyPayment,
       interestRate,
     });
-    alert('Your pre-approval request has been sent to both CredSure and Suzuki. We will contact you within 24-48 hours.');
+    Swal.fire({
+      icon: 'success',
+      title: 'Submission Received!',
+      text: 'Thank you for your submission. One of our representatives will be in touch with you shortly.',
+      confirmButtonText: 'Got it',
+      confirmButtonColor: '#2d9de5',
+      borderRadius: '12px',
+    });
     setShowModal(false);
     setShowEmploymentDropdown(false);
     setFormData({
@@ -250,7 +258,7 @@ const LoanCalculator = () => {
             </div>
 
             {/* Interest Rate (Non-editable) */}
-            <div className="mb-4 sm:mb-6">
+            {/* <div className="mb-4 sm:mb-6">
               <label className="text-gray-300 text-xs sm:text-sm font-medium mb-2 block">
                 Interest Rate
               </label>
@@ -258,7 +266,7 @@ const LoanCalculator = () => {
                 {interestRate}%
               </div>
               {/* <p className="text-gray-400 text-xs mt-1">NOTE: Calculation will be impacted by this value.</p> */}
-            </div>
+            {/* </div>  */}
 
             {/* Advance Payment/Down Payment Input */}
             <div className="mb-0">
