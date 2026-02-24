@@ -630,9 +630,14 @@ const CarManagement = () => {
       setError(null);
       try {
         const data = await carApi.getCars();
-        setVehicles(data);
+        if (Array.isArray(data)) {
+          setVehicles(data);
+        } else {
+          setVehicles([]);
+        }
       } catch (err) {
         setError('Failed to load vehicles');
+        setVehicles([]);
       } finally {
         setLoading(false);
       }
