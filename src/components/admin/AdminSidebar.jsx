@@ -45,12 +45,17 @@ const ALL_SECTIONS = [
   },
 ];
 
+
 const AdminSidebar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  // Debug: log user object
+  console.log('AdminSidebar user:', user);
+
+  // Normalize role to lowercase for comparison
   const navSections = ALL_SECTIONS.filter((s) =>
-    user ? s.roles.includes(user.role) : false
+    user && user.role ? s.roles.includes(user.role.toLowerCase()) : false
   );
 
   const handleLogout = () => {
