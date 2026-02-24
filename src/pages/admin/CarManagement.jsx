@@ -608,8 +608,13 @@ const EditVehicleForm = ({ vehicle, onBack }) => {
   );
 };
 
+import * as carApi from '../../api/cars';
+
 const CarManagement = () => {
   const { inventory, addStock, removeStock, setStock } = useCarContext();
+  const [vehicles, setVehicles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [search, setSearch] = useState('');
@@ -618,6 +623,22 @@ const CarManagement = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [pageSizeOpen, setPageSizeOpen] = useState(false);
+
+  useEffect(() => {
+    async function fetchVehicles() {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await carApi.getCars();
+        setVehicles(data);
+      } catch (err) {
+        setError('Failed to load vehicles');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchVehicles();
+  }, []);
 
   if (showAddForm) {
     return <AddVehicleForm onBack={() => setShowAddForm(false)} />;
