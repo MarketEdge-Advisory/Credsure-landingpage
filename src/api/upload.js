@@ -6,7 +6,8 @@ export async function uploadImagesToCloudinary(files) {
   Array.from(files).forEach((file) => {
     formData.append('images', file);
   });
-  const res = await fetch('/api/upload/images', {
+  const API_BASE = 'https://credsure-backend-1564d84ae428.herokuapp.com/api/upload/images';
+  const res = await fetch(API_BASE, {
     method: 'POST',
     body: formData,
   });
