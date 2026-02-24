@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight, MessageCircle, X, Send } from 'lucide-react';
+import { getCars } from '../api/cars';
 
 const DreamSuzuki = () => {
   // Chatbot state
@@ -53,123 +54,35 @@ const DreamSuzuki = () => {
   // Promotional hero images (up to 3 slots) - These are full background images with car
   // First image is mandatory
   // Structure: { id, image, title, price, description, buttonText, isMandatory }
-  const [promotionalSlides, setPromotionalSlides] = useState([
-    {
-      id: 1,
-      image: '/Dzire1.svg',
-      title: 'Drive Your Dream Suzuki Today. Pay Monthly from',
-      price: '₦500,000',
-      description: 'Fast pre-approval. Transparent payments. Vehicle delivery within 1 week. Finance your Suzuki with Credsure BNPL, Nigeria\'s trusted auto financing partner.',
-      buttonText: 'Check Your Monthly Payment',
-      isMandatory: true
-    },
-    {
-      id: 2,
-      image: '/across_suzuki.avif',
-      title: 'Drive Your Dream Suzuki Today. Pay Monthly from',
-      price: '₦800,000',
-      description: 'Fast pre-approval. Transparent payments. Vehicle delivery within 1 week. Finance your Suzuki with Credsure BNPL, Nigeria\'s trusted auto financing partner.',
-      buttonText: 'Check Your Monthly Payment',
-      isMandatory: false
-    },
-    {
-      id: 3,
-      image: '/Grand-vitara5.1L.avif',
-      title: 'Drive Your Dream Suzuki Today. Pay Monthly from',
-      price: '₦950,000',
-      description: 'Fast pre-approval. Transparent payments. Vehicle delivery within 1 week. Finance your Suzuki with Credsure BNPL, Nigeria\'s trusted auto financing partner.',
-      buttonText: 'Check Your Monthly Payment',
-      isMandatory: false
-    },
-  ]);
-  
-  // Vehicle model slides (up to 11 vehicles) - These also display as full hero backgrounds
-  // Structure: { id, name, image, title, description, specifications, price, monthlyPayment, buttonText }
-  // price: Vehicle worth in Naira
-  // monthlyPayment: Calculated lowest monthly fee (can use calculateMonthlyPayment helper)
-  const [vehicleSlides, setVehicleSlides] = useState([]);
+  const [promotionalSlides, setPromotionalSlides] = useState([]);
+  const [carGallery, setCarGallery] = useState([]);
 
-  // Car Gallery Data (11 cars with brief descriptions)
-  const carsPerPage = 3;
-  const carGallery = [
-    {
-      id: 1,
-      name: 'Suzuki Dzire',
-      image: '/Dzire.svg',
-      description: 'Compact sedan with modern features and excellent fuel efficiency. Perfect for city driving.',
-      price: 12500000
-    },
-    {
-      id: 2,
-      name: 'Suzuki Swift',
-      image: '/Swift.svg',
-      description: 'Sporty hatchback with dynamic styling and agile performance. Ideal for urban adventures.',
-      price: 15000000
-    },
-    {
-      id: 3,
-      name: 'Suzuki Alto',
-      image: '/Alto.svg',
-      description: 'Affordable and reliable everyday car with low running costs. Great first car option.',
-      price: 8500000
-    },
-    {
-      id: 4,
-      name: 'Suzuki Grand Vitara',
-      image: '/Grandvitara.svg',
-      description: 'Premium SUV with hybrid technology and advanced safety features. Luxury meets efficiency.',
-      price: 24300250
-    },
-    {
-      id: 5,
-      name: 'Suzuki Jimny 5-Door',
-      image: '/Jimny.svg',
-      description: 'Legendary off-road capability with extra space. Adventure-ready compact SUV.',
-      price: 18000000
-    },
-    {
-      id: 6,
-      name: 'Suzuki Grand Vitara 1.5L',
-      image: '/Grand-vitara5.1L.avif',
-      description: 'Powerful 1.5L engine with premium interior and smart technology integration.',
-      price: 22500000
-    },
-    {
-      id: 7,
-      name: 'Suzuki S-Presso',
-      image: '/presso.jpeg',
-      description: 'Bold SUV-inspired design with enhanced ground clearance. Compact yet spacious.',
-      price: 9800000
-    },
-    {
-      id: 8,
-      name: 'Suzuki Ertiga',
-      image: '/Ertiga.svg',
-      description: '7-seater MPV with spacious interior and comfortable ride. Perfect family car.',
-      price: 16500000
-    },
-    {
-      id: 9,
-      name: 'Suzuki Celerio',
-      image: '/celerio-suzuki.jpg',
-      description: 'Fuel-efficient hatchback with modern amenities. Budget-friendly and practical.',
-      price: 10200000
-    },
-    {
-      id: 10,
-      name: 'Suzuki Across',
-      image: '/across_suzuki.avif',
-      description: 'Hybrid SUV with all-wheel drive and cutting-edge technology. Eco-friendly performance.',
-      price: 45000000
-    },
-    {
-      id: 11,
-      name: 'Suzuki Eeco Cargo',
-      image: '/Eeco-cargo.avif',
-      description: 'Versatile cargo van with spacious loading capacity. Ideal for business needs.',
-      price: 25000000
+  useEffect(() => {
+    async function fetchCars() {
+      try {
+        const cars = await getCars();
+        setCarGallery(cars.map(car => ({
+          id: car.id,
+          name: car.name,
+          image: Array.isArray(car.images) ? car.images[0] : car.image,
+          description: car.description,
+          price: car.bestPrice || car.price
+        })));
+        setPromotionalSlides(cars.slice(0, 3).map(car => ({
+          id: car.id,
+          image: Array.isArray(car.images) ? car.images[0] : car.image,
+          title: car.name,
+          price: car.bestPrice ? `₦${car.bestPrice.toLocaleString()}` : '',
+          description: car.description,
+          buttonText: 'Check Your Monthly Payment',
+          isMandatory: false
+        })));
+      } catch (e) {
+        // fallback or error handling
+      }
     }
-  ];
+    fetchCars();
+  }, []);
 
   // Build gallery rows – groups of 3 cars each
   const galleryRows = [];

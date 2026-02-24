@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { changePassword } from '../../api/auth';
 import { Monitor, MoreVertical } from 'lucide-react';
 
 const sessions = [
@@ -19,7 +20,10 @@ const sessions = [
 ];
 
 const PlatformSettings = () => {
-  const [currentPassword, setCurrentPassword] = useState('········');
+  const [currentPassword, setCurrentPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -40,9 +44,40 @@ const PlatformSettings = () => {
               Please enter your current password to change your password.
             </p>
           </div>
-          <button className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
-            Save Details
+          <button
+            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+            disabled={loading}
+            onClick={async () => {
+              setLoading(true);
+              setError(null);
+              setSuccess(null);
+              if (!currentPassword || !newPassword || !confirmPassword) {
+                setError('All fields are required');
+                setLoading(false);
+                return;
+              }
+              if (newPassword !== confirmPassword) {
+                setError('New passwords do not match');
+                setLoading(false);
+                return;
+              }
+              try {
+                await changePassword({ oldPassword: currentPassword, newPassword });
+                setSuccess('Password changed successfully');
+                setCurrentPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
+              } catch (e) {
+                setError(e.message || 'Failed to change password');
+              } finally {
+                setLoading(false);
+              }
+            }}
+          >
+            {loading ? 'Saving...' : 'Save Details'}
           </button>
+          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+          {success && <div className="text-green-500 text-sm mt-2">{success}</div>}
         </div>
 
         <div className="grid grid-cols-[200px_1fr] gap-8 pb-8 border-b border-gray-100">

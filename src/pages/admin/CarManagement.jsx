@@ -1,120 +1,32 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import * as carApi from '../../api/cars';
+import { uploadImagesToCloudinary } from '../../api/upload';
 import { Plus, Search, Pencil, Trash2, Download, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ArrowLeft, UploadCloud, Minus } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 import { useCarContext } from '../../context/CarContext';
 
-const allVehicles = [
-  {
-    id: 1,
-    name: 'Suzuki Swift',
-    description: 'The Suzuki Swift 1.2L is a compact hatchback designed for drivers who value efficiency, reliability, and modern styling.',
-    image: '/across_suzuki.avif',
-    modelYear: '2026',
-    bestPrice: '₦4,000,000',
-    variant: 'Swift GL (Base version), Swift GL...',
-    specification: 'Engine Performance....',
-    status: 'Available',
-  },
-  {
-    id: 2,
-    name: 'New Dzire',
-    description: 'The Suzuki Swift 1.2L is a compact hatchback designed for drivers who value efficiency, reliability, and modern styling.',
-    image: '/Grand-vitara5.1L.avif',
-    modelYear: '2026',
-    bestPrice: '₦250,000.00',
-    variant: 'Swift GL (Base version), Swift GL...',
-    specification: 'Engine Performance....',
-    status: 'Not-Available',
-  },
-  {
-    id: 3,
-    name: 'Grand Vitara',
-    description: 'The Suzuki Swift 1.2L is a compact hatchback designed for drivers who value efficiency, reliability, and modern styling.',
-    image: '/Grand-vitara5.1L.avif',
-    modelYear: '2026',
-    bestPrice: '₦250,000.00',
-    variant: 'Swift GL (Base version), Swift GL...',
-    specification: 'Engine Performance....',
-    status: 'Coming Soon',
-  },
-  {
-    id: 4,
-    name: 'Fronx',
-    description: 'The Suzuki Swift 1.2L is a compact hatchback designed for drivers who value efficiency, reliability, and modern styling.',
-    image: '/Eeco-cargo.avif',
-    modelYear: '2026',
-    bestPrice: '₦250,000.00',
-    variant: 'Swift GL (Base version), Swift GL...',
-    specification: 'Engine Performance....',
-    status: 'Coming Soon',
-  },
-  {
-    id: 5,
-    name: 'Ertiga',
-    description: 'The Suzuki Ertiga is a versatile MPV combining spacious seating with efficient performance.',
-    image: '/across_suzuki.avif',
-    modelYear: '2026',
-    bestPrice: '₦3,200,000',
-    variant: 'Ertiga GL, Ertiga Sport...',
-    specification: 'Engine Performance....',
-    status: 'Available',
-  },
-  {
-    id: 6,
-    name: 'Jimny',
-    description: 'The Suzuki Jimny is a legendary off-road compact SUV built for rugged terrain and adventure.',
-    image: '/Eeco-cargo.avif',
-    modelYear: '2026',
-    bestPrice: '₦5,500,000',
-    variant: 'Jimny GL, Jimny GLX...',
-    specification: 'Engine Performance....',
-    status: 'Available',
-  },
-  {
-    id: 7,
-    name: 'Baleno',
-    description: 'The Suzuki Baleno is a premium hatchback offering a perfect blend of style and practicality.',
-    image: '/Grand-vitara5.1L.avif',
-    modelYear: '2026',
-    bestPrice: '₦2,800,000',
-    variant: 'Baleno GL, Baleno Alpha...',
-    specification: 'Engine Performance....',
-    status: 'Not-Available',
-  },
-  {
-    id: 8,
-    name: 'Eeco Cargo',
-    description: 'The Suzuki Eeco Cargo is a practical light commercial vehicle designed for business use.',
-    image: '/Eeco-cargo.avif',
-    modelYear: '2026',
-    bestPrice: '₦1,800,000',
-    variant: 'Eeco Standard, Eeco CNG...',
-    specification: 'Engine Performance....',
-    status: 'Available',
-  },
-  {
-    id: 9,
-    name: 'Ciaz',
-    description: 'The Suzuki Ciaz is a sophisticated sedan offering comfort and premium features at an accessible price.',
-    image: '/across_suzuki.avif',
-    modelYear: '2026',
-    bestPrice: '₦3,500,000',
-    variant: 'Ciaz GL, Ciaz GLX...',
-    specification: 'Engine Performance....',
-    status: 'Coming Soon',
-  },
-  {
-    id: 10,
-    name: 'S-Cross',
-    description: 'The Suzuki S-Cross is a stylish crossover combining urban versatility with off-road capability.',
-    image: '/Grand-vitara5.1L.avif',
-    modelYear: '2026',
-    bestPrice: '₦4,700,000',
-    variant: 'S-Cross GL, S-Cross AllGrip...',
-    specification: 'Engine Performance....',
-    status: 'Available',
-  },
-];
+import * as carApi from '../../api/cars';
+
+const [vehicles, setVehicles] = useState([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState(null);
+
+const fetchVehicles = async () => {
+  setLoading(true);
+  try {
+    const data = await carApi.getCars();
+    setVehicles(data);
+    setError(null);
+  } catch (e) {
+    setError(e.message || 'Failed to load vehicles');
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  fetchVehicles();
+}, []);
 
 const PAGE_SIZES = [10, 20, 50];
 
@@ -164,6 +76,35 @@ const AddVehicleForm = ({ onBack }) => {
   const handleChange = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
+  // Add vehicle handler
+  const handleAddVehicle = async () => {
+    try {
+      let imageUrls = [];
+      if (imagePreviews.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
+        // Upload images to Cloudinary
+        const uploadResult = await uploadImagesToCloudinary(fileInputRef.current.files);
+        imageUrls = uploadResult.urls || uploadResult; // Adjust based on backend response
+      }
+      // Compose car data from form
+      const carData = {
+        name: form.carName,
+        description: form.description,
+        modelYear: form.modelYear,
+        bestPrice: form.vehiclePrice,
+        variant: form.variant,
+        status: form.stockAvailability,
+        specification: form.engineSpec,
+        transmission: form.transmissionSpec,
+        fuelType: form.fuelTypeSpec,
+        images: imageUrls,
+      };
+      await carApi.createCar(carData);
+      await fetchVehicles();
+      onBack();
+    } catch (e) {
+      alert(e.message || 'Failed to add vehicle');
+    }
+  };
   return (
     <div className="p-8 w-full">
       {/* Back + Title */}
@@ -183,7 +124,10 @@ const AddVehicleForm = ({ onBack }) => {
             <p className="font-semibold text-gray-900">Add New Vehicle</p>
             <p className="text-sm text-gray-400 mt-0.5">Input the details below to add new vehicles</p>
           </div>
-          <button className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+          <button
+            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+            onClick={handleAddVehicle}
+          >
             Save Details
           </button>
         </div>
@@ -411,6 +355,36 @@ const EditVehicleForm = ({ vehicle, onBack }) => {
   const handleChange = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
+  // Edit vehicle handler
+  const handleEditVehicle = async () => {
+    try {
+      let imageUrls = [];
+      if (uploadedImages.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
+        // Upload images to Cloudinary
+        const uploadResult = await uploadImagesToCloudinary(fileInputRef.current.files);
+        imageUrls = uploadResult.urls || uploadResult; // Adjust based on backend response
+      } else {
+        imageUrls = uploadedImages;
+      }
+      const carData = {
+        name: form.carName,
+        description: form.description,
+        modelYear: form.modelYear,
+        bestPrice: form.vehiclePrice,
+        variant: form.variant,
+        status: form.stockAvailability,
+        specification: form.engineSpec,
+        transmission: form.transmissionSpec,
+        fuelType: form.fuelTypeSpec,
+        images: imageUrls,
+      };
+      await carApi.updateCar(vehicle.id, carData);
+      await fetchVehicles();
+      onBack();
+    } catch (e) {
+      alert(e.message || 'Failed to update vehicle');
+    }
+  };
   return (
     <div className="p-8 w-full">
       <button
@@ -469,7 +443,10 @@ const EditVehicleForm = ({ vehicle, onBack }) => {
             />
           </div>
         </div>
-          <button className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+          <button
+            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+            onClick={handleEditVehicle}
+          >
             Save Details
           </button>
         </div>
@@ -674,8 +651,8 @@ const CarManagement = () => {
     return <EditVehicleForm vehicle={editingVehicle} onBack={() => setEditingVehicle(null)} />;
   }
 
-  const filtered = allVehicles.filter((v) =>
-    v.name.toLowerCase().includes(search.toLowerCase())
+  const filtered = vehicles.filter((v) =>
+    v.name && v.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const totalEntries = filtered.length;
@@ -849,7 +826,19 @@ const CarManagement = () => {
                       <Pencil size={14} />
                       Edit Vehicle Details
                     </button>
-                    <button className="flex items-center gap-2 border border-gray-200 rounded-lg px-5 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                    <button
+                      className="flex items-center gap-2 border border-gray-200 rounded-lg px-5 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      onClick={async () => {
+                        if (window.confirm('Are you sure you want to delete this vehicle?')) {
+                          try {
+                            await carApi.deleteCar(vehicle.id);
+                            await fetchVehicles();
+                          } catch (e) {
+                            alert(e.message || 'Failed to delete vehicle');
+                          }
+                        }
+                      }}
+                    >
                       <Trash2 size={14} />
                       DeleteVehicle
                     </button>

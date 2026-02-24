@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getLoanTenures, addLoanTenure, updateLoanTenure, deleteLoanTenure } from '../../api/adminConfig';
 import { Plus, Trash2, X, CalendarDays } from 'lucide-react';
 
 const defaultTerms = [
@@ -12,22 +13,75 @@ const defaultTerms = [
 ];
 
 const LoanTermManagement = () => {
-  const [terms, setTerms] = useState(defaultTerms);
+  const [terms, setTerms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchTenures() {
+      setLoading(true);
+      try {
+        const data = await getLoanTenures();
+        setTerms(data.tenures);
+        setError(null);
+      } catch (e) {
+        setError(e.message || 'Failed to load loan tenures');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTenures();
+  }, []);
   const [showModal, setShowModal] = useState(false);
   const [duration, setDuration] = useState('');
 
-  const handleChange = (id, value) =>
-    setTerms((prev) => prev.map((t) => (t.id === id ? { ...t, label: value } : t)));
-
-  const handleDelete = (id) =>
-    setTerms((prev) => prev.filter((t) => t.id !== id));
-
-  const handleCreate = () => {
-    if (duration.trim()) {
-      setTerms((prev) => [...prev, { id: Date.now(), label: duration.trim() }]);
+  const handleChange = async (id, value) => {
+    setLoading(true);
+    try {
+      await updateLoanTenure(id, { label: value });
+      await refreshTenures();
+      setError(null);
+    } catch (e) {
+      setError(e.message || 'Failed to update loan tenure');
+    } finally {
+      setLoading(false);
     }
-    setDuration('');
-    setShowModal(false);
+  };
+
+  const handleDelete = async (id) => {
+    setLoading(true);
+    try {
+      await deleteLoanTenure(id);
+      await refreshTenures();
+      setError(null);
+    } catch (e) {
+      setError(e.message || 'Failed to delete loan tenure');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreate = async () => {
+    setLoading(true);
+    try {
+      if (duration.trim()) {
+        await addLoanTenure(duration.trim());
+        await refreshTenures();
+      }
+      setError(null);
+    } catch (e) {
+      setError(e.message || 'Failed to add loan tenure');
+    } finally {
+      setLoading(false);
+      setDuration('');
+      setShowModal(false);
+    }
+  };
+  const refreshTenures = async () => {
+    try {
+      const data = await getLoanTenures();
+      setTerms(data.tenures);
+    } catch {}
   };
 
   const handleCancel = () => {

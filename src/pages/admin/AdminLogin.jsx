@@ -103,13 +103,13 @@ const LoginStep = ({ onForgot, onSuccess }) => {
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError('');
     if (!email || !password) {
       setError('Please enter your email and password.');
       return;
     }
-    const result = onSuccess(email, password);
+    const result = await onSuccess(email, password);
     if (!result.ok) setError(result.message);
   };
 
@@ -328,8 +328,8 @@ export default function AdminLogin() {
     document.title = pageTitles[step];
   }, [step]);
 
-  const handleLogin = (email, password) => {
-    const result = login(email, password);
+  const handleLogin = async (email, password) => {
+    const result = await login(email, password);
     if (result.ok) {
       navigate('/admin/dashboard', { replace: true });
     }
