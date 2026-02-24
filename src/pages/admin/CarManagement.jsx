@@ -1,11 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import * as carApi from '../../api/cars';
 import { uploadImagesToCloudinary } from '../../api/upload';
 import { Plus, Search, Pencil, Trash2, Download, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ArrowLeft, UploadCloud, Minus } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 import { useCarContext } from '../../context/CarContext';
-
-import * as carApi from '../../api/cars';
 
 const PAGE_SIZES = [10, 20, 50];
 
