@@ -6,6 +6,7 @@ const ChooseSuzuki = () => {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedCarImages, setSelectedCarImages] = useState(null);
 
   useEffect(() => {
     async function fetchCars() {
