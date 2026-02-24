@@ -1,4 +1,4 @@
-// src/api/adminConfig.js
+
 // Utility for admin config endpoints
 
 export async function getAdminConfig() {
