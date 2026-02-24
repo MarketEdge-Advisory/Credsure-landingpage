@@ -46,7 +46,13 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await authApi.loginAdmin({ email, password });
       // Support various backend response shapes
-      const userObj = data.user || data.data?.user || data.data || data;
+      // Always store accessToken at the top level for consistency
+      let userObj = data.user || data.data?.user || data.data || data;
+      let accessToken = data.accessToken || data.data?.accessToken || data.token || '';
+      // If accessToken is not at top level, try to extract from nested data
+      if (!accessToken && userObj && userObj.accessToken) accessToken = userObj.accessToken;
+      // Compose a flat user object with accessToken at top level
+      if (accessToken) userObj = { ...userObj, accessToken };
       setUser(userObj);
       sessionStorage.setItem('admin_user', JSON.stringify(userObj));
       return { ok: true };
