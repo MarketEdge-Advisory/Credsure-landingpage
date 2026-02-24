@@ -724,7 +724,13 @@ const CarManagement = () => {
 
         {/* Vehicle Cards */}
         <div className="flex flex-col gap-4">
-          {pageItems.length === 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <img src="/empty-cars.svg" alt="Loading vehicles" className="w-32 h-32 mb-6 opacity-70 animate-pulse" />
+              <h2 className="text-lg font-semibold text-gray-700 mb-2">Loading vehicles...</h2>
+              <p className="text-gray-500 mb-4">Please wait while we fetch your inventory.</p>
+            </div>
+          ) : pageItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16">
               <img src="/empty-cars.svg" alt="No vehicles" className="w-32 h-32 mb-6 opacity-70" />
               <h2 className="text-lg font-semibold text-gray-700 mb-2">No vehicles found</h2>
