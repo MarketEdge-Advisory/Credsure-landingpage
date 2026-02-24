@@ -45,8 +45,10 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const data = await authApi.loginAdmin({ email, password });
-      setUser(data.user || data); // adjust if backend returns user in data.user
-      sessionStorage.setItem('admin_user', JSON.stringify(data.user || data));
+      // Support various backend response shapes
+      const userObj = data.user || data.data?.user || data.data || data;
+      setUser(userObj);
+      sessionStorage.setItem('admin_user', JSON.stringify(userObj));
       return { ok: true };
     } catch (e) {
       return { ok: false, message: e.message || 'Login failed' };

@@ -53,9 +53,17 @@ const AdminSidebar = () => {
   // Debug: log user object
   console.log('AdminSidebar user:', user);
 
-  // Normalize role to lowercase for comparison
+  // Helper to normalize backend roles to sidebar roles
+  const getNormalizedRole = (role) => {
+    if (!role) return '';
+    const r = role.toLowerCase();
+    if (r.includes('suzuki')) return 'suzuki';
+    if (r.includes('credsure')) return 'credsure';
+    return r;
+  };
+
   const navSections = ALL_SECTIONS.filter((s) =>
-    user && user.role ? s.roles.includes(user.role.toLowerCase()) : false
+    user && user.role ? s.roles.includes(getNormalizedRole(user.role)) : false
   );
 
   const handleLogout = () => {
