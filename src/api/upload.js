@@ -7,9 +7,16 @@ export async function uploadImagesToCloudinary(files) {
     formData.append('images', file);
   });
   const API_BASE = 'https://credsure-backend-1564d84ae428.herokuapp.com/api/upload/images';
+  // Get access token from sessionStorage (adjust if you store it elsewhere)
+  let accessToken = '';
+  try {
+    const user = JSON.parse(sessionStorage.getItem('admin_user'));
+    accessToken = user?.accessToken || user?.data?.accessToken || '';
+  } catch {}
   const res = await fetch(API_BASE, {
     method: 'POST',
     body: formData,
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
   });
   if (!res.ok) throw new Error('Failed to upload images');
   return res.json(); // Expecting array of image URLs or similar
