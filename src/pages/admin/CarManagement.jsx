@@ -7,27 +7,6 @@ import { useCarContext } from '../../context/CarContext';
 
 import * as carApi from '../../api/cars';
 
-const [vehicles, setVehicles] = useState([]);
-const [loading, setLoading] = useState(true);
-const [error, setError] = useState(null);
-
-const fetchVehicles = async () => {
-  setLoading(true);
-  try {
-    const data = await carApi.getCars();
-    setVehicles(data);
-    setError(null);
-  } catch (e) {
-    setError(e.message || 'Failed to load vehicles');
-  } finally {
-    setLoading(false);
-  }
-};
-
-useEffect(() => {
-  fetchVehicles();
-}, []);
-
 const PAGE_SIZES = [10, 20, 50];
 
 const statusConfig = {
