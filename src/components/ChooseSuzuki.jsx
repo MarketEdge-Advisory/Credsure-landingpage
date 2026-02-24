@@ -3,6 +3,7 @@ import { ArrowDown, ChevronDown, X, Images } from 'lucide-react';
 import { useCarContext } from '../context/CarContext';
   // Removed hardcoded cars array. Fetching from backend instead.
 const ChooseSuzuki = () => {
+  const [visibleCars, setVisibleCars] = useState(6);
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
