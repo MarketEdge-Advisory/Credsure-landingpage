@@ -138,7 +138,11 @@ const ChooseSuzuki = () => {
       description: 'Premium SUV with hybrid technology.',
       image: '/Grandvitara.svg',
       priceValue: 36000000,
-      images: ['/Grandvitara.svg', '/Grandvitara.svg', '/Grandvitara.svg'],
+      images: [
+        '/Grandvitara.svg', // For GRAND VITARA – Specs : N42M
+        '/Grand-vitara5.1L.avif', // For GRAND VITARA 1.5L – Specs – N52M
+        // No third variant, so no third image
+      ],
       variants: [
         {
           name: 'GRAND VITARA – Specs : N42M',
@@ -236,7 +240,9 @@ const ChooseSuzuki = () => {
       description: 'Reliable commercial vehicle for business.',
       image: '/Grand-vitara5.1L.avif',
       priceValue: 42000000,
-      images: ['/Grandvitara.svg', '/Grandvitara.svg', '/Grandvitara.svg'],
+      images: [
+        '/Grand-vitara5.1L.avif', // Only one variant, so only one image
+      ],
       variants: [
         {
           name: 'GRAND VITARA 1.5L – Specs : Premium',
@@ -523,20 +529,60 @@ const ChooseSuzuki = () => {
             </button>
           </div>
 
-          {/* Image Gallery */}
+          {/* Image Gallery - show up to 3 images, one per variant if available */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-8">
-            {selectedCarImages.images.map((img, index) => (
-              <div 
-                key={index}
-                className="bg-gray-100 rounded-sm overflow-hidden aspect-video"
-              >
-                <img 
-                  src={img} 
-                  alt={`${selectedCarImages.name} view ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
+            {Array.from({ length: 3 }).map((_, index) => {
+              // Prefer image per variant if available, else fallback to first image
+              const img = selectedCarImages.variants && selectedCarImages.variants[index] && selectedCarImages.images[index]
+                ? selectedCarImages.images[index]
+                : (index === 0 && selectedCarImages.images[0]) || null;
+              // Only show image if there is a variant for this slot
+              if (selectedCarImages.variants && selectedCarImages.variants[index]) {
+                return img ? (
+                  <div
+                    key={index}
+                    className="bg-gray-100 rounded-sm overflow-hidden aspect-video"
+                  >
+                    <img
+                      src={img}
+                      alt={`${selectedCarImages.name} model ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    key={index}
+                    className="bg-gray-100 rounded-sm aspect-video flex items-center justify-center"
+                  >
+                    <span className="text-gray-300 text-sm">No image</span>
+                  </div>
+                );
+              } else if (index === 0 && selectedCarImages.images[0]) {
+                // Always show the first image for the first slot
+                return (
+                  <div
+                    key={index}
+                    className="bg-gray-100 rounded-sm overflow-hidden aspect-video"
+                  >
+                    <img
+                      src={selectedCarImages.images[0]}
+                      alt={`${selectedCarImages.name} model 1`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                );
+              } else {
+                // Fill empty slots
+                return (
+                  <div
+                    key={index}
+                    className="bg-gray-100 rounded-sm aspect-video flex items-center justify-center"
+                  >
+                    <span className="text-gray-300 text-sm">No image</span>
+                  </div>
+                );
+              }
+            })}
           </div>
 
           {/* Specifications Grid */}

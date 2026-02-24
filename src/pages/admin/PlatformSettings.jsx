@@ -35,7 +35,7 @@ const PlatformSettings = () => {
         {/* Password Section */}
         <div className="flex items-start justify-between mb-6">
           <div>
-            <p className="font-semibold text-gray-900">Password</p>
+            <p className="font-semibold text-gray-900">Change Password</p>
             <p className="text-sm text-gray-400 mt-0.5">
               Please enter your current password to change your password.
             </p>

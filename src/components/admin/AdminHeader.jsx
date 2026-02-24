@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Bell, ChevronDown, LogOut, User, Settings } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const routeLabels = {
   dashboard: 'Dashboard',
@@ -15,6 +16,21 @@ const AdminHeader = () => {
   const { pathname } = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const { user } = useAuth();
+
+   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Remove auth data
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // Optional: clear everything
+    // localStorage.clear();
+
+    // Redirect to login page
+    navigate("/");
+  };
 
   // Derive current page label from pathname
   const segment = pathname.split('/').filter(Boolean).pop();
@@ -85,10 +101,12 @@ const AdminHeader = () => {
           >
             {/* Avatar */}
             <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-              <span className="text-blue-700 font-bold text-sm">CS</span>
+              <span className="text-blue-700 font-bold text-sm">
+                {user?.initials || 'AD'}
+              </span>
             </div>
             <span className="text-sm font-medium text-gray-700 hidden sm:block">
-              Credsuresuzuki@gmail.com
+              {user?.email || 'admin@credsure.com'}
             </span>
             <ChevronDown
               size={15}
@@ -99,16 +117,18 @@ const AdminHeader = () => {
           {/* Dropdown */}
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-50">
-              <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+              {/* <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                 <User size={15} className="text-gray-400" />
                 My Profile
               </button>
               <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                 <Settings size={15} className="text-gray-400" />
                 Account Settings
-              </button>
+              </button> */}
               <div className="my-1 border-t border-gray-100" />
-              <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+              <button 
+               onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
                 <LogOut size={15} />
                 Sign Out
               </button>

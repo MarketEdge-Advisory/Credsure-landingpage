@@ -90,7 +90,6 @@ const DreamSuzuki = () => {
   const [vehicleSlides, setVehicleSlides] = useState([]);
 
   // Car Gallery Data (11 cars with brief descriptions)
-  const [carGalleryPage, setCarGalleryPage] = useState(0);
   const carsPerPage = 3;
   const carGallery = [
     {
@@ -172,26 +171,27 @@ const DreamSuzuki = () => {
     }
   ];
 
-  const totalPages = Math.ceil(carGallery.length / carsPerPage);
-  const currentCars = carGallery.slice(
-    carGalleryPage * carsPerPage,
-    (carGalleryPage + 1) * carsPerPage
-  );
+  // Build gallery rows – groups of 3 cars each
+  const galleryRows = [];
+  for (let i = 0; i < carGallery.length; i += carsPerPage) {
+    galleryRows.push({
+      type: 'gallery',
+      id: `gallery-row-${Math.floor(i / carsPerPage)}`,
+      cars: carGallery.slice(i, i + carsPerPage)
+    });
+  }
 
-  const nextPage = () => {
-    setCarGalleryPage((prev) => (prev + 1) % totalPages);
-  };
+  // Interleaved sequence: [promo1, promo2, promo3, galleryRow1, promo1, promo2, promo3, galleryRow2, ...]
+  const interleavedSlides = [];
+  if (galleryRows.length === 0) {
+    promotionalSlides.forEach(slide => interleavedSlides.push({ type: 'promo', ...slide }));
+  } else {
+    galleryRows.forEach((row) => {
+      promotionalSlides.forEach(slide => interleavedSlides.push({ type: 'promo', ...slide }));
+      interleavedSlides.push(row);
+    });
+  }
 
-  const prevPage = () => {
-    setCarGalleryPage((prev) => (prev - 1 + totalPages) % totalPages);
-  };
-
-  const goToPage = (pageIndex) => {
-    setCarGalleryPage(pageIndex);
-  };
-
-  // Combine all slides (promotional + vehicles)
-  const allSlides = [...promotionalSlides, ...vehicleSlides];
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Helper function to calculate monthly payment
@@ -351,190 +351,150 @@ const DreamSuzuki = () => {
     }
   };
 
-  // Auto-advance slides
+  // Auto-advance – gallery slides linger a bit longer than promo slides
   useEffect(() => {
-    if (allSlides.length > 1) {
-      const timer = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % allSlides.length);
-      }, 5000);
-      return () => clearInterval(timer);
+    if (interleavedSlides.length > 1) {
+      const isGallery = interleavedSlides[currentSlide]?.type === 'gallery';
+      const delay = isGallery ? 7000 : 5000;
+      const timer = setTimeout(() => {
+        setCurrentSlide((prev) => (prev + 1) % interleavedSlides.length);
+      }, delay);
+      return () => clearTimeout(timer);
     }
-  }, [allSlides.length]);
+  }, [currentSlide, interleavedSlides.length]);
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % allSlides.length);
-  };
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % interleavedSlides.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + interleavedSlides.length) % interleavedSlides.length);
+  const goToSlide = (index) => setCurrentSlide(index);
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + allSlides.length) % allSlides.length);
-  };
-
-  const goToSlide = (index) => {
-    setCurrentSlide(index);
-  };
-
-  // Check if current slide is promotional (first 3)
-  const isPromotionalSlide = currentSlide < promotionalSlides.length;
-  const currentSlideData = allSlides[currentSlide];
+  const currentSlideData = interleavedSlides[currentSlide];
+  const isGallerySlide = currentSlideData?.type === 'gallery';
 
   return (
     <div id="home" className="relative w-full overflow-hidden">
-      {/* Hero Section with Full Background Image */}
+      {/* ── Single Hero Container – Interleaved Promo + Gallery Slides ── */}
       <div className="relative min-h-screen w-full bg-[#0f1e3d] mt-16">
-        {/* Background Image - Current Slide */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700"
-          style={{
-            backgroundImage: `url('${currentSlideData?.image}')`,
-            backgroundSize: 'cover',
-          }}
+
+        {/* ── PROMO SLIDE: full background image ── */}
+        {!isGallerySlide && (
+          <div
+            key={currentSlideData?.id}
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700"
+            style={{ backgroundImage: `url('${currentSlideData?.image}')` }}
+          />
+        )}
+
+        {/* Overlay – darker for gallery so cards pop */}
+        <div
+          className={`absolute inset-0 transition-all duration-700 ${
+            isGallerySlide
+              ? 'bg-[#0a1628]'
+              : 'bg-gradient-to-r from-black/60 via-black/40 to-transparent'
+          }`}
         />
 
-        {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent" />
-
         {/* Content */}
-        <div className="relative z-10 flex min-h-screen items-center">
-          <div className="container px-4 md:px-8 lg:px-16">
-            <div className="max-w-2xl">
-              {/* Heading */}
-              <h1 className="mb-4 sm:mb-6 text-2xl sm:text-3xl md:text-4xl lg:text-[55px] font-bold text-white leading-tight animate-[fade-in_1s_ease-out]">
-                {isPromotionalSlide ? (
-                  <>
-                    {currentSlideData?.title}{' '}
-                    <span className="block mt-1 sm:mt-2 text-blue-300">{currentSlideData?.price}</span>
-                  </>
-                ) : (
-                  <>
-                    {currentSlideData?.title}
-                    <span className="block mt-2 sm:mt-3 text-2xl sm:text-3xl md:text-4xl lg:text-[45px]">
-                      {currentSlideData?.name}
+        <div className="relative z-10 flex min-h-screen items-center justify-center">
+
+          {/* ─── PROMO CONTENT ─── */}
+          {!isGallerySlide && (
+            <div className="w-full container px-4 md:px-8 lg:px-16">
+              <div className="max-w-2xl">
+                <h1 className="mb-4 sm:mb-6 text-2xl sm:text-3xl md:text-4xl lg:text-[55px] font-bold text-white leading-tight">
+                  {currentSlideData?.title}{' '}
+                  <span className="block mt-1 sm:mt-2 text-blue-300">{currentSlideData?.price}</span>
+                </h1>
+                <p className="mb-6 sm:mb-10 text-sm sm:text-base md:text-lg lg:text-[18px] max-w-[620px] text-gray-200 leading-relaxed">
+                  {currentSlideData?.description}
+                </p>
+                <div>
+                  <button
+                    className="group flex items-center justify-between gap-2 sm:gap-4 bg-white hover:bg-cyan-400 hover:text-slate-100 text-gray-700 font-medium px-6 sm:px-8 md:px-10 py-3 sm:py-4 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl w-full sm:w-auto sm:min-w-[280px] md:min-w-[320px]"
+                    onClick={() => {
+                      const calculator = document.querySelector('#calculator');
+                      if (calculator) calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                  >
+                    <span className="text-sm sm:text-base md:text-lg">
+                      {currentSlideData?.buttonText || 'Check Your Monthly Payment'}
                     </span>
-                    {currentSlideData?.monthlyPayment && (
-                      <span className="block mt-2 sm:mt-3 text-xl sm:text-2xl md:text-3xl lg:text-[40px] text-blue-300">
-                        Pay Monthly from ₦{currentSlideData.monthlyPayment.toLocaleString()}
-                      </span>
-                    )}
-                  </>
-                )}
-              </h1>
-
-              {/* Description */}
-              <p className="mb-6 sm:mb-10 text-sm sm:text-base md:text-lg lg:text-[18px] max-w-[620px] text-gray-200 leading-relaxed animate-[fade-in-delay_1s_ease-out_0.3s_both]">
-                {currentSlideData?.description}
-              </p>
-
-              {/* Specifications (for vehicle slides) */}
-              {!isPromotionalSlide && currentSlideData?.specifications && (
-                <div className="mb-6 animate-[fade-in-delay_1s_ease-out_0.4s_both]">
-                  <p className="text-sm md:text-base text-gray-300 mb-2">
-                    {currentSlideData.specifications}
-                  </p>
-                  {currentSlideData?.price && (
-                    <p className="text-xs md:text-sm text-gray-400">
-                      Vehicle Price: ₦{currentSlideData.price.toLocaleString()}
-                    </p>
-                  )}
+                    <ChevronDown className="w-5 h-5 text-blue-500 transition-transform duration-300 group-hover:translate-y-1 group-hover:text-slate-100" />
+                  </button>
                 </div>
-              )}
-
-              {/* CTA Button */}
-              <div className="animate-[fade-in-delay-2_1s_ease-out_0.6s_both]">
-                <button 
-                  className="group flex items-center justify-between gap-2 sm:gap-4 bg-white hover:bg-cyan-400 hover:text-slate-100 text-gray-700 font-medium px-6 sm:px-8 md:px-10 py-3 sm:py-4 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl w-full sm:w-auto sm:min-w-[280px] md:min-w-[320px]"
-                  onClick={() => {
-                    const calculator = document.querySelector('#calculator');
-                    if (calculator) {
-                      calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                  }}
-                >
-                  <span className="text-sm sm:text-base md:text-lg">
-                    {currentSlideData?.buttonText || 'Check Your Monthly Payment'}
-                  </span>
-                  <ChevronDown className="w-5 h-5 text-blue-500 transition-transform duration-300 group-hover:translate-y-1 group-hover:text-slate-100" />
-                </button>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Car Gallery - Floating on Right Side */}
-          <div className="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 w-80 z-20">
-            <div className="bg-black/30 backdrop-blur-md rounded-lg p-4">
-              <h3 className="text-white text-lg font-bold mb-4 text-center">Explore Our Fleet</h3>
-              
-              {/* Car Cards */}
-              <div className="space-y-3 mb-4">
-                {currentCars.map((car) => (
-                  <div 
+          {/* ─── GALLERY CONTENT ─── */}
+          {isGallerySlide && (
+            <div className="w-full px-8 md:px-16 lg:px-24 py-12">
+              {/* Header */}
+              <div className="text-center mb-10">
+                <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-2">Explore Our Fleet</p>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+                  Find Your Perfect Suzuki
+                </h2>
+                <p className="text-gray-400 mt-3 text-base md:text-lg max-w-xl mx-auto">
+                  Every model available through Credsure flexible financing.
+                </p>
+              </div>
+
+              {/* 3-card grid – each card is a background image */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 md:gap-6">
+                {currentSlideData.cars.map((car) => (
+                  <div
                     key={car.id}
-                    className="bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden hover:bg-white/20 transition-all duration-300"
+                    className="relative h-64 sm:h-72 md:h-80 lg:h-96 rounded-2xl overflow-hidden group cursor-pointer"
+                    style={{
+                      backgroundImage: `url('${car.image}')`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
                   >
-                    <div className="flex gap-3 p-3">
-                      <div className="w-20 h-16 bg-white/5 rounded flex-shrink-0 flex items-center justify-center">
-                        <img 
-                          src={car.image} 
-                          alt={car.name}
-                          className="h-full w-auto object-contain"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-white font-semibold text-sm truncate">{car.name}</h4>
-                        <p className="text-gray-300 text-xs line-clamp-2">{car.description}</p>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-blue-300 text-xs font-semibold">
-                            ₦{(car.price / 1000000).toFixed(1)}M
-                          </span>
-                          <a 
-                            href="#calculator"
-                            className="text-blue-400 hover:text-blue-300 text-xs"
-                          >
-                            Calculate →
-                          </a>
-                        </div>
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent transition-all duration-300 group-hover:via-black/50" />
+
+                    {/* Caption */}
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <h4 className="text-white font-bold text-lg md:text-xl mb-1">{car.name}</h4>
+                      <p className="text-gray-300 text-sm line-clamp-2 mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {car.description}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-blue-300 font-semibold text-sm md:text-base">
+                          ₦{(car.price / 1000000).toFixed(1)}M
+                        </span>
+                        <button
+                          className="text-xs md:text-sm bg-white/20 hover:bg-blue-600 text-white px-3 py-1.5 rounded-full transition-all duration-200 backdrop-blur-sm"
+                          onClick={() => {
+                            const calc = document.querySelector('#calculator');
+                            if (calc) calc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
+                        >
+                          Calculate →
+                        </button>
                       </div>
                     </div>
                   </div>
                 ))}
-              </div>
 
-              {/* Pagination */}
-              <div className="flex items-center justify-center gap-2">
-                <button
-                  onClick={prevPage}
-                  className="bg-white/10 hover:bg-white/20 text-white p-1.5 rounded-full transition-all"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                
-                <div className="flex gap-1.5">
-                  {Array.from({ length: totalPages }).map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => goToPage(index)}
-                      className={`w-7 h-7 rounded-full text-xs transition-all ${
-                        carGalleryPage === index
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-white/10 hover:bg-white/20 text-white'
-                      }`}
-                    >
-                      {index + 1}
-                    </button>
+                {/* Fill empty slots on the last row */}
+                {currentSlideData.cars.length < carsPerPage &&
+                  Array.from({ length: carsPerPage - currentSlideData.cars.length }).map((_, i) => (
+                    <div key={`empty-${i}`} className="h-64 sm:h-72 md:h-80 lg:h-96 rounded-2xl bg-white/5" />
                   ))}
-                </div>
-
-                <button
-                  onClick={nextPage}
-                  className="bg-white/10 hover:bg-white/20 text-white p-1.5 rounded-full transition-all"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
               </div>
-            </div>
-          </div>
 
-          {/* Navigation Arrows */}
-          {allSlides.length > 1 && (
+              {/* Row indicator */}
+              <p className="text-center text-gray-500 text-sm mt-6">
+                Showing models {(interleavedSlides.filter((s, i) => s.type === 'gallery' && i < currentSlide).length) * carsPerPage + 1}–
+                {Math.min((interleavedSlides.filter((s, i) => s.type === 'gallery' && i < currentSlide).length) * carsPerPage + currentSlideData.cars.length, carGallery.length)} of {carGallery.length}
+              </p>
+            </div>
+          )}
+
+          {/* ─── Navigation Arrows (always visible) ─── */}
+          {interleavedSlides.length > 1 && (
             <>
               <button
                 onClick={prevSlide}
@@ -553,17 +513,21 @@ const DreamSuzuki = () => {
             </>
           )}
 
-          {/* Pagination Dots */}
-          {allSlides.length > 1 && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-              {allSlides.map((_, index) => (
+          {/* ─── Pagination Dots ─── */}
+          {interleavedSlides.length > 1 && (
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 flex-wrap justify-center max-w-xs">
+              {interleavedSlides.map((slide, index) => (
                 <button
                   key={index}
                   onClick={() => goToSlide(index)}
                   className={`transition-all duration-300 rounded-full ${
-                    index === currentSlide 
-                      ? 'w-8 h-2 bg-white' 
-                      : 'w-2 h-2 bg-white/50 hover:bg-white/75'
+                    index === currentSlide
+                      ? slide.type === 'gallery'
+                        ? 'w-8 h-2 bg-blue-400'
+                        : 'w-8 h-2 bg-white'
+                      : slide.type === 'gallery'
+                        ? 'w-2 h-2 bg-blue-500/50 hover:bg-blue-400/75'
+                        : 'w-2 h-2 bg-white/40 hover:bg-white/70'
                   }`}
                   aria-label={`Go to slide ${index + 1}`}
                 />
@@ -571,14 +535,10 @@ const DreamSuzuki = () => {
             </div>
           )}
 
-          {/* Slide Counter */}
-          <div className="absolute top-24 right-4 bg-black/40 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm z-20">
-            <div className="text-center">
-              <p className="font-semibold">{currentSlide + 1} / {allSlides.length}</p>
-              {!isPromotionalSlide && currentSlideData?.name && (
-                <p className="text-xs text-gray-300 mt-0.5">{currentSlideData.name}</p>
-              )}
-            </div>
+          {/* ─── Slide type badge ─── */}
+          <div className="absolute top-24 right-4 bg-black/40 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm z-20 text-center">
+            <p className="font-semibold">{currentSlide + 1} / {interleavedSlides.length}</p>
+            <p className="text-xs text-gray-300">{isGallerySlide ? 'Fleet' : 'Promo'}</p>
           </div>
 
           {/* Chatbot */}
@@ -608,10 +568,7 @@ const DreamSuzuki = () => {
                 {/* Chat Messages */}
                 <div className="flex-1 overflow-y-auto p-3 bg-gray-50 space-y-3 min-h-0">
                   {chatMessages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
+                    <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div
                         className={`max-w-[80%] rounded-2xl px-3 py-2 ${
                           msg.type === 'user'
@@ -672,11 +629,7 @@ const DreamSuzuki = () => {
               className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
               aria-label="Toggle chat"
             >
-              {isChatOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <MessageCircle className="w-6 h-6" />
-              )}
+              {isChatOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
             </button>
           </div>
         </div>

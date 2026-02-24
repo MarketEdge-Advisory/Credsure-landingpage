@@ -127,7 +127,7 @@ const statusConfig = {
 const AddVehicleForm = ({ onBack }) => {
   const fileInputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [form, setForm] = useState({
     carName: '',
     description: '',
@@ -140,18 +140,25 @@ const AddVehicleForm = ({ onBack }) => {
     fuelTypeSpec: '',
   });
 
-  const handleImageFile = (file) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => setImagePreview(e.target.result);
-    reader.readAsDataURL(file);
+  const handleImageFiles = (files) => {
+    if (!files || files.length === 0) return;
+    const newPreviews = [];
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        newPreviews.push(e.target.result);
+        if (newPreviews.length === files.length) {
+          setImagePreviews((prev) => [...prev, ...newPreviews]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    handleImageFile(file);
+    handleImageFiles(e.dataTransfer.files);
   };
 
   const handleChange = (field) => (e) =>
@@ -168,7 +175,6 @@ const AddVehicleForm = ({ onBack }) => {
         Go back
       </button>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Add New Vehicle</h1>
-
       {/* Form Card */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         {/* Card Header */}
@@ -181,15 +187,14 @@ const AddVehicleForm = ({ onBack }) => {
             Save Details
           </button>
         </div>
-
         <div className="divide-y divide-gray-100">
           {/* Upload Image Row */}
           <div className="grid grid-cols-[200px_1fr] gap-8 py-6">
             <div>
-              <p className="text-sm font-medium text-gray-700">Upload Vehicle Image</p>
+              <p className="text-sm font-medium text-gray-700">Upload Vehicle Images</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500 mb-2">Click to upload</p>
+              <p className="text-sm text-gray-500 mb-2">Click to upload or drag and drop multiple images</p>
               <div
                 className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'}`}
                 onClick={() => fileInputRef.current?.click()}
@@ -197,8 +202,12 @@ const AddVehicleForm = ({ onBack }) => {
                 onDragLeave={() => setDragOver(false)}
                 onDrop={handleDrop}
               >
-                {imagePreview ? (
-                  <img src={imagePreview} alt="Preview" className="max-h-40 rounded-lg object-contain" />
+                {imagePreviews.length > 0 ? (
+                  <div className="flex flex-wrap gap-4">
+                    {imagePreviews.map((src, idx) => (
+                      <img key={idx} src={src} alt={`Preview ${idx + 1}`} className="max-h-40 rounded-lg object-contain" />
+                    ))}
+                  </div>
                 ) : (
                   <>
                     <UploadCloud size={32} className="text-blue-400" />
@@ -213,12 +222,12 @@ const AddVehicleForm = ({ onBack }) => {
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                multiple
                 className="hidden"
-                onChange={(e) => handleImageFile(e.target.files[0])}
+                onChange={(e) => handleImageFiles(e.target.files)}
               />
             </div>
           </div>
-
           {/* Car Details Row */}
           <div className="grid grid-cols-[200px_1fr] gap-8 py-6">
             <div>
@@ -226,7 +235,7 @@ const AddVehicleForm = ({ onBack }) => {
             </div>
             <div className="flex flex-col gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Car Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name of Model</label>
                 <input
                   type="text"
                   placeholder="Enter car name"
@@ -256,7 +265,7 @@ const AddVehicleForm = ({ onBack }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Price</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price (NGN)</label>
                 <input
                   type="text"
                   placeholder="Enter amount"
@@ -276,10 +285,10 @@ const AddVehicleForm = ({ onBack }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Car Listing</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Number of units</label>
                 <input
                   type="text"
-                  placeholder="Enter car listing details"
+                  placeholder="Enter number of units"
                   value={form.carListing}
                   onChange={handleChange('carListing')}
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
@@ -287,15 +296,14 @@ const AddVehicleForm = ({ onBack }) => {
               </div>
             </div>
           </div>
-
           {/* Car Specifications Row */}
           <div className="grid grid-cols-[200px_1fr] gap-8 py-6">
             <div>
-              <p className="text-sm font-medium text-gray-700">Input Car Specifications</p>
+              <p className="text-sm font-medium text-gray-700">Specifications</p>
             </div>
             <div className="flex flex-col gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Engine Specification</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Engine Capacity</label>
                 <textarea
                   placeholder="Enter Message..."
                   rows={4}
@@ -305,14 +313,16 @@ const AddVehicleForm = ({ onBack }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Transmission Specification</label>
-                <textarea
-                  placeholder="Enter Message..."
-                  rows={4}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Transmission</label>
+                <select
                   value={form.transmissionSpec}
                   onChange={handleChange('transmissionSpec')}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400 resize-none"
-                />
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-400"
+                >
+                  {/* <option value="">Select transmission</option> */}
+                  <option value="Manual">Manual</option>
+                  <option value="Automatic">Automatic</option>
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Fuel Type Specification</label>
@@ -324,20 +334,33 @@ const AddVehicleForm = ({ onBack }) => {
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400 resize-none"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Stock Availability</label>
+                <select
+                  value={form.stockAvailability || ''}
+                  onChange={handleChange('stockAvailability')}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-400"
+                >
+                  {/* <option value="">Select availability</option> */}
+                  <option value="Available">Available</option>
+                  <option value="Not Available">Not Available</option>
+                   <option value="Coming Soon">Coming Soon</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
 const EditVehicleForm = ({ vehicle, onBack }) => {
   const fileInputRef = useRef(null);
   const changeInputRefs = useRef([]);
   const [dragOver, setDragOver] = useState(false);
   const [uploadedImages, setUploadedImages] = useState(
-    [vehicle.image, vehicle.image, vehicle.image]
+    vehicle.images ? vehicle.images : [vehicle.image]
   );
   const [form, setForm] = useState({
     carName: vehicle.name || '',
@@ -351,12 +374,19 @@ const EditVehicleForm = ({ vehicle, onBack }) => {
     fuelTypeSpec: '',
   });
 
-  const handleNewImageFile = (file) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) =>
-      setUploadedImages((prev) => [...prev, e.target.result]);
-    reader.readAsDataURL(file);
+  const handleNewImageFiles = (files) => {
+    if (!files || files.length === 0) return;
+    const newImages = [];
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        newImages.push(e.target.result);
+        if (newImages.length === files.length) {
+          setUploadedImages((prev) => [...prev, ...newImages]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleChangeImageFile = (idx, file) => {
@@ -375,7 +405,7 @@ const EditVehicleForm = ({ vehicle, onBack }) => {
   const handleDrop = (e) => {
     e.preventDefault();
     setDragOver(false);
-    handleNewImageFile(e.dataTransfer.files[0]);
+    handleNewImageFiles(e.dataTransfer.files);
   };
 
   const handleChange = (field) => (e) =>
@@ -398,6 +428,47 @@ const EditVehicleForm = ({ vehicle, onBack }) => {
             <p className="font-semibold text-gray-900">Edit Vehicle Details</p>
             <p className="text-sm text-gray-400 mt-0.5">Change the Input details below</p>
           </div>
+        </div>
+        {/* Upload Images Row */}
+        <div className="grid grid-cols-[200px_1fr] gap-8 py-6">
+          <div>
+            <p className="text-sm font-medium text-gray-700">Upload Vehicle Images</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 mb-2">Click to upload or drag and drop multiple images</p>
+            <div
+              className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'}`}
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={handleDrop}
+            >
+              {uploadedImages.length > 0 ? (
+                <div className="flex flex-wrap gap-4">
+                  {uploadedImages.map((src, idx) => (
+                    <img key={idx} src={src} alt={`Preview ${idx + 1}`} className="max-h-40 rounded-lg object-contain" />
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <UploadCloud size={32} className="text-blue-400" />
+                  <p className="text-sm text-gray-500">
+                    <span className="text-blue-500 font-medium">Click to upload</span> or drag and drop
+                  </p>
+                  <p className="text-xs text-gray-400">SVG, PNG, JPG or GIF (max. 800×400px)</p>
+                </>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => handleNewImageFiles(e.target.files)}
+            />
+          </div>
+        </div>
           <button className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
             Save Details
           </button>
@@ -581,7 +652,6 @@ const EditVehicleForm = ({ vehicle, onBack }) => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
