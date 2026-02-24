@@ -725,7 +725,17 @@ const CarManagement = () => {
         {/* Vehicle Cards */}
         <div className="flex flex-col gap-4">
           {pageItems.length === 0 ? (
-            <div className="text-center py-12 text-gray-400 text-sm">No vehicles found.</div>
+            <div className="flex flex-col items-center justify-center py-16">
+              <img src="/empty-cars.svg" alt="No vehicles" className="w-32 h-32 mb-6 opacity-70" />
+              <h2 className="text-lg font-semibold text-gray-700 mb-2">No vehicles found</h2>
+              <p className="text-gray-500 mb-4">You haven't added any cars yet. Start by adding your first vehicle to manage inventory, pricing, and details.</p>
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-6 py-3 rounded-lg transition-colors shadow-md"
+              >
+                <Plus size={18} className="inline-block mr-2" /> Add New Vehicle
+              </button>
+            </div>
           ) : (
             pageItems.map((vehicle) => {
               const status = statusConfig[vehicle.status] || statusConfig['Available'];
