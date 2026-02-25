@@ -804,7 +804,7 @@ const CarManagement = () => {
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-4">
-                        <h3 className="text-lg font-bold text-gray-900">{vehicle.name}</h3>
+                        <h3 className="text-lg font-bold text-gray-900 break-words whitespace-normal">{vehicle.name}</h3>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
                           <span className={`w-2 h-2 rounded-full ${status.dot}`}></span>
                           <span className={`text-sm font-medium ${status.text}`}>{vehicle.status}</span>
@@ -828,7 +828,7 @@ const CarManagement = () => {
                           <p className="text-sm text-gray-400">Variant:</p>
                           <p className="text-sm font-bold text-gray-900 mt-0.5 truncate">{vehicle.variant}</p>
                         </div>
-                        <div className='flex'>
+                        <div className='flex gap-4'>
                           <p className="text-sm text-gray-400">Engine:</p>
                           <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.specs?.engine || '-'}</p>
                           <p className="text-sm text-gray-400 mt-2">Transmission:</p>
