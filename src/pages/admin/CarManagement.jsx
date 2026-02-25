@@ -20,9 +20,9 @@ const AddVehicleForm = ({ onBack }) => {
     carName: '',
     description: '',
     modelYear: '',
-    vehiclePrice: '',
+    basePrice: '',
     variant: '',
-    carListing: '',
+    category: '',
     engineSpec: '',
     transmissionSpec: '',
     fuelTypeSpec: '',
@@ -65,14 +65,18 @@ const AddVehicleForm = ({ onBack }) => {
       const carData = {
         name: form.carName,
         description: form.description,
-        modelYear: form.modelYear,
-        bestPrice: form.vehiclePrice,
+        modelYear: Number(form.modelYear),
+        basePrice: Number(form.basePrice),
         variant: form.variant,
-        status: form.stockAvailability,
-        specification: form.engineSpec,
-        transmission: form.transmissionSpec,
-        fuelType: form.fuelTypeSpec,
-        images: imageUrls,
+        category: form.category,
+        specs: {
+          engine: form.engineSpec,
+          transmission: form.transmissionSpec,
+          fuelType: form.fuelTypeSpec,
+        },
+        images: Array.isArray(imageUrls)
+          ? imageUrls.filter(url => typeof url === 'string' && url.match(/\.(jpg|jpeg|png)$/i)).map(url => ({ url }))
+          : [],
       };
       await carApi.createCar(carData);
       await fetchVehicles();
@@ -161,6 +165,16 @@ const AddVehicleForm = ({ onBack }) => {
                   placeholder="Enter car name"
                   value={form.carName}
                   onChange={handleChange('carName')}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <input
+                  type="text"
+                  placeholder="Enter car category"
+                  value={form.category}
+                  onChange={handleChange('category')}
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
                 />
               </div>
