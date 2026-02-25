@@ -667,9 +667,9 @@ const CarManagement = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await carApi.getCars();
-        if (Array.isArray(data)) {
-          setVehicles(data);
+        const response = await carApi.getCars();
+        if (Array.isArray(response?.data)) {
+          setVehicles(response.data);
         } else {
           setVehicles([]);
         }
