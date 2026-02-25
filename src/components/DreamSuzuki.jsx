@@ -3,6 +3,7 @@ import { ChevronDown, ChevronLeft, ChevronRight, MessageCircle, X, Send } from '
 import { getCars } from '../api/cars';
 
 const DreamSuzuki = () => {
+    const carsPerPage = 3;
   // Chatbot state
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([
@@ -60,19 +61,20 @@ const DreamSuzuki = () => {
   useEffect(() => {
     async function fetchCars() {
       try {
-        const cars = await getCars();
+        const response = await getCars();
+        const cars = Array.isArray(response?.data) ? response.data : [];
         setCarGallery(cars.map(car => ({
           id: car.id,
           name: car.name,
-          image: Array.isArray(car.images) ? car.images[0] : car.image,
+          image: (Array.isArray(car.images) && car.images[0]?.url) ? car.images[0].url : '/empty-cars.svg',
           description: car.description,
-          price: car.bestPrice || car.price
+          price: car.basePrice || car.bestPrice || car.price
         })));
         setPromotionalSlides(cars.slice(0, 3).map(car => ({
           id: car.id,
-          image: Array.isArray(car.images) ? car.images[0] : car.image,
+          image: (Array.isArray(car.images) && car.images[0]?.url) ? car.images[0].url : '/empty-cars.svg',
           title: car.name,
-          price: car.bestPrice ? `₦${car.bestPrice.toLocaleString()}` : '',
+          price: car.basePrice ? `₦${car.basePrice.toLocaleString()}` : (car.bestPrice ? `₦${car.bestPrice.toLocaleString()}` : ''),
           description: car.description,
           buttonText: 'Check Your Monthly Payment',
           isMandatory: false

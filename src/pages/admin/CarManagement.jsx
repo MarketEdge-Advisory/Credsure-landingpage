@@ -30,6 +30,7 @@ const AddVehicleForm = ({ onBack }) => {
     category: '',
     engineSpec: '',
     transmissionSpec: 'Manual',
+    availability: '',
     fuelTypeSpec: '',
   });
   const [formError, setFormError] = useState('');
@@ -70,6 +71,7 @@ const AddVehicleForm = ({ onBack }) => {
       setFormError('Transmission is required.');
       return;
     }
+    console.log('Submitting car with availability:', form.availability);
     try {
       // --- Old logic for multiple images (commented out) ---
       /*
@@ -95,6 +97,7 @@ const AddVehicleForm = ({ onBack }) => {
         basePrice: Number(form.basePrice),
         variant: form.variant,
         category: form.category,
+        availability: form.availability,
         specs: {
           engine: form.engineSpec,
           transmission: form.transmissionSpec,
@@ -133,12 +136,7 @@ const AddVehicleForm = ({ onBack }) => {
             <p className="font-semibold text-gray-900">Add New Vehicle</p>
             <p className="text-sm text-gray-400 mt-0.5">Input the details below to add new vehicles</p>
           </div>
-          <button
-            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
-            onClick={handleAddVehicle}
-          >
-            Save Details
-          </button>
+         
         </div>
         <div className="divide-y divide-gray-100">
           {/* Upload Image Row */}
@@ -300,19 +298,27 @@ const AddVehicleForm = ({ onBack }) => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Stock Availability</label>
                 <select
-                  value={form.stockAvailability || ''}
-                  onChange={handleChange('stockAvailability')}
+                  value={form.availability || ''}
+                  onChange={handleChange('availability')}
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-400"
                 >
-                  {/* <option value="">Select availability</option> */}
-                  <option value="Available">Available</option>
-                  <option value="Not Available">Not Available</option>
-                   <option value="Coming Soon">Coming Soon</option>
+                  <option value="">Select availability</option>
+                  <option value="AVAILABLE">Available</option>
+                  <option value="NOT_AVAILABLE">Not Available</option>
+                  <option value="COMING_SOON">Coming Soon</option>
                 </select>
               </div>
             </div>
           </div>
         </div>
+        <div className='flex w-full justify-end'>
+        <button
+            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+            onClick={handleAddVehicle}
+          >
+            Save Details
+          </button>
+          </div>
       </div>
     </div>
   );

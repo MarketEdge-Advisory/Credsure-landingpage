@@ -331,15 +331,11 @@ const LoanCalculator = () => {
             </div>
 {/* Vehicle Price Disclaimers */}
               <div className="mt-1 bg-[#0D2A46] rounded-lg p-3">
-                <p className="text-gray-400 text-xs font-medium mb-2">Vehicle price excludes:</p>
+                {/* <p className="text-gray-400 text-xs font-medium mb-2">Vehicle price excludes:</p> */}
                 <ul className="space-y-1">
                   <li className="text-gray-300 text-xs flex items-start">
                     <span className="mr-2">•</span>
-                    <span>Insurance Payment</span>
-                  </li>
-                  <li className="text-gray-300 text-xs flex items-start">
-                    <span className="mr-2">•</span>
-                    <span>3 Year Warranty</span>
+                    <span>1 Year Free Maintenance Service Plan or 15,000KM whichever comes first</span>
                   </li>
                   <li className="text-gray-300 text-xs flex items-start">
                     <span className="mr-2">•</span>
@@ -347,8 +343,12 @@ const LoanCalculator = () => {
                   </li>
                   <li className="text-gray-300 text-xs flex items-start">
                     <span className="mr-2">•</span>
-                    <span>Free 1 Year (or 15,000 km) Vehicle Service</span>
+                    <span>New Vehicle purchase comes with a 3 Years Warranty or 100,000KM whichever comes first</span>
                   </li>
+                  {/* <li className="text-gray-300 text-xs flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Free 1 Year (or 15,000 km) Vehicle Service</span>
+                  </li> */}
                 </ul>
               </div>
             {/* Get Approved Section */}

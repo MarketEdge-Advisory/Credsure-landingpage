@@ -3,6 +3,22 @@ import { ArrowDown, ChevronDown, X, Images } from 'lucide-react';
 import { useCarContext } from '../context/CarContext';
   // Removed hardcoded cars array. Fetching from backend instead.
 const ChooseSuzuki = () => {
+    // Helper to format price as currency
+    function formatPrice(price) {
+      if (!price) return '₦0';
+      return `₦${Number(price).toLocaleString()}`;
+    }
+
+    // Simple monthly payment calculation
+    function calculateMonthly(price, months = 60) {
+      if (!price) return '₦0';
+      const downPayment = price * 0.1;
+      const loanAmount = price - downPayment;
+      const monthlyInterestRate = 0.08 / 12;
+      const monthlyPayment = (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, months)) /
+        (Math.pow(1 + monthlyInterestRate, months) - 1);
+      return formatPrice(Math.round(monthlyPayment));
+    }
   const [visibleCars, setVisibleCars] = useState(6);
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,17 +31,16 @@ const ChooseSuzuki = () => {
       setError(null);
       try {
         const { getCars } = await import('../api/cars');
-        const data = await getCars();
-        const BASE_URL = 'https://credsure-backend-1564d84ae428.herokuapp.com';
-        const formatted = data.map(car => {
-          const toAbsolute = (img) =>
-            img && !img.startsWith('http') ? `${BASE_URL}${img.startsWith('/') ? '' : '/'}${img}` : img;
+        const response = await getCars();
+        const cars = Array.isArray(response?.data) ? response.data : [];
+        const formatted = cars.map(car => {
+          const imageUrl = (Array.isArray(car.images) && car.images[0]?.url) ? car.images[0].url : '/empty-cars.svg';
           return {
             ...car,
-            image: toAbsolute(car.image),
-            images: Array.isArray(car.images) ? car.images.map(toAbsolute) : [],
-            price: formatPrice(car.priceValue || car.price),
-            monthly: calculateMonthly(car.priceValue || car.price),
+            image: imageUrl,
+            images: Array.isArray(car.images) ? car.images.map(img => img.url || img) : [],
+            price: car.basePrice || car.price || 0,
+            monthly: car.basePrice ? calculateMonthly(car.basePrice) : (car.price ? calculateMonthly(car.price) : 0),
           };
         });
         setCars(formatted);
@@ -100,14 +115,9 @@ const ChooseSuzuki = () => {
               </button>
 
               {/* Inventory badge */}
-              {(() => {
-                const stock = inventory[car.id] ?? 0;
-                return (
-                  <div className="absolute top-2 sm:top-4 left-12 sm:left-16 z-10 flex items-center gap-1 bg-[#1a2942] text-white text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full shadow-md">
-                    <span>{stock === 0 ? 'Out of stock' : `${stock} left`}</span>
-                  </div>
-                );
-              })()}
+              <div className="absolute top-2 sm:top-4 left-12 sm:left-16 z-10 flex items-center gap-1 bg-[#1a2942] text-white text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full shadow-md">
+                <span>Available</span>
+              </div>
 
               {/* Price Info Box */}
               <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-10 bg-[#1a2942] rounded-lg px-2 sm:px-3 md:px-4 py-2 sm:py-3 shadow-lg">
@@ -128,10 +138,12 @@ const ChooseSuzuki = () => {
                 <button 
                   onClick={() => {
                     selectCar(car);
-                    const calculator = document.querySelector('#calculator');
-                    if (calculator) {
-                      calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    setTimeout(() => {
+                      const calculator = document.querySelector('#calculator');
+                      if (calculator) {
+                        calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }, 100);
                   }}
                   className="group/btn flex items-center justify-between w-full bg-cyan-500 hover:bg-slate-100 hover:text-black text-white font-medium px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-full transition-all duration-300"
                 >

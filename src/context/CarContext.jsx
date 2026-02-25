@@ -29,10 +29,6 @@ export const CarProvider = ({ children }) => {
 
   const selectCar = (car) => {
     setSelectedCar(car);
-    const calculatorSection = document.getElementById('calculator');
-    if (calculatorSection) {
-      calculatorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
   };
 
   /** Add stock units to a car */
