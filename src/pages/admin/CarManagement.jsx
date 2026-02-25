@@ -203,8 +203,8 @@ const AddVehicleForm = ({ onBack }) => {
                 <input
                   type="text"
                   placeholder="Enter amount"
-                  value={form.vehiclePrice}
-                  onChange={handleChange('vehiclePrice')}
+                  value={form.basePrice}
+                  onChange={handleChange('basePrice')}
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
                 />
               </div>
