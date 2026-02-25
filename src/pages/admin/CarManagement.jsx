@@ -822,7 +822,7 @@ const CarManagement = () => {
                         </div>
                         <div>
                           <p className="text-sm text-gray-400">Base Price:</p>
-                          <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.basePrice}</p>
+                          <p className="text-sm font-bold text-gray-900 mt-0.5">N{vehicle.basePrice}M</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-400">Variant:</p>
