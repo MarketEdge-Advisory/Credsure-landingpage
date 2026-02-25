@@ -66,13 +66,22 @@ const AddVehicleForm = ({ onBack }) => {
       return;
     }
     try {
+      // --- Old logic for multiple images (commented out) ---
+      /*
       let imageUrls = [];
       if (imagePreviews.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
         // Upload images to Cloudinary
         const uploadResult = await uploadImagesToCloudinary(fileInputRef.current.files);
         imageUrls = uploadResult.urls || uploadResult; // Adjust based on backend response
       }
-      // Compose car data from form
+      */
+
+      // --- New logic for backend's single image response ---
+      let imageUrl = '';
+      if (imagePreviews.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
+        const uploadResult = await uploadImagesToCloudinary(fileInputRef.current.files[0]);
+        imageUrl = uploadResult.imageUrl;
+      }
       const carData = {
         name: form.carName,
         description: form.description,
@@ -85,9 +94,7 @@ const AddVehicleForm = ({ onBack }) => {
           transmission: form.transmissionSpec,
           fuelType: form.fuelTypeSpec,
         },
-        images: Array.isArray(imageUrls)
-          ? imageUrls.filter(url => typeof url === 'string' && url.match(/\.(jpg|jpeg|png)$/i)).map(url => ({ url }))
-          : [],
+        images: imageUrl ? [imageUrl] : [],
       };
       await carApi.createCar(carData);
       await fetchVehicles();
