@@ -81,7 +81,7 @@ const AddVehicleForm = ({ onBack }) => {
       if (imagePreviews.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
         // Wrap the single file in an array so FormData is correct
         const uploadResult = await uploadImagesToCloudinary([fileInputRef.current.files[0]]);
-        imageUrl = uploadResult.imageUrl;
+        imageUrl = uploadResult?.data?.imageUrl;
       }
       const carData = {
         name: form.carName,
