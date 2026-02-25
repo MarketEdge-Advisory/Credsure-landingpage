@@ -807,7 +807,7 @@ const CarManagement = () => {
                         <h3 className="text-lg font-bold text-gray-900 break-words whitespace-normal">{vehicle.name}</h3>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
                           <span className={`w-2 h-2 rounded-full ${status.dot}`}></span>
-                          <span className={`text-sm font-medium ${status.text}`}>{vehicle.status}</span>
+                          <span className={`text-sm font-medium ${status.text}`}>{vehicle.availaibility}</span>
                         </div>
                       </div>
                       <p className="text-sm text-gray-500 mt-1 leading-relaxed max-w-lg">
@@ -815,14 +815,15 @@ const CarManagement = () => {
                       </p>
 
                       {/* Specs Grid */}
-                      <div className="grid grid-cols-4 gap-4 mt-4">
+                      {/* <div className="grid grid-cols-4 gap-4 mt-4"> */}
+                      <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 mt-4">
                         <div>
                           <p className="text-sm text-gray-400">Model Year:</p>
                           <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.modelYear}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-400">Base Price:</p>
-                          <p className="text-sm font-bold text-gray-900 mt-0.5">N{vehicle.basePrice}M</p>
+                          <p className="text-sm font-bold text-gray-900 mt-0.5">N{vehicle.basePrice}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-400">Variant:</p>
