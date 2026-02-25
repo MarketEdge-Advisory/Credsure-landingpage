@@ -821,16 +821,20 @@ const CarManagement = () => {
                           <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.modelYear}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-400">Best Price:</p>
-                          <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.bestPrice}</p>
+                          <p className="text-sm text-gray-400">Base Price:</p>
+                          <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.basePrice}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-400">Variant:</p>
                           <p className="text-sm font-bold text-gray-900 mt-0.5 truncate">{vehicle.variant}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-400">Specification</p>
-                          <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.specification}</p>
+                          <p className="text-sm text-gray-400">Engine:</p>
+                          <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.specs?.engine || '-'}</p>
+                          <p className="text-sm text-gray-400 mt-2">Transmission:</p>
+                          <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.specs?.transmission || '-'}</p>
+                          <p className="text-sm text-gray-400 mt-2">Fuel Type:</p>
+                          <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.specs?.fuelType || '-'}</p>
                         </div>
                       </div>
 
