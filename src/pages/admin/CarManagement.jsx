@@ -795,7 +795,7 @@ const CarManagement = () => {
                     {/* Image */}
                     <div className="flex-shrink-0">
                       <img
-                        src={vehicle.image}
+                        src={vehicle.images?.[0]?.url || '/empty-cars.svg'}
                         alt={vehicle.name}
                         className="w-44 h-32 object-cover rounded-lg"
                       />
