@@ -98,7 +98,7 @@ const AddVehicleForm = ({ onBack }) => {
         images: imageUrl ? [imageUrl] : [],
       };
       await carApi.createCar(carData);
-      await fetchVehicles();
+      // await fetchVehicles(); // Commented out because fetchVehicles is not defined
       onBack();
     } catch (e) {
       alert(e.message || 'Failed to add vehicle');
