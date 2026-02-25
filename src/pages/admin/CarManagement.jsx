@@ -79,7 +79,8 @@ const AddVehicleForm = ({ onBack }) => {
       // --- New logic for backend's single image response ---
       let imageUrl = '';
       if (imagePreviews.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
-        const uploadResult = await uploadImagesToCloudinary(fileInputRef.current.files[0]);
+        // Wrap the single file in an array so FormData is correct
+        const uploadResult = await uploadImagesToCloudinary([fileInputRef.current.files[0]]);
         imageUrl = uploadResult.imageUrl;
       }
       const carData = {
