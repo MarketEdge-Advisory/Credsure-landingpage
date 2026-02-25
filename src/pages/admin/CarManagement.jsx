@@ -24,9 +24,10 @@ const AddVehicleForm = ({ onBack }) => {
     variant: '',
     category: '',
     engineSpec: '',
-    transmissionSpec: '',
+    transmissionSpec: 'Manual',
     fuelTypeSpec: '',
   });
+  const [formError, setFormError] = useState('');
 
   const handleImageFiles = (files) => {
     if (!files || files.length === 0) return;
@@ -54,6 +55,16 @@ const AddVehicleForm = ({ onBack }) => {
 
   // Add vehicle handler
   const handleAddVehicle = async () => {
+    setFormError('');
+    // Validation
+    if (!form.basePrice || isNaN(Number(form.basePrice)) || Number(form.basePrice) < 0.01) {
+      setFormError('Base price must be a number greater than 0.01');
+      return;
+    }
+    if (!form.transmissionSpec) {
+      setFormError('Transmission is required.');
+      return;
+    }
     try {
       let imageUrls = [];
       if (imagePreviews.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
@@ -87,6 +98,11 @@ const AddVehicleForm = ({ onBack }) => {
   };
   return (
     <div className="p-8 w-full">
+      {formError && (
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+          {formError}
+        </div>
+      )}
       {/* Back + Title */}
       <button
         onClick={onBack}
