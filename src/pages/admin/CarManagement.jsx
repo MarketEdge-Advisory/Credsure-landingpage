@@ -7,9 +7,14 @@ import { useCarContext } from '../../context/CarContext';
 const PAGE_SIZES = [10, 20, 50];
 
 const statusConfig = {
-  Available: { dot: 'bg-green-500', text: 'text-green-500' },
-  'Not-Available': { dot: 'bg-red-500', text: 'text-red-500' },
-  'Coming Soon': { dot: 'bg-yellow-500', text: 'text-yellow-500' },
+  AVAILABLE: { dot: 'bg-green-500', text: 'text-green-500', label: 'Available' },
+  NOT_AVAILABLE: { dot: 'bg-red-500', text: 'text-red-500', label: 'Not Available' },
+  'NOT AVAILABLE': { dot: 'bg-red-500', text: 'text-red-500', label: 'Not Available' },
+  'Not-Available': { dot: 'bg-red-500', text: 'text-red-500', label: 'Not Available' },
+  'Not Available': { dot: 'bg-red-500', text: 'text-red-500', label: 'Not Available' },
+  'Coming Soon': { dot: 'bg-yellow-500', text: 'text-yellow-500', label: 'Coming Soon' },
+  COMING_SOON: { dot: 'bg-yellow-500', text: 'text-yellow-500', label: 'Coming Soon' },
+  'COMING SOON': { dot: 'bg-yellow-500', text: 'text-yellow-500', label: 'Coming Soon' },
 };
 
 const AddVehicleForm = ({ onBack }) => {
@@ -787,7 +792,7 @@ const CarManagement = () => {
             </div>
           ) : (
             pageItems.map((vehicle) => {
-              const status = statusConfig[vehicle.status] || statusConfig['Available'];
+              const status = statusConfig[vehicle.availability] || statusConfig['AVAILABLE'];
               return (
                 <div key={vehicle.id} className="border border-gray-200 rounded-xl overflow-hidden">
                   {/* Card Top */}
@@ -807,7 +812,7 @@ const CarManagement = () => {
                         <h3 className="text-lg font-bold text-gray-900 break-words whitespace-normal">{vehicle.name}</h3>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
                           <span className={`w-2 h-2 rounded-full ${status.dot}`}></span>
-                          <span className={`text-sm font-medium ${status.text}`}>{vehicle.availaibility}</span>
+                          <span className={`text-sm font-medium ${status.text}`}>{status.label}</span>
                         </div>
                       </div>
                       <p className="text-sm text-gray-500 mt-1 leading-relaxed max-w-lg">
