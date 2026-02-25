@@ -815,8 +815,7 @@ const CarManagement = () => {
                       </p>
 
                       {/* Specs Grid */}
-                      {/* <div className="grid grid-cols-4 gap-4 mt-4"> */}
-                      <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 mt-4">
+                      <div className="grid grid-cols-4 gap-4 mt-4">
                         <div>
                           <p className="text-sm text-gray-400">Model Year:</p>
                           <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.modelYear}</p>
@@ -829,7 +828,8 @@ const CarManagement = () => {
                           <p className="text-sm text-gray-400">Variant:</p>
                           <p className="text-sm font-bold text-gray-900 mt-0.5 truncate">{vehicle.variant}</p>
                         </div>
-                        <div className='flex gap-4'>
+                      </div>
+                       <div className='flex gap-4 w-full'>
                           <p className="text-sm text-gray-400">Engine:</p>
                           <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.specs?.engine || '-'}</p>
                           <p className="text-sm text-gray-400 mt-2">Transmission:</p>
@@ -837,7 +837,6 @@ const CarManagement = () => {
                           <p className="text-sm text-gray-400 mt-2">Fuel Type:</p>
                           <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.specs?.fuelType || '-'}</p>
                         </div>
-                      </div>
 
                       {/* Inventory Controls */}
                       <div className="flex items-center gap-3 mt-4">
