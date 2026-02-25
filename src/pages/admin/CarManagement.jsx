@@ -828,10 +828,12 @@ const CarManagement = () => {
                           <p className="text-sm text-gray-400">Variant:</p>
                           <p className="text-sm font-bold text-gray-900 mt-0.5 truncate">{vehicle.variant}</p>
                         </div>
-                      </div>
-                       <div className='flex gap-4 w-full items-center mt-4'>
+                         <div className='flex gap-4 items-center'>
                           <p className="text-sm text-gray-400">Engine:</p>
                           <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.specs?.engine || '-'}</p>
+                      </div>
+                      </div>
+                       <div className='flex gap-4 w-full items-center mt-4'>
                           <p className="text-sm text-gray-400 mt-2">Transmission:</p>
                           <p className="text-sm font-bold text-gray-900 mt-0.5">{vehicle.specs?.transmission || '-'}</p>
                           <p className="text-sm text-gray-400 mt-2">Fuel Type:</p>
