@@ -95,7 +95,7 @@ const AddVehicleForm = ({ onBack }) => {
           transmission: form.transmissionSpec,
           fuelType: form.fuelTypeSpec,
         },
-        images: imageUrl ? [imageUrl] : [],
+        images: imageUrl ? [{ url: imageUrl }] : [],
       };
       await carApi.createCar(carData);
       // await fetchVehicles(); // Commented out because fetchVehicles is not defined
