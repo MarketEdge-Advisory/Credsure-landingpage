@@ -121,13 +121,13 @@ const Dashboard = () => {
       <div className="flex items-start justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          {/* <p className="text-gray-500 text-sm mt-1">
             This overview provides a comprehensive snapshot of website activities.
-          </p>
+          </p> */}
         </div>
 
         {/* Period picker */}
-        <div className="relative">
+        {/* <div className="relative">
           <button
             onClick={() => setShowPeriodPicker((o) => !o)}
             className="flex items-center gap-2 border border-gray-200 bg-white rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
@@ -142,25 +142,18 @@ const Dashboard = () => {
               if (startDate && endDate) setPeriod(`${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`);
             }}
           />
-        </div>
+        </div> */}
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map(({ label, value, pct, trend, icon: Icon, cardBg, iconBg, iconColor, textColor, subTextColor, badgeBg, badgeText }) => (
           <div key={label} className={`${cardBg} rounded-sm p-4 flex flex-col gap-3`}>
-            {/* Icon */}
             <div className={`w-8 h-8 rounded-full ${iconBg} flex items-center justify-center`}>
               <Icon size={16} className={iconColor} />
             </div>
-
-            {/* Label */}
             <p className={`text-xs ${subTextColor}`}>{label}</p>
-
-            {/* Value */}
             <p className={`text-2xl font-bold ${textColor} leading-none`}>{value}</p>
-
-            {/* Badge + vs label */}
             <div className="flex items-center gap-2">
               <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${badgeBg} ${badgeText}`}>
                 {trend === 'up'
@@ -174,10 +167,10 @@ const Dashboard = () => {
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
 
       {/* Website Visitors Chart */}
-      <div className="mt-6 bg-white rounded-sm border border-gray-100 p-6 shadow-sm">
+      {/* <div className="mt-6 bg-white rounded-sm border border-gray-100 p-6 shadow-sm">
         <div className="flex items-start justify-between mb-6">
           <div>
             <h2 className="text-base font-bold text-gray-900">Website Vistors</h2>
@@ -245,10 +238,10 @@ const Dashboard = () => {
             />
           </AreaChart>
         </ResponsiveContainer>
-      </div>
+      </div> */}
 
       {/* Pre-Approval Application Trends */}
-      <div className="mt-6 bg-white rounded-sm border border-gray-100 p-6 shadow-sm">
+      {/* <div className="mt-6 bg-white rounded-sm border border-gray-100 p-6 shadow-sm">
         <div className="flex items-start justify-between mb-6">
           <div>
             <h2 className="text-base font-bold text-gray-900">Pre-Approval Application Trends</h2>
@@ -308,13 +301,11 @@ const Dashboard = () => {
               }}
               cursor={false}
             />
-            {/* Value bar (bottom, solid blue) */}
             <Bar dataKey="value" stackId="stack" fill="#60b8f5" radius={[0, 0, 0, 0]} />
-            {/* Remainder bar (top, hatched) */}
             <Bar dataKey="remainder" stackId="stack" fill="url(#hatchPattern)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </div> */}
       {/* Recent Pre-Approval Applications Table */}
       <RecentApplications />
     </div>
@@ -322,20 +313,8 @@ const Dashboard = () => {
 };
 
 /* ── Recent Pre-Approval Applications ── */
-const allApplications = [
-  { id: 1,  name: 'Admin User',       email: 'adimore@email.com',           phone: '+234 801 234 5678', income: '₦450,000.00', employment: 'Employed',     vehicle: 'Suzuki Swift GL',   amount: '₦250,000.00', down: '₦250,000.00', status: 'Approved' },
-  { id: 2,  name: 'Brandon Ifeanyi',  email: 'brandonifeanyi@yahoo.com',    phone: '+234 802 345 6789', income: '₦600,000.00', employment: 'Self-Employed', vehicle: 'Suzuki Vitara GLX', amount: '₦250,000.00', down: '₦250,000.00', status: 'Approved' },
-  { id: 3,  name: 'Tonye Wariboko',   email: 'calabarfinest@icloud.com',    phone: '+234 803 456 7890', income: '₦380,000.00', employment: 'Employed',     vehicle: 'Suzuki Jimny GL',   amount: '₦250,000.00', down: '₦250,000.00', status: 'Pending' },
-  { id: 4,  name: 'Zainab Bashir',    email: 'oyoamala@yandex.com',         phone: '+234 804 567 8901', income: '₦520,000.00', employment: 'Employed',     vehicle: 'Suzuki Baleno GLX', amount: '₦250,000.00', down: '₦250,000.00', status: 'Under Review' },
-  { id: 5,  name: 'Kuroebi Ebizi',    email: 'abujafinest@outlook.com',     phone: '+234 805 678 9012', income: '₦710,000.00', employment: 'Self-Employed', vehicle: 'Suzuki Fronx GL',   amount: '₦250,000.00', down: '₦250,000.00', status: 'Approved' },
-  { id: 6,  name: 'Yusuf Tukur',      email: 'gombejewel@zoho.com',         phone: '+234 806 789 0123', income: '₦290,000.00', employment: 'Contract',     vehicle: 'New Dzire',         amount: '₦250,000.00', down: '₦250,000.00', status: 'Under Review' },
-  { id: 7,  name: 'Musa Maiwada',     email: 'lillianc@yahoo.com',          phone: '+234 807 890 1234', income: '₦340,000.00', employment: 'Employed',     vehicle: 'Celereo',           amount: '₦250,000.00', down: '₦250,000.00', status: 'Under Review' },
-  { id: 8,  name: 'Tonye Idamiebi',   email: 'akwaibom@icloud.com',         phone: '+234 808 901 2345', income: '₦415,000.00', employment: 'Self-Employed', vehicle: 'S.Presso',          amount: '₦250,000.00', down: '₦250,000.00', status: 'Pending' },
-  { id: 9,  name: 'Kio Yellowe',      email: 'ariannap@aol.com',            phone: '+234 809 012 3456', income: '₦560,000.00', employment: 'Employed',     vehicle: 'Suzuki Baleno GLX', amount: '₦250,000.00', down: '₦250,000.00', status: 'Approved' },
-  { id: 10, name: 'Iretiola Adekola', email: 'edobronze@aol.com',           phone: '+234 810 123 4567', income: '₦480,000.00', employment: 'Contract',     vehicle: 'Suzuki Swift GL',   amount: '₦250,000.00', down: '₦250,000.00', status: 'Pending' },
-  { id: 11, name: 'Emeka Okafor',     email: 'emeka.o@gmail.com',           phone: '+234 811 234 5678', income: '₦650,000.00', employment: 'Employed',     vehicle: 'Suzuki Ertiga GL',  amount: '₦250,000.00', down: '₦250,000.00', status: 'Approved' },
-  { id: 12, name: 'Fatima Aliyu',     email: 'fatimaaliyu@hotmail.com',     phone: '+234 812 345 6789', income: '₦370,000.00', employment: 'Self-Employed', vehicle: 'Suzuki Ciaz',       amount: '₦250,000.00', down: '₦250,000.00', status: 'Pending' },
-];
+// Fetch applications from backend
+import financeApplicationsApi from '../../api/financeApplications';
 
 const PAGE_SIZES = [10, 20, 50];
 
@@ -346,6 +325,8 @@ const statusStyle = {
 };
 
 const RecentApplications = () => {
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
@@ -353,6 +334,23 @@ const RecentApplications = () => {
   const [sortDir, setSortDir] = useState('asc');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterEmail, setFilterEmail] = useState('');
+  const [filterEmployment, setFilterEmployment] = useState('');
+  const [filterIncome, setFilterIncome] = useState('');
+
+  React.useEffect(() => {
+    setLoading(true);
+    financeApplicationsApi.getAll()
+      .then((res) => {
+        // If backend returns array in data, use it; else wrap single object in array
+        let data = res?.data;
+        if (!Array.isArray(data)) data = data ? [data] : [];
+        setApplications(data);
+      })
+      .catch(() => setApplications([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleSort = (key) => {
     if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
@@ -360,9 +358,38 @@ const RecentApplications = () => {
     setPage(1);
   };
 
-  const filtered = allApplications.filter((r) =>
-    `${r.name} ${r.status} ${r.vehicle} ${r.email}`.toLowerCase().includes(search.toLowerCase())
+  // Map backend fields to table columns
+  const mapped = applications.map((a) => ({
+    id: a.id,
+    name: a.fullName,
+    email: a.email,
+    phone: a.phoneNumber,
+    income: a.estimatedNetMonthlyIncome ? `₦${Number(a.estimatedNetMonthlyIncome).toLocaleString()}` : '',
+    employment: a.employmentStatus,
+    vehicle: a.selectedVehicle,
+    amount: a.vehicleAmount ? `₦${Number(a.vehicleAmount).toLocaleString()}` : '',
+    down: a.downPayment ? `₦${Number(a.downPayment).toLocaleString()}` : '',
+    status: a.status === 'PENDING' ? 'Pending' : a.status === 'APPROVED' ? 'Approved' : a.status === 'UNDER_REVIEW' ? 'Under Review' : a.status,
+  }));
+
+  let filtered = mapped.filter((r) =>
+    `${r.name} ${r.status} ${r.vehicle}`.toLowerCase().includes(search.toLowerCase())
   );
+  // Apply advanced filters
+  if (filterEmail) {
+    filtered = filtered.filter((r) => r.email && r.email.toLowerCase().includes(filterEmail.toLowerCase()));
+  }
+  if (filterEmployment) {
+    filtered = filtered.filter((r) => r.employment === filterEmployment);
+  }
+  if (filterIncome) {
+    // Remove non-numeric chars and compare as number
+    const minIncome = Number(filterIncome.replace(/[^\d]/g, ''));
+    filtered = filtered.filter((r) => {
+      const incomeNum = Number((r.income || '').replace(/[^\d]/g, ''));
+      return !isNaN(minIncome) && incomeNum >= minIncome;
+    });
+  }
 
   const sorted = sortKey
     ? [...filtered].sort((a, b) => {
@@ -395,12 +422,22 @@ const RecentApplications = () => {
             </svg>
             <input
               type="text"
-              placeholder="Search name, status..."
+              placeholder="Search name, status, vehicle..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl w-64 focus:outline-none focus:border-blue-400 bg-gray-50"
             />
           </div>
+          {/* Filter Button */}
+          <button
+            className="flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            onClick={() => setShowFilters((v) => !v)}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2a1 1 0 0 1-.293.707l-6.414 6.414A2 2 0 0 0 13 14.586V19a1 1 0 0 1-1.447.894l-2-1A1 1 0 0 1 9 18v-3.414a2 2 0 0 0-.293-1.293L2.293 6.707A1 1 0 0 1 2 6V4z" />
+            </svg>
+            Filter
+          </button>
           {/* Download */}
           <button className="flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -426,22 +463,65 @@ const RecentApplications = () => {
         </div>
       </div>
 
+      {/* Collapsible Filters */}
+      {showFilters && (
+        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex flex-wrap gap-4 items-end animate-fade-in">
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Email</label>
+            <input
+              type="text"
+              value={filterEmail}
+              onChange={(e) => { setFilterEmail(e.target.value); setPage(1); }}
+              placeholder="Filter by email"
+              className="border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none w-48"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Employment Status</label>
+            <select
+              value={filterEmployment}
+              onChange={(e) => { setFilterEmployment(e.target.value); setPage(1); }}
+              className="border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none w-48"
+            >
+              <option value="">All</option>
+              <option value="Employed">Employed</option>
+              <option value="Self-Employed">Self-Employed</option>
+              <option value="Unemployed">Unemployed</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Monthly Income (Min)</label>
+            <input
+              type="number"
+              value={filterIncome}
+              onChange={(e) => { setFilterIncome(e.target.value); setPage(1); }}
+              placeholder="e.g. 100000"
+              className="border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none w-48"
+            />
+          </div>
+          <button
+            className="ml-auto text-xs text-gray-500 hover:text-blue-600 underline"
+            onClick={() => { setFilterEmail(''); setFilterEmployment(''); setFilterIncome(''); setPage(1); }}
+          >
+            Reset Filters
+          </button>
+        </div>
+      )}
+
       {/* Table + footer in shared horizontal scroll */}
       <div className="overflow-x-auto">
       <div className="min-w-max">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-100">
+              {/* Only show columns: Full Name, Phone Number, Vehicle Selected, Vehicle Amount, Down Payment, Status */}
               {[
-                { label: 'Full Name',          key: 'name' },
-                { label: 'Email',              key: 'email' },
-                { label: 'Phone Number',       key: 'phone' },
-                { label: 'Monthly Income',     key: 'income' },
-                { label: 'Employment Status',  key: 'employment' },
-                { label: 'Vehicle Selected',   key: 'vehicle' },
-                { label: 'Vehicle Amount',     key: 'amount' },
-                { label: 'Down Payment',       key: 'down' },
-                { label: 'Status',             key: 'status' },
+                { label: 'Full Name',        key: 'name' },
+                { label: 'Phone Number',     key: 'phone' },
+                { label: 'Vehicle Selected', key: 'vehicle' },
+                { label: 'Vehicle Amount',   key: 'amount' },
+                { label: 'Down Payment',     key: 'down' },
+                { label: 'Status',           key: 'status' },
               ].map(({ label, key }) => (
                 <th
                   key={key}
@@ -454,35 +534,29 @@ const RecentApplications = () => {
             </tr>
           </thead>
           <tbody>
-            {paginated.map((row) => (
-              <tr key={row.id} className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors">
-                <td className="px-6 py-4 text-blue-500 font-medium">{row.name}</td>
-                <td className="px-6 py-4 text-gray-600">{row.email}</td>
-                <td className="px-6 py-4 text-gray-700 whitespace-nowrap">{row.phone}</td>
-                <td className="px-6 py-4 text-gray-700 whitespace-nowrap">{row.income}</td>
-                <td className="px-6 py-4">
-                  <span className={`inline-block px-3 py-1 rounded-md text-xs font-semibold ${
-                    row.employment === 'Employed'     ? 'bg-blue-50 border border-blue-300 text-blue-600' :
-                    row.employment === 'Self-Employed' ? 'bg-purple-50 border border-purple-300 text-purple-600' :
-                    'bg-gray-50 border border-gray-300 text-gray-600'
-                  }`}>
-                    {row.employment}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-gray-700">{row.vehicle}</td>
-                <td className="px-6 py-4 text-gray-700">{row.amount}</td>
-                <td className="px-6 py-4 text-gray-700">{row.down}</td>
-                <td className="px-6 py-4">
-                  <span className={`inline-block px-3 py-1 rounded-md text-xs font-semibold ${statusStyle[row.status] ?? ''}`}>
-                    {row.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-            {paginated.length === 0 && (
+            {loading ? (
               <tr>
-                <td colSpan={9} className="px-6 py-10 text-center text-gray-400 text-sm">No results found.</td>
+                <td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">Loading...</td>
               </tr>
+            ) : paginated.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">No results found.</td>
+              </tr>
+            ) : (
+              paginated.map((row) => (
+                <tr key={row.id} className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors">
+                  <td className="px-6 py-4 text-blue-500 font-medium">{row.name}</td>
+                  <td className="px-6 py-4 text-gray-700 whitespace-nowrap">{row.phone}</td>
+                  <td className="px-6 py-4 text-gray-700">{row.vehicle}</td>
+                  <td className="px-6 py-4 text-gray-700">{row.amount}</td>
+                  <td className="px-6 py-4 text-gray-700">{row.down}</td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-block px-3 py-1 rounded-md text-xs font-semibold ${statusStyle[row.status] ?? ''}`}>
+                      {row.status}
+                    </span>
+                  </td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>

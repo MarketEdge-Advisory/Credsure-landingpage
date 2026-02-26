@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { updateCalculatorConfig } from '../../api/adminConfig';
 import { Download, CalendarDays, ArrowDown, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 
@@ -27,6 +28,9 @@ const CalculatorInputMgt = () => {
   const [downPayment, setDownPayment] = useState('');
   const [processingFee, setProcessingFee] = useState('');
   const [insuranceCost, setInsuranceCost] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
   const [page, setPage] = useState(1);
@@ -52,9 +56,33 @@ const CalculatorInputMgt = () => {
             <p className="font-semibold text-gray-900">Update Calculator Input</p>
             <p className="text-sm text-gray-400 mt-0.5">Input the details below to modify calculator input</p>
           </div>
-          <button className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
-            Update Details
+          <button
+            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50"
+            disabled={loading}
+            onClick={async () => {
+              setLoading(true);
+              setError('');
+              setSuccess('');
+              try {
+                await updateCalculatorConfig({
+                  downPaymentPct: Number(downPayment),
+                  processingFeePct: Number(processingFee),
+                  insuranceCost: Number(insuranceCost),
+                });
+                setSuccess('Calculator input updated successfully.');
+              } catch (e) {
+                setError(e.message || 'Failed to update.');
+              } finally {
+                setLoading(false);
+              }
+            }}
+          >
+            {loading ? 'Updating...' : 'Update Details'}
           </button>
+                {/* Feedback messages */}
+                {(error || success) && (
+                  <div className={`mt-4 text-sm font-medium ${error ? 'text-red-600' : 'text-green-600'}`}>{error || success}</div>
+                )}
         </div>
 
         <div className="grid grid-cols-[200px_1fr] gap-8">
@@ -95,7 +123,7 @@ const CalculatorInputMgt = () => {
       </div>
 
       {/* History Card */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      {/* <div className="bg-white rounded-xl border border-gray-200 p-6">
         <div className="flex items-start justify-between mb-6">
           <div>
             <p className="font-semibold text-gray-900">Calculator Input Update History</p>
@@ -121,12 +149,12 @@ const CalculatorInputMgt = () => {
               />
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Table */}
-        <div className="w-full">
+        {/* <div className="w-full"> */}
           {/* Head */}
-          <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr_1fr_1fr_1fr] border-b border-gray-100 pb-3 mb-1">
+          {/* <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr_1fr_1fr_1fr] border-b border-gray-100 pb-3 mb-1">
             {[
               'Date Modified',
               'Previous Down Payment',
@@ -143,10 +171,10 @@ const CalculatorInputMgt = () => {
                 {col} <ArrowDown size={11} className="text-gray-400 flex-shrink-0" />
               </button>
             ))}
-          </div>
+          </div> */}
 
           {/* Rows */}
-          <div className="flex flex-col divide-y divide-gray-50">
+          {/* <div className="flex flex-col divide-y divide-gray-50">
             {pageItems.map((row) => (
               <div key={row.id} className="grid grid-cols-[1.4fr_1fr_1fr_1fr_1fr_1fr_1fr] py-4">
                 <span className="text-sm text-gray-700">{row.date}</span>
@@ -159,10 +187,10 @@ const CalculatorInputMgt = () => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* Pagination */}
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+        {/* <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
           <p className="text-sm text-gray-500">
             Showing {startIdx + 1}–{Math.min(startIdx + pageSize, totalEntries)} of {totalEntries} entries
           </p>
@@ -212,7 +240,7 @@ const CalculatorInputMgt = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -87,25 +87,20 @@ const DreamSuzuki = () => {
   }, []);
 
   // Build gallery rows – groups of 3 cars each
-  const galleryRows = [];
-  for (let i = 0; i < carGallery.length; i += carsPerPage) {
-    galleryRows.push({
-      type: 'gallery',
-      id: `gallery-row-${Math.floor(i / carsPerPage)}`,
-      cars: carGallery.slice(i, i + carsPerPage)
-    });
-  }
+  // Build gallery slides – one car per slide
+  // Limit fleet gallery to 11 cars
+  const galleryRows = carGallery.slice(0, 11).map((car, idx) => ({
+    type: 'gallery',
+    id: `gallery-slide-${idx}`,
+    cars: [car]
+  }));
 
   // Interleaved sequence: [promo1, promo2, promo3, galleryRow1, promo1, promo2, promo3, galleryRow2, ...]
-  const interleavedSlides = [];
-  if (galleryRows.length === 0) {
-    promotionalSlides.forEach(slide => interleavedSlides.push({ type: 'promo', ...slide }));
-  } else {
-    galleryRows.forEach((row) => {
-      promotionalSlides.forEach(slide => interleavedSlides.push({ type: 'promo', ...slide }));
-      interleavedSlides.push(row);
-    });
-  }
+  // Show promo slides first, then fleet gallery slides (max 11)
+  const interleavedSlides = [
+    ...promotionalSlides.map(slide => ({ type: 'promo', ...slide })),
+    ...galleryRows
+  ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -342,9 +337,9 @@ const DreamSuzuki = () => {
 
           {/* ─── GALLERY CONTENT ─── */}
           {isGallerySlide && (
-            <div className="w-full px-8 md:px-16 lg:px-24 py-12">
+            <div className="w-full flex flex-col items-center justify-center px-4 py-12">
               {/* Header */}
-              <div className="text-center mb-10">
+              <div className="text-center mb-8">
                 <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-2">Explore Our Fleet</p>
                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white">
                   Find Your Perfect Suzuki
@@ -353,57 +348,41 @@ const DreamSuzuki = () => {
                   Every model available through Credsure flexible financing.
                 </p>
               </div>
-
-              {/* 3-card grid – each card is a background image */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 md:gap-6">
-                {currentSlideData.cars.map((car) => (
-                  <div
-                    key={car.id}
-                    className="relative h-64 sm:h-72 md:h-80 lg:h-96 rounded-2xl overflow-hidden group cursor-pointer"
-                    style={{
-                      backgroundImage: `url('${car.image}')`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                    }}
-                  >
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent transition-all duration-300 group-hover:via-black/50" />
-
-                    {/* Caption */}
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <h4 className="text-white font-bold text-lg md:text-xl mb-1">{car.name}</h4>
-                      <p className="text-gray-300 text-sm line-clamp-2 mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        {car.description}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-blue-300 font-semibold text-sm md:text-base">
-                          ₦{(car.price / 1000000).toFixed(1)}M
-                        </span>
-                        <button
-                          className="text-xs md:text-sm bg-white/20 hover:bg-blue-600 text-white px-3 py-1.5 rounded-full transition-all duration-200 backdrop-blur-sm"
-                          onClick={() => {
-                            const calc = document.querySelector('#calculator');
-                            if (calc) calc.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          }}
-                        >
-                          Calculate →
-                        </button>
-                      </div>
-                    </div>
+              {/* Single portrait image, centered */}
+              {currentSlideData.cars.map((car) => (
+                <div
+                  key={car.id}
+                  className="relative flex flex-col items-center justify-center mx-auto h-[420px] w-full max-w-[33vw] min-w-[220px] rounded-2xl overflow-hidden group shadow-lg bg-white/10"
+                  style={{
+                    backgroundImage: `url('${car.image}')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
+                >
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-all duration-300 group-hover:via-black/40" />
+                  {/* Caption */}
+                  <div className="absolute bottom-0 left-0 right-0 p-5 text-center">
+                    <h4 className="text-white font-bold text-xl mb-1">{car.name}</h4>
+                    <p className="text-gray-300 text-sm mb-3">{car.description}</p>
+                    <span className="text-blue-300 font-semibold text-base block mb-2">
+                      ₦{(car.price / 1000000).toFixed(1)}M
+                    </span>
+                    <button
+                      className="text-xs md:text-sm bg-white/20 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm"
+                      onClick={() => {
+                        const calc = document.querySelector('#calculator');
+                        if (calc) calc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                    >
+                      Calculate →
+                    </button>
                   </div>
-                ))}
-
-                {/* Fill empty slots on the last row */}
-                {currentSlideData.cars.length < carsPerPage &&
-                  Array.from({ length: carsPerPage - currentSlideData.cars.length }).map((_, i) => (
-                    <div key={`empty-${i}`} className="h-64 sm:h-72 md:h-80 lg:h-96 rounded-2xl bg-white/5" />
-                  ))}
-              </div>
-
-              {/* Row indicator */}
+                </div>
+              ))}
+              {/* Slide indicator */}
               <p className="text-center text-gray-500 text-sm mt-6">
-                Showing models {(interleavedSlides.filter((s, i) => s.type === 'gallery' && i < currentSlide).length) * carsPerPage + 1}–
-                {Math.min((interleavedSlides.filter((s, i) => s.type === 'gallery' && i < currentSlide).length) * carsPerPage + currentSlideData.cars.length, carGallery.length)} of {carGallery.length}
+                Showing model {currentSlide + 1} of {carGallery.length}
               </p>
             </div>
           )}

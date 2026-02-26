@@ -1,19 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getInterestRateHistory, updateInterestRate } from '../../api/adminConfig';
 import { Download, CalendarDays, ArrowDownUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 
-const historyData = Array.from({ length: 100 }, (_, i) => {
-  const rates = [
-    { prev: '50%', updated: '60%' },
-    { prev: '40%', updated: '50%' },
-    { prev: '20%', updated: '30%' },
-    { prev: '10%', updated: '15%' },
-    { prev: '40%', updated: '50%' },
-    { prev: '5%',  updated: '10%' },
-  ];
-  const r = rates[i % rates.length];
-  return { id: i + 1, date: '23/09/26, 09:11:04', prevRate: r.prev, updatedRate: r.updated };
-});
+// historyData will be fetched from backend
 
 const PAGE_SIZES = [10, 20, 50];
 
@@ -24,6 +14,34 @@ const InterestRateManagement = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [pageSizeOpen, setPageSizeOpen] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [updateError, setUpdateError] = useState('');
+  const [updateSuccess, setUpdateSuccess] = useState('');
+
+  const [historyData, setHistoryData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchHistory = () => {
+    setLoading(true);
+    setError('');
+    getInterestRateHistory()
+      .then((res) => {
+        const arr = Array.isArray(res.data) ? res.data : [];
+        setHistoryData(arr.map((item, idx) => ({
+          id: item.id || idx,
+          date: item.updatedAt ? new Date(item.updatedAt).toLocaleString() : '',
+          prevRate: item.previousRate ? `${item.previousRate}%` : '',
+          updatedRate: item.updatedRate ? `${item.updatedRate}%` : '',
+        })));
+      })
+      .catch((e) => setError(e.message || 'Failed to load history'))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
 
   const totalEntries = historyData.length;
   const totalPages = Math.max(1, Math.ceil(totalEntries / pageSize));
@@ -46,9 +64,30 @@ const InterestRateManagement = () => {
             <p className="font-semibold text-gray-900">Update Interest Rate</p>
             <p className="text-sm text-gray-400 mt-0.5">Input the details below to modify interest rate</p>
           </div>
-          <button className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
-            Update Rates
+          <button
+            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50"
+            disabled={updateLoading}
+            onClick={async () => {
+              setUpdateLoading(true);
+              setUpdateError('');
+              setUpdateSuccess('');
+              try {
+                await updateInterestRate(Number(interestRate));
+                setUpdateSuccess('Interest rate updated successfully.');
+                fetchHistory();
+              } catch (e) {
+                setUpdateError(e.message || 'Failed to update.');
+              } finally {
+                setUpdateLoading(false);
+              }
+            }}
+          >
+            {updateLoading ? 'Updating...' : 'Update Rates'}
           </button>
+                {/* Feedback messages */}
+                {(updateError || updateSuccess) && (
+                  <div className={`mt-4 text-sm font-medium ${updateError ? 'text-red-600' : 'text-green-600'}`}>{updateError || updateSuccess}</div>
+                )}
         </div>
 
         <div className="grid grid-cols-[200px_1fr] gap-8">
@@ -113,13 +152,21 @@ const InterestRateManagement = () => {
 
           {/* Rows */}
           <div className="flex flex-col divide-y divide-gray-50">
-            {pageItems.map((row) => (
-              <div key={row.id} className="grid grid-cols-3 py-4">
-                <span className="text-sm text-gray-700">{row.date}</span>
-                <span className="text-sm text-gray-700">{row.prevRate}</span>
-                <span className="text-sm text-gray-700">{row.updatedRate}</span>
-              </div>
-            ))}
+            {loading ? (
+              <div className="py-8 text-center text-gray-400 text-sm">Loading...</div>
+            ) : error ? (
+              <div className="py-8 text-center text-red-500 text-sm">{error}</div>
+            ) : pageItems.length === 0 ? (
+              <div className="py-8 text-center text-gray-400 text-sm">No history found.</div>
+            ) : (
+              pageItems.map((row) => (
+                <div key={row.id} className="grid grid-cols-3 py-4">
+                  <span className="text-sm text-gray-700">{row.date}</span>
+                  <span className="text-sm text-gray-700">{row.prevRate}</span>
+                  <span className="text-sm text-gray-700">{row.updatedRate}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

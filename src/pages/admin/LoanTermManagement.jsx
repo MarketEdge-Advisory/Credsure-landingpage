@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getLoanTenures, addLoanTenure, updateLoanTenure, deleteLoanTenure } from '../../api/adminConfig';
 import { Plus, Trash2, X, CalendarDays } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 const defaultTerms = [
   { id: 1, label: '3 Months' },
@@ -41,8 +42,10 @@ const LoanTermManagement = () => {
       await updateLoanTenure(id, { label: value });
       await refreshTenures();
       setError(null);
+      Swal.fire({ icon: 'success', title: 'Updated!', text: 'Loan tenure updated successfully.' });
     } catch (e) {
       setError(e.message || 'Failed to update loan tenure');
+      Swal.fire({ icon: 'error', title: 'Update Failed', text: e.message || 'Failed to update loan tenure.' });
     } finally {
       setLoading(false);
     }
@@ -54,8 +57,10 @@ const LoanTermManagement = () => {
       await deleteLoanTenure(id);
       await refreshTenures();
       setError(null);
+      Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Loan tenure deleted successfully.' });
     } catch (e) {
       setError(e.message || 'Failed to delete loan tenure');
+      Swal.fire({ icon: 'error', title: 'Delete Failed', text: e.message || 'Failed to delete loan tenure.' });
     } finally {
       setLoading(false);
     }
@@ -67,10 +72,12 @@ const LoanTermManagement = () => {
       if (duration.trim()) {
         await addLoanTenure(duration.trim());
         await refreshTenures();
+        Swal.fire({ icon: 'success', title: 'Created!', text: 'Loan tenure added successfully.' });
       }
       setError(null);
     } catch (e) {
       setError(e.message || 'Failed to add loan tenure');
+      Swal.fire({ icon: 'error', title: 'Create Failed', text: e.message || 'Failed to add loan tenure.' });
     } finally {
       setLoading(false);
       setDuration('');
