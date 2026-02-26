@@ -142,23 +142,27 @@ const AdminSidebar = ({ open, setOpen }) => {
 
       {/* Welcome Card */}
       <div className="mx-3 mb-3 rounded-xl bg-[#132f52] p-4 relative overflow-hidden">
-        <div className="relative z-10">
-          <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center mb-3">
-            <Monitor size={18} className="text-white" />
-          </div>
-          <p className="text-white font-bold text-sm mb-1">
-            {user?.name ? user.name : user?.role === 'suzuki' ? 'Suzuki Admin' : 'Credsure Admin'}
-          </p>
-          <p className="text-gray-400 text-xs leading-relaxed">
-            {user?.role === 'suzuki'
-              ? 'Manage car listings, inventory, and vehicle details.'
-              : 'Manage loan rates, calculator inputs, and loan terms.'}
-          </p>
-        </div>
-        <div className="absolute -right-4 -bottom-4 w-20 h-20 rounded-full bg-white/5" />
-        <div className="absolute -right-1 -top-4 w-12 h-12 rounded-full bg-white/5" />
-      </div>
+  <div className="relative z-10">
+    <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center mb-3">
+      <Monitor size={18} className="text-white" />
+    </div>
 
+    {getNormalizedRole(user?.role) === 'credsure' && (
+      <>
+        <p className="text-white font-bold text-sm mb-1">
+          {user?.name ?? 'Credsure Admin'}
+        </p>
+        <p className="text-gray-400 text-xs leading-relaxed">
+          Manage loan rates, calculator inputs, and loan terms.
+        </p>
+      </>
+    )}
+
+  </div>
+
+  <div className="absolute -right-4 -bottom-4 w-20 h-20 rounded-full bg-white/5" />
+  <div className="absolute -right-1 -top-4 w-12 h-12 rounded-full bg-white/5" />
+</div>
       {/* Log Out */}
       <div className="border-t border-white/10 mx-4" />
       <div className="flex items-center justify-between px-4 py-4">
