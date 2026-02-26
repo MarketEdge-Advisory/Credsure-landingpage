@@ -147,7 +147,7 @@ const AdminSidebar = ({ open, setOpen }) => {
       <Monitor size={18} className="text-white" />
     </div>
 
-    {getNormalizedRole(user?.role) === 'credsure' && (
+    {getNormalizedRole(user?.role) === 'credsure' ? (
       <>
         <p className="text-white font-bold text-sm mb-1">
           {user?.name ?? 'Credsure Admin'}
@@ -156,10 +156,18 @@ const AdminSidebar = ({ open, setOpen }) => {
           Manage loan rates, calculator inputs, and loan terms.
         </p>
       </>
-    )}
+    ) : getNormalizedRole(user?.role) === 'suzuki' ? (
+      <>
+        <p className="text-white font-bold text-sm mb-1">
+          {user?.name ?? 'Suzuki Admin'}
+        </p>
+        <p className="text-gray-400 text-xs leading-relaxed">
+          Manage car listings, inventory, and vehicle details.
+        </p>
+      </>
+    ) : null}
 
   </div>
-
   <div className="absolute -right-4 -bottom-4 w-20 h-20 rounded-full bg-white/5" />
   <div className="absolute -right-1 -top-4 w-12 h-12 rounded-full bg-white/5" />
 </div>
