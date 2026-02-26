@@ -352,7 +352,7 @@ const DreamSuzuki = () => {
               {currentSlideData.cars.map((car) => (
                 <div
                   key={car.id}
-                  className="relative flex flex-col items-center justify-center mx-auto h-[420px] w-full max-w-[33vw] min-w-[220px] rounded-2xl overflow-hidden group shadow-lg bg-white/10"
+                  className="relative flex flex-col items-center justify-center mx-auto h-[420px] w-full max-w-[900px] rounded-2xl overflow-hidden group shadow-xl bg-white/10 text"
                   style={{
                     backgroundImage: `url('${car.image}')`,
                     backgroundSize: 'cover',
@@ -362,9 +362,9 @@ const DreamSuzuki = () => {
                   {/* Gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-all duration-300 group-hover:via-black/40" />
                   {/* Caption */}
-                  <div className="absolute bottom-0 left-0 right-0 p-5 text-center">
+                  <div className="absolute bottom-0 left-0 right-0 p-5 text-left">
                     <h4 className="text-white font-bold text-xl mb-1">{car.name}</h4>
-                    <p className="text-gray-300 text-sm mb-3">{car.description}</p>
+                    <p className="text-gray-300 text-sm mb-3 md:max-w-[600px]">{car.description}</p>
                     <span className="text-blue-300 font-semibold text-base block mb-2">
                       ₦{(car.price / 1000000).toFixed(1)}M
                     </span>

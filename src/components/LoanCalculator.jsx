@@ -14,14 +14,17 @@ const LoanCalculator = () => {
   const interestRate = 10; // 10% annual interest rate
   const [showModal, setShowModal] = useState(false);
   const [showEmploymentDropdown, setShowEmploymentDropdown] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: '',
-    phone: '',
-    email: '',
-    employmentStatus: '',
-    monthlyIncome: '',
-    agreeToContact: false,
-  });
+ const [formData, setFormData] = useState({
+  fullName: '',
+  phone: '',
+  email: '',
+  employmentStatus: '',
+  monthlyIncome: '',
+  agreeToContact: false,
+});
+
+const [formErrors, setFormErrors] = useState({});
+const [isSubmitting, setIsSubmitting] = useState(false);
   const employmentDropdownRef = useRef(null);
 
   const tenures = [
@@ -121,20 +124,34 @@ const LoanCalculator = () => {
 
   const handleFormChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormErrors({ ...formErrors, [e.target.name]: undefined });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!formData.employmentStatus) return alert('Please select an employment status');
-    if (!carId) {
-      return Swal.fire({
+    setIsSubmitting(true);
+    // Validate fields
+    const errors = {};
+    if (!formData.fullName.trim()) errors.fullName = 'Full name is required';
+    if (!formData.phone.trim()) errors.phone = 'Phone number is required';
+    else if (!/^\d{10,}$/.test(formData.phone.trim())) errors.phone = 'Enter a valid phone number';
+    if (!formData.email.trim()) errors.email = 'Email address is required';
+    else if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) errors.email = 'Enter a valid email address';
+    if (!formData.employmentStatus) errors.employmentStatus = 'Employment status is required';
+    if (!formData.monthlyIncome.trim()) errors.monthlyIncome = 'Monthly income is required';
+    else if (isNaN(Number(formData.monthlyIncome)) || Number(formData.monthlyIncome) <= 0) errors.monthlyIncome = 'Enter a valid income';
+    if (!carId) errors.carId = 'Could not determine the selected vehicle.';
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setIsSubmitting(false);
+      Swal.fire({
         icon: 'error',
-        title: 'Vehicle Error',
-        text: 'Could not determine the selected vehicle. Please select again.',
+        title: 'Form Error',
+        text: 'Please correct the highlighted fields.',
         confirmButtonText: 'OK',
         confirmButtonColor: '#e53e3e',
       });
+      return;
     }
 
     const payload = {
@@ -176,6 +193,7 @@ const LoanCalculator = () => {
         monthlyIncome: '',
         agreeToContact: false,
       });
+      setFormErrors({});
     } catch (err) {
       Swal.fire({
         icon: 'error',
@@ -185,6 +203,7 @@ const LoanCalculator = () => {
         confirmButtonColor: '#e53e3e',
       });
     }
+    setIsSubmitting(false);
   };
 
   return (
@@ -356,25 +375,57 @@ const LoanCalculator = () => {
                   {/* Full Name */}
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-2">Full name*</label>
-                    <input type="text" name="fullName" value={formData.fullName} onChange={handleFormChange} required className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50" placeholder="Enter your full name" />
+                    <input
+                      type="text"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleFormChange}
+                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${formErrors.fullName ? 'border-red-500' : 'border-gray-300'}`}
+                      placeholder="Enter your full name"
+                      autoComplete="off"
+                    />
+                    {formErrors.fullName && <span className="text-xs text-red-500 mt-1 block">{formErrors.fullName}</span>}
                   </div>
                   {/* Phone */}
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-2">Phone number*</label>
-                    <input type="tel" name="phone" value={formData.phone} onChange={handleFormChange} required className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50" placeholder="Enter your phone number" />
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleFormChange}
+                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${formErrors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                      placeholder="Enter your phone number"
+                      autoComplete="off"
+                    />
+                    {formErrors.phone && <span className="text-xs text-red-500 mt-1 block">{formErrors.phone}</span>}
                   </div>
                   {/* Email */}
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-2">Email address*</label>
-                    <input type="email" name="email" value={formData.email} onChange={handleFormChange} required className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50" placeholder="Enter your email" />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleFormChange}
+                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${formErrors.email ? 'border-red-500' : 'border-gray-300'}`}
+                      placeholder="Enter your email"
+                      autoComplete="off"
+                    />
+                    {formErrors.email && <span className="text-xs text-red-500 mt-1 block">{formErrors.email}</span>}
                   </div>
                   {/* Employment Status */}
                   <div ref={employmentDropdownRef} className="relative">
                     <label className="block text-sm font-medium text-gray-600 mb-2">Employment status*</label>
-                    <button type="button" onClick={() => setShowEmploymentDropdown(!showEmploymentDropdown)} className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white flex justify-between items-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowEmploymentDropdown(!showEmploymentDropdown)}
+                      className={`w-full px-4 py-3 text-base text-gray-900 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white flex justify-between items-center ${formErrors.employmentStatus ? 'border-red-500' : 'border-gray-300'}`}
+                    >
                       <span className={formData.employmentStatus ? 'text-gray-900' : 'text-gray-500'}>{formData.employmentStatus || 'Select employment status'}</span>
                       <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${showEmploymentDropdown ? 'rotate-180' : ''}`} />
                     </button>
+                    {formErrors.employmentStatus && <span className="text-xs text-red-500 mt-1 block">{formErrors.employmentStatus}</span>}
                     {showEmploymentDropdown && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                         {['Salaried Employee', 'Business Owner', 'Self Employed', 'Corporate'].map(option => (
@@ -386,16 +437,17 @@ const LoanCalculator = () => {
                   {/* Monthly Income */}
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-2">Estimated net monthly income*</label>
-                                       <input
+                    <input
                       type="number"
                       name="monthlyIncome"
                       value={formData.monthlyIncome}
                       onChange={handleFormChange}
-                      required
-                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50"
+                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${formErrors.monthlyIncome ? 'border-red-500' : 'border-gray-300'}`}
                       placeholder="Enter your monthly income"
                       min="0"
+                      autoComplete="off"
                     />
+                    {formErrors.monthlyIncome && <span className="text-xs text-red-500 mt-1 block">{formErrors.monthlyIncome}</span>}
                   </div>
 
                   {/* Consent Checkbox */}
@@ -416,9 +468,11 @@ const LoanCalculator = () => {
                   <button
                     type="submit"
                     className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 hover:shadow-lg text-base sm:text-lg"
+                    disabled={isSubmitting}
                   >
-                    Submit Application
+                    {isSubmitting ? 'Submitting...' : 'Submit Application'}
                   </button>
+                  {formErrors.carId && <span className="text-xs text-red-500 mt-2 block text-center">{formErrors.carId}</span>}
                 </form>
               </div>
             </div>

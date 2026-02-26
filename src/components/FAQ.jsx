@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import Swal from 'sweetalert2';
 import { Plus, Minus, HelpCircle, X } from 'lucide-react';
 import { MdQuestionMark } from "react-icons/md";
 import { CirclePlus } from 'lucide-react';
 
 const FAQ = () => {
+    const [formErrors, setFormErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
   const [openIndex, setOpenIndex] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -18,19 +21,60 @@ const FAQ = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    setFormErrors({ ...formErrors, [e.target.name]: undefined });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Contact form submitted:', formData);
-    alert('Your inquiry has been sent to both CredSure and Suzuki. We will contact you within 24-48 hours.');
-    setShowModal(false);
-    setFormData({
-      fullName: '',
-      phone: '',
-      email: '',
-      message: '',
-    });
+    setIsSubmitting(true);
+    // Validate fields
+    const errors = {};
+    if (!formData.fullName.trim()) errors.fullName = 'Full name is required';
+    if (!formData.phone.trim()) errors.phone = 'Phone number is required';
+    else if (!/^\d{10,}$/.test(formData.phone.trim())) errors.phone = 'Enter a valid phone number';
+    if (!formData.email.trim()) errors.email = 'Email address is required';
+    else if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) errors.email = 'Enter a valid email address';
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setIsSubmitting(false);
+      Swal.fire({
+        icon: 'error',
+        title: 'Form Error',
+        text: 'Please correct the highlighted fields.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#e53e3e',
+      });
+      return;
+    }
+    // Simulate submit
+    try {
+      // Simulate API call
+      console.log('Contact form submitted:', formData);
+      Swal.fire({
+        icon: 'success',
+        title: 'Inquiry Sent!',
+        text: 'Your inquiry has been sent to both CredSure and Suzuki. We will contact you within 24-48 hours.',
+        confirmButtonText: 'Got it',
+        confirmButtonColor: '#2d9de5',
+      });
+      setShowModal(false);
+      setFormData({
+        fullName: '',
+        phone: '',
+        email: '',
+        message: '',
+      });
+      setFormErrors({});
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Submission Failed',
+        text: err.message || 'An error occurred. Please try again.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#e53e3e',
+      });
+    }
+    setIsSubmitting(false);
   };
 
   const faqs = [
@@ -186,10 +230,11 @@ const FAQ = () => {
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleFormChange}
-                      required
-                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50"
+                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${formErrors.fullName ? 'border-red-500' : 'border-gray-300'}`}
                       placeholder="Enter your full name"
+                      autoComplete="off"
                     />
+                    {formErrors.fullName && <span className="text-xs text-red-500 mt-1 block">{formErrors.fullName}</span>}
                   </div>
 
                   {/* Phone Number */}
@@ -202,10 +247,11 @@ const FAQ = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleFormChange}
-                      required
-                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50"
+                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${formErrors.phone ? 'border-red-500' : 'border-gray-300'}`}
                       placeholder="Enter your phone number"
+                      autoComplete="off"
                     />
+                    {formErrors.phone && <span className="text-xs text-red-500 mt-1 block">{formErrors.phone}</span>}
                   </div>
 
                   {/* Email Address */}
@@ -218,10 +264,11 @@ const FAQ = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleFormChange}
-                      required
-                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50"
+                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${formErrors.email ? 'border-red-500' : 'border-gray-300'}`}
                       placeholder="Enter your email"
+                      autoComplete="off"
                     />
+                    {formErrors.email && <span className="text-xs text-red-500 mt-1 block">{formErrors.email}</span>}
                   </div>
 
                   {/* Message */}
@@ -243,8 +290,9 @@ const FAQ = () => {
                   <button
                     type="submit"
                     className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3.5 rounded-lg transition-all duration-300 hover:shadow-lg text-base mt-6"
+                    disabled={isSubmitting}
                   >
-                    Send Inquiry
+                    {isSubmitting ? 'Sending...' : 'Send Inquiry'}
                   </button>
                 </form>
               </div>

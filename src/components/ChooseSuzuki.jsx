@@ -1347,7 +1347,7 @@ const ChooseSuzuki = () => {
 
                 {/* POPUP INSIDE CARD */}
                 {isOpen && (
-                  <div className="absolute inset-0 z-30 bg-black/80 flex flex-col p-4">
+                  <div className="absolute inset-0 z-30 bg-black/20 flex flex-col p-4">
                     {/* Close */}
                     <button
                       onClick={() => setSelectedCarId(null)}
@@ -1361,7 +1361,7 @@ const ChooseSuzuki = () => {
                     </h3>
 
                     {/* Images */}
-                    <div className="grid grid-cols-3 gap-3">
+                    {/* <div className="grid grid-cols-3 gap-3">
                       {car.images?.map((img, index) => (
                         <img
                           key={index}
@@ -1370,8 +1370,38 @@ const ChooseSuzuki = () => {
                           className="rounded-lg object-cover w-full h-28"
                         />
                       ))}
-                    </div>
+                    </div> */}
+<div className="bg-white rounded-lg p-2 w-full">
+  {/* Images */}
+  {car.images?.length > 1 ? (
+    <div className="grid grid-cols-3 gap-2">
+      {car.images.slice(0, 3).map((img, index) => (
+        <img
+          key={index}
+          src={img}
+          alt={car.name}
+          className="rounded-lg object-cover w-full h-24"
+        />
+      ))}
+    </div>
+  ) : (
+    <img
+      src={car.images?.[0]}
+      alt={car.name}
+      className="rounded-lg object-cover w-full h-40"
+    />
+  )}
 
+  {/* Car details */}
+  <div className="mt-2">
+    <p className="text-sm font-semibold text-gray-900">
+      {car.name}
+    </p>
+    <p className="text-xs text-gray-500">
+      {car.description}
+    </p>
+  </div>
+</div>
                     <button
                       onClick={() => {
                         selectCar(car);
