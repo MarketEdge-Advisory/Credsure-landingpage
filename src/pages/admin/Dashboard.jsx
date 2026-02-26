@@ -4,6 +4,10 @@ import DateRangePicker from '../../components/admin/DateRangePicker';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
+// Fetch applications from backend
+import financeApplicationsApi from '../../api/financeApplications';
+
+const PAGE_SIZES = [10, 20, 50];
 
 const preApprovalData = [
   { month: 'Jan',  value: 7000,  remainder: 17000 },
@@ -126,198 +130,16 @@ const Dashboard = () => {
           </p> */}
         </div>
 
-        {/* Period picker */}
-        {/* <div className="relative">
-          <button
-            onClick={() => setShowPeriodPicker((o) => !o)}
-            className="flex items-center gap-2 border border-gray-200 bg-white rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
-          >
-            <Calendar size={16} className="text-gray-500" />
-            {period}
-          </button>
-          <DateRangePicker
-            isOpen={showPeriodPicker}
-            onClose={() => setShowPeriodPicker(false)}
-            onApply={({ startDate, endDate }) => {
-              if (startDate && endDate) setPeriod(`${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`);
-            }}
-          />
-        </div> */}
+        
       </div>
 
-      {/* KPI Cards */}
-      {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map(({ label, value, pct, trend, icon: Icon, cardBg, iconBg, iconColor, textColor, subTextColor, badgeBg, badgeText }) => (
-          <div key={label} className={`${cardBg} rounded-sm p-4 flex flex-col gap-3`}>
-            <div className={`w-8 h-8 rounded-full ${iconBg} flex items-center justify-center`}>
-              <Icon size={16} className={iconColor} />
-            </div>
-            <p className={`text-xs ${subTextColor}`}>{label}</p>
-            <p className={`text-2xl font-bold ${textColor} leading-none`}>{value}</p>
-            <div className="flex items-center gap-2">
-              <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${badgeBg} ${badgeText}`}>
-                {trend === 'up'
-                  ? <TrendingUp size={11} />
-                  : <TrendingDown size={11} />}
-                {pct}
-              </span>
-              <span className={`text-xs ${subTextColor}`}>
-                Vs Last {period === 'This year' || period === 'Last year' ? 'year' : 'Year'}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div> */}
-
-      {/* Website Visitors Chart */}
-      {/* <div className="mt-6 bg-white rounded-sm border border-gray-100 p-6 shadow-sm">
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h2 className="text-base font-bold text-gray-900">Website Vistors</h2>
-            <p className="text-gray-400 text-sm mt-0.5">Shows the total amount of customers that visited Credsure website.</p>
-          </div>
-          <div className="relative">
-            <button
-              onClick={() => setShowChartPicker((o) => !o)}
-              className="flex items-center gap-2 border border-gray-200 bg-white rounded-xl px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
-            >
-              <Calendar size={15} className="text-gray-500" />
-              {chartPeriod}
-            </button>
-            <DateRangePicker
-              isOpen={showChartPicker}
-              onClose={() => setShowChartPicker(false)}
-              onApply={({ startDate, endDate }) => {
-                if (startDate && endDate) setChartPeriod(`${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`);
-              }}
-            />
-          </div>
-        </div>
-
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={visitorsData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="visitorsGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#c8d8e8" stopOpacity={0.6} />
-                <stop offset="100%" stopColor="#e8f0f7" stopOpacity={0.1} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="" stroke="#f0f0f0" vertical={false} />
-            <XAxis
-              dataKey="month"
-              tick={{ fontSize: 12, fill: '#9ca3af' }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tickFormatter={(v) => `${v / 1000}k`}
-              tick={{ fontSize: 12, fill: '#9ca3af' }}
-              axisLine={false}
-              tickLine={false}
-              domain={[0, 25000]}
-              ticks={[0, 5000, 10000, 15000, 20000, 25000]}
-            />
-            <Tooltip
-              content={({ active, payload }) =>
-                active && payload?.length ? (
-                  <div className="bg-gray-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-lg">
-                    {`${Math.round(payload[0].value / 1000)}k`}
-                  </div>
-                ) : null
-              }
-              cursor={{ stroke: '#1e293b', strokeWidth: 1, strokeDasharray: '4 4' }}
-            />
-            <Area
-              type="linear"
-              dataKey="visitors"
-              stroke="#1e293b"
-              strokeWidth={2}
-              fill="url(#visitorsGrad)"
-              dot={false}
-              activeDot={{ r: 5, fill: '#1e293b', strokeWidth: 0 }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div> */}
-
-      {/* Pre-Approval Application Trends */}
-      {/* <div className="mt-6 bg-white rounded-sm border border-gray-100 p-6 shadow-sm">
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h2 className="text-base font-bold text-gray-900">Pre-Approval Application Trends</h2>
-            <p className="text-gray-400 text-sm mt-0.5">Shows the trends of customers that applied for car loan</p>
-          </div>
-          <div className="relative">
-            <button
-              onClick={() => setShowBarPicker((o) => !o)}
-              className="flex items-center gap-2 border border-gray-200 bg-white rounded-xl px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
-            >
-              <Calendar size={15} className="text-gray-500" />
-              {barPeriod}
-            </button>
-            <DateRangePicker
-              isOpen={showBarPicker}
-              onClose={() => setShowBarPicker(false)}
-              onApply={({ startDate, endDate }) => {
-                if (startDate && endDate) setBarPeriod(`${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`);
-              }}
-            />
-          </div>
-        </div>
-
-        <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={preApprovalData} barSize={36} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <defs>
-              <pattern id="hatchPattern" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
-                <rect width="8" height="8" fill="#dbeafe" />
-                <line x1="0" y1="0" x2="0" y2="8" stroke="#bfdbfe" strokeWidth="3" />
-              </pattern>
-            </defs>
-            <CartesianGrid strokeDasharray="" stroke="#f0f0f0" vertical={false} />
-            <XAxis
-              dataKey="month"
-              tick={{ fontSize: 12, fill: '#9ca3af' }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tickFormatter={(v) => `${v / 1000}k`}
-              tick={{ fontSize: 12, fill: '#9ca3af' }}
-              axisLine={false}
-              tickLine={false}
-              domain={[0, 25000]}
-              ticks={[0, 5000, 10000, 15000, 20000, 25000]}
-            />
-            <Tooltip
-              content={({ active, payload }) => {
-                if (!active || !payload?.length) return null;
-                const val = payload.find((p) => p.dataKey === 'value');
-                if (!val) return null;
-                return (
-                  <div className="bg-white border border-gray-200 text-gray-800 text-xs font-semibold px-3 py-1.5 rounded-lg shadow-lg">
-                    {`${Math.round(val.value / 1000)}k`}
-                  </div>
-                );
-              }}
-              cursor={false}
-            />
-            <Bar dataKey="value" stackId="stack" fill="#60b8f5" radius={[0, 0, 0, 0]} />
-            <Bar dataKey="remainder" stackId="stack" fill="url(#hatchPattern)" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div> */}
-      {/* Recent Pre-Approval Applications Table */}
+     
       <RecentApplications />
     </div>
   );
 };
 
 /* ── Recent Pre-Approval Applications ── */
-// Fetch applications from backend
-import financeApplicationsApi from '../../api/financeApplications';
-
-const PAGE_SIZES = [10, 20, 50];
-
 const statusStyle = {
   Approved:     'border border-green-400 text-green-600 bg-green-50',
   Pending:      'border border-yellow-400 text-yellow-600 bg-yellow-50',
@@ -465,46 +287,31 @@ const RecentApplications = () => {
 
       {/* Collapsible Filters */}
       {showFilters && (
-        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex flex-wrap gap-4 items-end animate-fade-in">
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Email</label>
-            <input
-              type="text"
-              value={filterEmail}
-              onChange={(e) => { setFilterEmail(e.target.value); setPage(1); }}
-              placeholder="Filter by email"
-              className="border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none w-48"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Employment Status</label>
-            <select
-              value={filterEmployment}
-              onChange={(e) => { setFilterEmployment(e.target.value); setPage(1); }}
-              className="border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none w-48"
-            >
-              <option value="">All</option>
-              <option value="Employed">Employed</option>
-              <option value="Self-Employed">Self-Employed</option>
-              <option value="Unemployed">Unemployed</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Monthly Income (Min)</label>
-            <input
-              type="number"
-              value={filterIncome}
-              onChange={(e) => { setFilterIncome(e.target.value); setPage(1); }}
-              placeholder="e.g. 100000"
-              className="border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none w-48"
-            />
-          </div>
-          <button
-            className="ml-auto text-xs text-gray-500 hover:text-blue-600 underline"
-            onClick={() => { setFilterEmail(''); setFilterEmployment(''); setFilterIncome(''); setPage(1); }}
-          >
-            Reset Filters
-          </button>
+        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 animate-fade-in">
+          <table className="w-full text-sm">
+            <thead>
+              <tr>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600">
+                  Email <span className="ml-1 text-gray-400">↓</span>
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600">
+                  Employment Status <span className="ml-1 text-gray-400">↓</span>
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600">
+                  Monthly Income <span className="ml-1 text-gray-400">↓</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((row) => (
+                <tr key={row.id}>
+                  <td className="px-4 py-2 text-gray-700">{row.email}</td>
+                  <td className="px-4 py-2 text-gray-700">{row.employment}</td>
+                  <td className="px-4 py-2 text-gray-700">{row.income}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 

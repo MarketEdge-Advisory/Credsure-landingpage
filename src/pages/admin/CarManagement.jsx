@@ -73,17 +73,6 @@ const AddVehicleForm = ({ onBack }) => {
     }
     console.log('Submitting car with availability:', form.availability);
     try {
-      // --- Old logic for multiple images (commented out) ---
-      /*
-      let imageUrls = [];
-      if (imagePreviews.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
-        // Upload images to Cloudinary
-        const uploadResult = await uploadImagesToCloudinary(fileInputRef.current.files);
-        imageUrls = uploadResult.urls || uploadResult; // Adjust based on backend response
-      }
-      */
-
-      // --- New logic for backend's single image response ---
       let imageUrl = '';
       if (imagePreviews.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
         // Wrap the single file in an array so FormData is correct
@@ -720,7 +709,7 @@ const CarManagement = () => {
   return (
     <div className="p-8 w-full">
       {/* Page Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Car Management</h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -729,7 +718,7 @@ const CarManagement = () => {
         </div>
         <button
           onClick={() => setShowAddForm(true)}
-          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors w-full sm:w-auto justify-center"
         >
           <Plus size={16} />
           Add New Vehicle
@@ -739,39 +728,41 @@ const CarManagement = () => {
       {/* Card Container */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         {/* Table Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
           <div>
             <p className="font-semibold text-gray-900">Recent Cheque Items</p>
             <p className="text-sm text-gray-400 mt-0.5">Latest processed cheques across all batches</p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
+          <div className="flex flex-col gap-3 w-full sm:w-auto sm:flex-row sm:items-center">
+            <div className="relative w-full sm:w-auto">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search car names..."
                 value={search}
                 onChange={handleSearch}
-                className="border border-gray-200 rounded-sm pl-9 pr-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400 w-56"
+                className="border border-gray-200 rounded-sm pl-9 pr-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400 w-full sm:w-56"
               />
             </div>
-            <button className="flex items-center gap-2 border border-gray-200 rounded-sm px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-              <Download size={15} />
-              Download
-            </button>
-            <div className="relative">
-              <button
-                onClick={() => setShowDatePicker((o) => !o)}
-                className="flex items-center gap-2 border border-gray-200 rounded-sm px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                <CalendarDays size={15} />
-                Custom Date
+            <div className="flex flex-row gap-3 w-full sm:w-auto">
+              <button className="flex items-center gap-2 border border-gray-200 rounded-sm px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full sm:w-auto justify-center">
+                <Download size={15} />
+                Download
               </button>
-              <DateRangePicker
-                isOpen={showDatePicker}
-                onClose={() => setShowDatePicker(false)}
-                onApply={(range) => setDateRange(range)}
-              />
+              <div className="relative w-full sm:w-auto">
+                <button
+                  onClick={() => setShowDatePicker((o) => !o)}
+                  className="flex items-center gap-2 border border-gray-200 rounded-sm px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full sm:w-auto justify-center"
+                >
+                  <CalendarDays size={15} />
+                  Custom Date
+                </button>
+                <DateRangePicker
+                  isOpen={showDatePicker}
+                  onClose={() => setShowDatePicker(false)}
+                  onApply={(range) => setDateRange(range)}
+                />
+              </div>
             </div>
           </div>
         </div>

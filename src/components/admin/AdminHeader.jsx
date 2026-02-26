@@ -12,7 +12,7 @@ const routeLabels = {
   settings: 'Platform Settings',
 };
 
-const AdminHeader = () => {
+const AdminHeader = ({ onHamburgerClick }) => {
   const { pathname } = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -45,9 +45,19 @@ const AdminHeader = () => {
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between relative z-30">
-      {/* Breadcrumb */}
+    <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex items-center justify-between relative z-30">
+      {/* Left: Hamburger (mobile) + Breadcrumb */}
       <div className="flex items-center gap-2 text-sm">
+        {/* Hamburger icon for mobile */}
+        <button
+          className="md:hidden mr-2 p-2 rounded focus:outline-none hover:bg-gray-100"
+          onClick={onHamburgerClick}
+          aria-label="Open sidebar"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-7 h-7 text-gray-700">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
         <span className="text-gray-400 font-medium">Pages</span>
         <span className="text-gray-300">/</span>
         <span className="text-gray-800 font-semibold">{pageLabel}</span>

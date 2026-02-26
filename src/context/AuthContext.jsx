@@ -46,15 +46,23 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await authApi.loginAdmin({ email, password });
       // Support various backend response shapes
-      // Always store accessToken at the top level for consistency
       let userObj = data.user || data.data?.user || data.data || data;
       let accessToken = data.accessToken || data.data?.accessToken || data.token || '';
-      // If accessToken is not at top level, try to extract from nested data
       if (!accessToken && userObj && userObj.accessToken) accessToken = userObj.accessToken;
-      // Compose a flat user object with accessToken at top level
-      if (accessToken) userObj = { ...userObj, accessToken };
-      setUser(userObj);
-      sessionStorage.setItem('admin_user', JSON.stringify(userObj));
+      // Map correct name/initials based on email or role
+      let mapped = { ...userObj };
+      if (userObj.email === 'credsure@admin.com' || userObj.role === 'credsure') {
+        mapped.name = 'Credsure Admin';
+        mapped.initials = 'CA';
+        mapped.role = 'credsure';
+      } else if (userObj.email === 'suzuki@admin.com' || userObj.role === 'suzuki') {
+        mapped.name = 'Suzuki Admin';
+        mapped.initials = 'SA';
+        mapped.role = 'suzuki';
+      }
+      if (accessToken) mapped.accessToken = accessToken;
+      setUser(mapped);
+      sessionStorage.setItem('admin_user', JSON.stringify(mapped));
       return { ok: true };
     } catch (e) {
       return { ok: false, message: e.message || 'Login failed' };

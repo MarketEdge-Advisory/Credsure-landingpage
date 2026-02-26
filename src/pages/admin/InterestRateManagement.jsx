@@ -59,38 +59,45 @@ const InterestRateManagement = () => {
 
       {/* Update Card */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-        <div className="flex items-start justify-between mb-6">
+        <form
+          className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setUpdateLoading(true);
+            setUpdateError('');
+            setUpdateSuccess('');
+            try {
+              await updateInterestRate(Number(interestRate));
+              setUpdateSuccess('Interest rate updated successfully.');
+              fetchHistory();
+            } catch (e) {
+              setUpdateError(e.message || 'Failed to update.');
+            } finally {
+              setUpdateLoading(false);
+            }
+          }}
+        >
           <div>
             <p className="font-semibold text-gray-900">Update Interest Rate</p>
             <p className="text-sm text-gray-400 mt-0.5">Input the details below to modify interest rate</p>
           </div>
-          <button
-            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50"
-            disabled={updateLoading}
-            onClick={async () => {
-              setUpdateLoading(true);
-              setUpdateError('');
-              setUpdateSuccess('');
-              try {
-                await updateInterestRate(Number(interestRate));
-                setUpdateSuccess('Interest rate updated successfully.');
-                fetchHistory();
-              } catch (e) {
-                setUpdateError(e.message || 'Failed to update.');
-              } finally {
-                setUpdateLoading(false);
-              }
-            }}
-          >
-            {updateLoading ? 'Updating...' : 'Update Rates'}
-          </button>
-                {/* Feedback messages */}
-                {(updateError || updateSuccess) && (
-                  <div className={`mt-4 text-sm font-medium ${updateError ? 'text-red-600' : 'text-green-600'}`}>{updateError || updateSuccess}</div>
-                )}
-        </div>
+          {/* Update button for desktop */}
+          <div className="hidden md:flex flex-col items-end gap-2">
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50"
+              disabled={updateLoading}
+            >
+              {updateLoading ? 'Updating...' : 'Update Rates'}
+            </button>
+            {(updateError || updateSuccess) && (
+              <div className={`mt-4 text-sm font-medium ${updateError ? 'text-red-600' : 'text-green-600'}`}>{updateError || updateSuccess}</div>
+            )}
+          </div>
+          {/* ...existing code... */}
+        </form>
 
-        <div className="grid grid-cols-[200px_1fr] gap-8">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-[200px_1fr] md:gap-8">
           <p className="text-sm font-medium text-gray-700 pt-2">Input rate details</p>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Interest Rate (%)</label>
@@ -101,6 +108,20 @@ const InterestRateManagement = () => {
               onChange={(e) => setInterestRate(e.target.value)}
               className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
             />
+            {/* Update button for mobile (bottom, full width) */}
+            <button
+              type="submit"
+              className="block md:hidden w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50"
+              disabled={updateLoading}
+            >
+              {updateLoading ? 'Updating...' : 'Update Rates'}
+            </button>
+            {/* Feedback messages for mobile */}
+            <div className="block md:hidden">
+              {(updateError || updateSuccess) && (
+                <div className={`mt-4 text-sm font-medium ${updateError ? 'text-red-600' : 'text-green-600'}`}>{updateError || updateSuccess}</div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -108,12 +129,12 @@ const InterestRateManagement = () => {
       {/* History Card */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         {/* History Header */}
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4">
           <div>
             <p className="font-semibold text-gray-900">Interest Rate Update History</p>
             <p className="text-sm text-gray-400 mt-0.5">View and track all previous interest rate changes</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex gap-3">
             <button className="flex items-center gap-2 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
               <Download size={15} />
               Download

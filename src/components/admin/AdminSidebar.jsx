@@ -46,7 +46,7 @@ const ALL_SECTIONS = [
 ];
 
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ open, setOpen }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -71,8 +71,28 @@ const AdminSidebar = () => {
     navigate('/admin/login', { replace: true });
   };
 
+  // Responsive sidebar: hidden on mobile, drawer on mobile
   return (
-    <aside className="flex flex-col bg-[#0d1e3a] self-stretch w-64 flex-shrink-0">
+    <aside
+      className={`flex flex-col bg-[#0d1e3a] self-stretch w-64 flex-shrink-0 z-50
+        fixed md:static top-0 left-0 h-full transition-transform duration-300
+        ${open ? 'translate-x-0' : '-translate-x-full'}
+        md:translate-x-0
+      `}
+      style={{ boxShadow: open ? '0 0 0 9999px rgba(0,0,0,0.2)' : undefined }}
+    >
+      {/* Hamburger close button (mobile only) */}
+      <div className="md:hidden flex justify-end p-4">
+        <button
+          onClick={() => setOpen(false)}
+          className="text-white focus:outline-none"
+          aria-label="Close sidebar"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-7 h-7">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 pt-5 pb-4">
         <img
@@ -127,7 +147,7 @@ const AdminSidebar = () => {
             <Monitor size={18} className="text-white" />
           </div>
           <p className="text-white font-bold text-sm mb-1">
-            {user?.role === 'suzuki' ? 'Suzuki Admin' : 'Credsure Admin'}
+            {user?.name ? user.name : user?.role === 'suzuki' ? 'Suzuki Admin' : 'Credsure Admin'}
           </p>
           <p className="text-gray-400 text-xs leading-relaxed">
             {user?.role === 'suzuki'

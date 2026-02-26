@@ -37,51 +37,58 @@ const PlatformSettings = () => {
       <div className="bg-white rounded-xl border border-gray-200 p-6">
 
         {/* Password Section */}
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4">
           <div>
             <p className="font-semibold text-gray-900">Change Password</p>
             <p className="text-sm text-gray-400 mt-0.5">
               Please enter your current password to change your password.
             </p>
           </div>
-          <button
-            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
-            disabled={loading}
-            onClick={async () => {
-              setLoading(true);
-              setError(null);
-              setSuccess(null);
-              if (!currentPassword || !newPassword || !confirmPassword) {
-                setError('All fields are required');
-                setLoading(false);
-                return;
-              }
-              if (newPassword !== confirmPassword) {
-                setError('New passwords do not match');
-                setLoading(false);
-                return;
-              }
-              try {
-                await changePassword({ oldPassword: currentPassword, newPassword });
-                setSuccess('Password changed successfully');
-                setCurrentPassword('');
-                setNewPassword('');
-                setConfirmPassword('');
-              } catch (e) {
-                setError(e.message || 'Failed to change password');
-              } finally {
-                setLoading(false);
-              }
-            }}
-          >
-            {loading ? 'Saving...' : 'Save Details'}
-          </button>
-          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
-          {success && <div className="text-green-500 text-sm mt-2">{success}</div>}
+          {/* Save button and messages for desktop */}
+          <div className="hidden md:flex flex-col items-end gap-2">
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+              disabled={loading}
+            >
+              {loading ? 'Saving...' : 'Save Details'}
+            </button>
+            {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+            {success && <div className="text-green-500 text-sm mt-2">{success}</div>}
+          </div>
         </div>
 
-        <div className="grid grid-cols-[200px_1fr] gap-8 pb-8 border-b border-gray-100">
-          <p className="text-sm font-medium text-gray-700 pt-2">Input password details</p>
+        <form
+          className="grid grid-cols-1 gap-4 pb-8 border-b border-gray-100 md:grid-cols-[200px_1fr] md:gap-8"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setLoading(true);
+            setError(null);
+            setSuccess(null);
+            if (!currentPassword || !newPassword || !confirmPassword) {
+              setError('All fields are required');
+              setLoading(false);
+              return;
+            }
+            if (newPassword !== confirmPassword) {
+              setError('New passwords do not match');
+              setLoading(false);
+              return;
+            }
+            try {
+              await changePassword({ oldPassword: currentPassword, newPassword });
+              setSuccess('Password changed successfully');
+              setCurrentPassword('');
+              setNewPassword('');
+              setConfirmPassword('');
+            } catch (e) {
+              setError(e.message || 'Failed to change password');
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          <p className="text-sm font-medium text-gray-700 pt-2 md:pt-2">Input password details</p>
           <div className="flex flex-col gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
@@ -112,10 +119,24 @@ const PlatformSettings = () => {
                 className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
               />
             </div>
+            {/* Save button for mobile (bottom, full width) */}
+            <button
+              type="submit"
+              className="block md:hidden w-full mt-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+              disabled={loading}
+            >
+              {loading ? 'Saving...' : 'Save Details'}
+            </button>
+            {/* Error/Success messages for mobile */}
+            <div className="block md:hidden">
+              {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+              {success && <div className="text-green-500 text-sm mt-2">{success}</div>}
+            </div>
           </div>
-        </div>
+        </form>
 
         {/* Where you're logged in */}
+        {/* Save button for desktop (top right) is already present in the header section */}
         <div className="pt-6">
           <div className="flex items-start justify-between mb-1">
             <div>

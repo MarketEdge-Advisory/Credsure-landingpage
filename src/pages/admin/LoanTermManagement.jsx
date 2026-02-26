@@ -99,14 +99,14 @@ const LoanTermManagement = () => {
   return (
     <div className="p-8 w-full">
       {/* Page Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Loan Term Management</h1>
           <p className="text-sm text-gray-500 mt-1">Set and modify loan term management.</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors md:text-left text-center w-full md:w-auto justify-center md:justify-start"
         >
           <Plus size={16} />
           Add New Tenure
@@ -115,7 +115,7 @@ const LoanTermManagement = () => {
 
       {/* Card */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4">
           <div>
             <p className="font-semibold text-gray-900">Update Loan Term</p>
             <p className="text-sm text-gray-400 mt-0.5">Input the details below to modify loan term</p>
