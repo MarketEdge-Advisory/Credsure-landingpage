@@ -4,6 +4,7 @@ import { uploadImagesToCloudinary } from '../../api/upload';
 import { Plus, Search, Pencil, Trash2, Download, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ArrowLeft, UploadCloud, Minus } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 import { useCarContext } from '../../context/CarContext';
+import * as carApi from '../../api/cars';
 
 const PAGE_SIZES = [10, 20, 50];
 
@@ -18,10 +19,11 @@ const statusConfig = {
   'COMING SOON': { dot: 'bg-yellow-500', text: 'text-yellow-500', label: 'Coming Soon' },
 };
 
+// ---------- Add Vehicle Form ----------
 const AddVehicleForm = ({ onBack, fetchVehicles }) => {
   const fileInputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
-  const [imagePreviews, setImagePreviews] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]); // { src: dataUrl, file: File }
   const [form, setForm] = useState({
     carName: '',
     description: '',
@@ -42,18 +44,17 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
     const errors = {};
     if (!form.carName.trim()) errors.carName = 'Car name is required.';
     if (!form.description.trim()) errors.description = 'Description is required.';
-    if (!form.basePrice || isNaN(Number(form.basePrice)) || Number(form.basePrice) < 0.01) errors.basePrice = 'Base price must be a number greater than 0.01.';
+    if (!form.basePrice || isNaN(Number(form.basePrice)) || Number(form.basePrice) < 0.01)
+      errors.basePrice = 'Base price must be a number greater than 0.01.';
     if (!form.variant.trim()) errors.variant = 'Variant is required.';
-    if (!form.numberOfUnits || isNaN(Number(form.numberOfUnits)) || Number(form.numberOfUnits) < 1) errors.numberOfUnits = 'Number of units must be at least 1.';
+    if (!form.numberOfUnits || isNaN(Number(form.numberOfUnits)) || Number(form.numberOfUnits) < 1)
+      errors.numberOfUnits = 'Number of units must be at least 1.';
     if (!form.engineSpec.trim()) errors.engineSpec = 'Engine specification is required.';
     if (!form.transmissionSpec.trim()) errors.transmissionSpec = 'Transmission is required.';
     if (!form.availability) errors.availability = 'Availability is required.';
-    // Optionally validate image
-    // if (imagePreviews.length === 0) errors.images = 'At least one image is required.';
     return errors;
   };
 
-  // Handle multiple image files
   const handleNewImageFiles = (files) => {
     if (!files || files.length === 0) return;
     const newImages = [];
@@ -69,11 +70,9 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
     });
   };
 
-  // Remove image from preview and input
   const handleRemoveImage = (idx) => {
     setImagePreviews((prev) => prev.filter((_, i) => i !== idx));
     if (fileInputRef.current) {
-      // Remove file from input field
       const dt = new DataTransfer();
       Array.from(fileInputRef.current.files).forEach((file, i) => {
         if (i !== idx) dt.items.add(file);
@@ -99,30 +98,28 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
     setSaving(true);
     try {
       let imageUrls = [];
-      let uploadResult = null;
       if (imagePreviews.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
-        // Only upload files that are still in imagePreviews
         const filesToUpload = imagePreviews.map(img => img.file);
-        uploadResult = await uploadImagesToCloudinary(filesToUpload);
-        // Support both single and multiple image upload responses
-        if (uploadResult.imageUrls && Array.isArray(uploadResult.imageUrls)) {
-          imageUrls = uploadResult.imageUrls;
-        } else if (uploadResult.imageUrl) {
-          imageUrls = [uploadResult.imageUrl];
-        } else if (uploadResult.urls && Array.isArray(uploadResult.urls)) {
-          imageUrls = uploadResult.urls;
-        } else if (Array.isArray(uploadResult)) {
-          imageUrls = uploadResult;
+        const uploadResult = await uploadImagesToCloudinary(filesToUpload);
+        // Extract URLs – the response may be wrapped in a 'data' field
+        const resultData = uploadResult?.data || uploadResult;
+        if (resultData.imageUrls && Array.isArray(resultData.imageUrls)) {
+          imageUrls = resultData.imageUrls;
+        } else if (resultData.imageUrl) {
+          imageUrls = [resultData.imageUrl];
+        } else if (resultData.urls && Array.isArray(resultData.urls)) {
+          imageUrls = resultData.urls;
+        } else if (Array.isArray(resultData)) {
+          imageUrls = resultData;
         }
       }
-      // Debug log
-      console.log('Image upload result:', uploadResult);
-      console.log('Image URLs:', imageUrls);
+
       if (!imageUrls || imageUrls.length === 0 || !imageUrls[0]) {
         setFormError('Image upload failed. Please try again.');
         setSaving(false);
         return;
       }
+
       const carData = {
         name: form.carName,
         description: form.description,
@@ -134,12 +131,10 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
           engine: form.engineSpec,
           transmission: form.transmissionSpec,
         },
+        // Backend expects images as array of objects with 'url' property
         images: imageUrls.map(url => ({ url })),
-        imageUrls: imageUrls,
-        primaryImageUrl: imageUrls[0],
       };
-      // Debug log
-      console.log('Car data to send:', carData);
+
       await carApi.createCar(carData);
       await fetchVehicles();
       Swal.fire({ icon: 'success', title: 'Success', text: 'Vehicle added successfully!' });
@@ -163,7 +158,6 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
           {formError}
         </div>
       )}
-      {/* Back + Title */}
       <button
         onClick={onBack}
         className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 mb-4 transition-colors"
@@ -172,9 +166,7 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
         Go back
       </button>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Add New Vehicle</h1>
-      {/* Form Card */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
-        {/* Card Header */}
         <div className="flex items-start justify-between mb-6">
           <div>
             <p className="font-semibold text-gray-900">Add New Vehicle</p>
@@ -204,13 +196,13 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
                       <div key={idx} className="relative group">
                         <img src={img.src} alt={`Preview ${idx + 1}`} className="max-h-40 rounded-lg object-contain" />
                         <button
-  type="button"
-  onClick={e => { e.stopPropagation(); handleRemoveImage(idx); }}
-  title="Remove image"
-  className="absolute top-1 right-1 w-6 h-6 grid place-items-center bg-white/80 rounded-full shadow hover:bg-red-500 hover:text-white transition z-10"
->
-  <span className="leading-none">×</span>
-</button>
+                          type="button"
+                          onClick={e => { e.stopPropagation(); handleRemoveImage(idx); }}
+                          title="Remove image"
+                          className="absolute top-1 right-1 w-6 h-6 grid place-items-center bg-white/80 rounded-full shadow hover:bg-red-500 hover:text-white transition z-10"
+                        >
+                          <span className="leading-none">×</span>
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -345,7 +337,7 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
           </div>
         </div>
         <div className='flex w-full justify-end'>
-        <button
+          <button
             className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2"
             onClick={handleAddVehicle}
             disabled={saving}
@@ -358,17 +350,19 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
             )}
             Save Details
           </button>
-          </div>
+        </div>
       </div>
     </div>
   );
-}
+};
 
+// ---------- Edit Vehicle Form ----------
 const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
   const fileInputRef = useRef(null);
-  const changeInputRefs = useRef([]);
   const [dragOver, setDragOver] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState([]);
+  const [existingImageUrls, setExistingImageUrls] = useState([]); // Cloudinary URLs (strings)
+  const [newImageFiles, setNewImageFiles] = useState([]); // Files selected for upload
+  const [newImagePreviews, setNewImagePreviews] = useState([]); // data URLs for preview
   const [form, setForm] = useState({
     carName: '',
     description: '',
@@ -377,6 +371,7 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
     numberOfUnits: '',
     engineSpec: '',
     transmissionSpec: '',
+    availability: '',
   });
   const [saving, setSaving] = useState(false);
 
@@ -385,48 +380,49 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
     setForm({
       carName: vehicle.name || '',
       description: vehicle.description || '',
-      vehiclePrice: vehicle.basePrice || vehicle.basePrice || '',
+      vehiclePrice: vehicle.basePrice || '',
       variant: vehicle.variant || '',
       numberOfUnits: vehicle.numberOfUnits || '',
-      engineSpec: vehicle.specs?.engine || vehicle.specification || '',
-      transmissionSpec: vehicle.specs?.transmission || vehicle.transmission || '',
+      engineSpec: vehicle.specs?.engine || '',
+      transmissionSpec: vehicle.specs?.transmission || '',
+      availability: vehicle.availability || '',
     });
-    if (vehicle.images?.length > 0) {
-      setUploadedImages(vehicle.images.map(img => img.url || img));
-    } else if (vehicle.image) {
-      setUploadedImages([vehicle.image]);
+    // Extract existing image URLs from the vehicle's images array (each is { url: string })
+    if (vehicle.images && Array.isArray(vehicle.images)) {
+      setExistingImageUrls(vehicle.images.map(img => img.url));
+    } else if (vehicle.imageUrls && Array.isArray(vehicle.imageUrls)) {
+      // Fallback in case backend returns imageUrls directly
+      setExistingImageUrls(vehicle.imageUrls);
+    } else if (vehicle.primaryImageUrl) {
+      setExistingImageUrls([vehicle.primaryImageUrl]);
     } else {
-      setUploadedImages([]);
+      setExistingImageUrls([]);
     }
   }, [vehicle]);
 
   const handleNewImageFiles = (files) => {
     if (!files || files.length === 0) return;
-    const newImages = [];
-    Array.from(files).forEach((file) => {
+    const newFiles = Array.from(files);
+    setNewImageFiles(prev => [...prev, ...newFiles]);
+
+    // Generate previews
+    newFiles.forEach(file => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        newImages.push(e.target.result);
-        if (newImages.length === files.length) {
-          setUploadedImages((prev) => [...prev, ...newImages]);
-        }
+        setNewImagePreviews(prev => [...prev, e.target.result]);
       };
       reader.readAsDataURL(file);
     });
   };
 
-  const handleChangeImageFile = (idx, file) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) =>
-      setUploadedImages((prev) =>
-        prev.map((img, i) => (i === idx ? e.target.result : img))
-      );
-    reader.readAsDataURL(file);
+  const handleRemoveNewImage = (idx) => {
+    setNewImageFiles(prev => prev.filter((_, i) => i !== idx));
+    setNewImagePreviews(prev => prev.filter((_, i) => i !== idx));
   };
 
-  const handleDeleteImage = (idx) =>
-    setUploadedImages((prev) => prev.filter((_, i) => i !== idx));
+  const handleRemoveExistingImage = (idx) => {
+    setExistingImageUrls(prev => prev.filter((_, i) => i !== idx));
+  };
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -437,39 +433,43 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
   const handleChange = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
-  // Edit vehicle handler
   const handleEditVehicle = async () => {
     setSaving(true);
     try {
-      let imageUrls = [];
-      if (uploadedImages.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
-        const uploadResult = await uploadImagesToCloudinary(fileInputRef.current.files);
-        // Support both single and multiple image upload responses
-        if (uploadResult.imageUrls && Array.isArray(uploadResult.imageUrls)) {
-          imageUrls = uploadResult.imageUrls;
-        } else if (uploadResult.imageUrl) {
-          imageUrls = [uploadResult.imageUrl];
-        } else if (uploadResult.urls && Array.isArray(uploadResult.urls)) {
-          imageUrls = uploadResult.urls;
-        } else if (Array.isArray(uploadResult)) {
-          imageUrls = uploadResult;
+      let finalImageUrls = [...existingImageUrls];
+
+      // Upload new images if any
+      if (newImageFiles.length > 0) {
+        const uploadResult = await uploadImagesToCloudinary(newImageFiles);
+        const resultData = uploadResult?.data || uploadResult;
+        let newUrls = [];
+        if (resultData.imageUrls && Array.isArray(resultData.imageUrls)) {
+          newUrls = resultData.imageUrls;
+        } else if (resultData.imageUrl) {
+          newUrls = [resultData.imageUrl];
+        } else if (resultData.urls && Array.isArray(resultData.urls)) {
+          newUrls = resultData.urls;
+        } else if (Array.isArray(resultData)) {
+          newUrls = resultData;
         }
-      } else {
-        imageUrls = uploadedImages;
+        finalImageUrls = [...finalImageUrls, ...newUrls];
       }
+
       const carData = {
         name: form.carName,
         description: form.description,
-        basePrice: form.vehiclePrice,
+        basePrice: Number(form.vehiclePrice),
         variant: form.variant,
         numberOfUnits: Number(form.numberOfUnits),
-        status: form.stockAvailability,
+        availability: form.availability,
         specs: {
           engine: form.engineSpec,
           transmission: form.transmissionSpec,
         },
-        images: imageUrls && imageUrls.length > 0 ? imageUrls.map(url => ({ url })) : [],
+        // Send as array of objects with 'url' property
+        images: finalImageUrls.map(url => ({ url })),
       };
+
       await carApi.updateCar(vehicle.id, carData);
       await fetchVehicles();
       Swal.fire({ icon: 'success', title: 'Success', text: 'Vehicle updated successfully!' });
@@ -480,6 +480,7 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
       setSaving(false);
     }
   };
+
   return (
     <div className="p-8 w-full">
       <button
@@ -498,13 +499,37 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
             <p className="text-sm text-gray-400 mt-0.5">Change the Input details below</p>
           </div>
         </div>
-        {/* Upload Images Row */}
-        <div className="grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] gap-4 md:gap-8 py-6 w-full">
+
+        {/* Upload Images Section */}
+        <div className="grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] gap-4 md:gap-8 py-6 w-full border-b border-gray-100">
           <div className="w-full">
-            <p className="text-sm font-medium text-gray-700">Upload Vehicle Images</p>
+            <p className="text-sm font-medium text-gray-700">Vehicle Images</p>
           </div>
           <div className="w-full">
-            <p className="text-sm text-gray-500 mb-2">Click to upload or drag and drop multiple images</p>
+            {/* Existing Images */}
+            {existingImageUrls.length > 0 && (
+              <div className="mb-4">
+                <p className="text-sm text-gray-500 mb-2">Current Images</p>
+                <div className="flex flex-wrap gap-4">
+                  {existingImageUrls.map((url, idx) => (
+                    <div key={`existing-${idx}`} className="relative group">
+                      <img src={url} alt={`Existing ${idx + 1}`} className="max-h-40 rounded-lg object-contain" />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveExistingImage(idx)}
+                        className="absolute top-1 right-1 w-6 h-6 grid place-items-center bg-white/80 rounded-full shadow hover:bg-red-500 hover:text-white transition z-10"
+                        title="Remove image"
+                      >
+                        <span className="leading-none">×</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* New Images Upload Area */}
+            <p className="text-sm text-gray-500 mb-2">Add more images (optional)</p>
             <div
               className={`border-2 border-dashed rounded-xl p-6 sm:p-8 md:p-10 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
                 dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
@@ -514,10 +539,20 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
             >
-              {uploadedImages.length > 0 ? (
+              {newImagePreviews.length > 0 ? (
                 <div className="flex flex-wrap gap-4">
-                  {uploadedImages.map((src, idx) => (
-                    <img key={idx} src={src} alt={`Preview ${idx + 1}`} className="max-h-40 rounded-lg object-contain" />
+                  {newImagePreviews.map((src, idx) => (
+                    <div key={`new-${idx}`} className="relative group">
+                      <img src={src} alt={`New Preview ${idx + 1}`} className="max-h-40 rounded-lg object-contain" />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveNewImage(idx)}
+                        className="absolute top-1 right-1 w-6 h-6 grid place-items-center bg-white/80 rounded-full shadow hover:bg-red-500 hover:text-white transition z-10"
+                        title="Remove image"
+                      >
+                        <span className="leading-none">×</span>
+                      </button>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -540,6 +575,110 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
             />
           </div>
         </div>
+
+        {/* Car Details Row */}
+        <div className="grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] gap-4 md:gap-8 py-6 w-full border-b border-gray-100">
+          <div className="w-full">
+            <p className="text-sm font-medium text-gray-700">Input Car Details</p>
+          </div>
+          <div className="flex flex-col gap-4 w-full">
+            <div className="w-full">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Car Name</label>
+              <input
+                type="text"
+                placeholder="Enter car name"
+                value={form.carName}
+                onChange={handleChange('carName')}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+              />
+            </div>
+            <div className="w-full">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Specifications</label>
+              <textarea
+                placeholder="Enter Message..."
+                rows={4}
+                value={form.description}
+                onChange={handleChange('description')}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400 resize-none"
+              />
+            </div>
+            <div className="w-full">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Price</label>
+              <input
+                type="text"
+                placeholder="Enter amount"
+                value={form.vehiclePrice}
+                onChange={handleChange('vehiclePrice')}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+              />
+            </div>
+            <div className="w-full">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Variant</label>
+              <input
+                type="text"
+                placeholder="Enter car variant"
+                value={form.variant}
+                onChange={handleChange('variant')}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+              />
+            </div>
+            <div className="w-full">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Number of Units</label>
+              <input
+                type="number"
+                min="1"
+                placeholder="Enter number of units"
+                value={form.numberOfUnits}
+                onChange={handleChange('numberOfUnits')}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Car Specifications Row */}
+        <div className="grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] gap-4 md:gap-8 py-6 w-full border-b border-gray-100">
+          <div>
+            <p className="text-sm font-medium text-gray-700">Input Car Specifications</p>
+          </div>
+          <div className="flex flex-col gap-4 w-full">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Engine Specification</label>
+              <textarea
+                placeholder="Enter Message..."
+                rows={4}
+                value={form.engineSpec}
+                onChange={handleChange('engineSpec')}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400 resize-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Transmission Specification</label>
+              <textarea
+                placeholder="Enter Message..."
+                rows={4}
+                value={form.transmissionSpec}
+                onChange={handleChange('transmissionSpec')}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400 resize-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Stock Availability</label>
+              <select
+                value={form.availability || ''}
+                onChange={handleChange('availability')}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-400"
+              >
+                <option value="">Select availability</option>
+                <option value="AVAILABLE">Available</option>
+                <option value="NOT_AVAILABLE">Not Available</option>
+                <option value="COMING_SOON">Coming Soon</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className='flex w-full justify-end'>
           <button
             className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2"
             onClick={handleEditVehicle}
@@ -554,218 +693,12 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
             Save Details
           </button>
         </div>
-
-        <div className="divide-y divide-gray-100">
-          {/* Upload Image Row */}
-          <div className="grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] gap-4 md:gap-8 py-6 w-full">
-            <div>
-              <p className="text-sm font-medium text-gray-700">Upload Vehicle Image</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 mb-2">Click to upload more images</p>
-              <div
-                className={`border-2 border-dashed rounded-xl p-6 sm:p-8 md:p-10 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
-                  dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
-                }`}
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                onDragLeave={() => setDragOver(false)}
-                onDrop={handleDrop}
-              >
-                <UploadCloud size={32} className="text-blue-400" />
-                <p className="text-sm text-gray-500">
-                  <span className="text-blue-500 font-medium">Click to upload</span> or drag and drop
-                </p>
-                <p className="text-xs text-gray-400">SVG, PNG, JPG or GIF (max. 800×400px)</p>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleNewImageFile(e.target.files[0])}
-              />
-
-              {uploadedImages.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-sm font-medium text-gray-700 mb-3">Uploaded Images</p>
-                  <div className="flex flex-wrap gap-4">
-                    {uploadedImages.map((img, idx) => (
-                      <div key={idx} className="flex flex-col items-center gap-1">
-                        <img
-                          src={img}
-                          alt={`Vehicle ${idx + 1}`}
-                          className="w-40 h-28 object-cover rounded-lg border border-gray-200"
-                        />
-                        <button
-                          onClick={() => changeInputRefs.current[idx]?.click()}
-                          className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                        >
-                          Change Image
-                        </button>
-                        <button
-                          onClick={() => handleDeleteImage(idx)}
-                          className="text-sm text-red-500 hover:text-red-700 transition-colors"
-                        >
-                          Delete Image
-                        </button>
-                        <input
-                          ref={(el) => (changeInputRefs.current[idx] = el)}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => handleChangeImageFile(idx, e.target.files[0])}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Car Details Row */}
-          {/* <div className="grid grid-cols-[200px_1fr] gap-8 py-6"> */}
-          <div className="grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] gap-4 md:gap-8 py-6 w-full">
-            <div className="w-full">
-              <p className="text-sm font-medium text-gray-700">Input Car Details</p>
-            </div>
-            <div className="flex flex-col gap-4 w-full">
-              <div className="w-full">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Car Name</label>
-                <input
-                  type="text"
-                  placeholder="Enter car name"
-                  value={form.carName}
-                  onChange={handleChange('carName')}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
-                />
-              </div>
-              <div className="w-full">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Specifications</label>
-                <textarea
-                  placeholder="Enter Message..."
-                  rows={4}
-                  value={form.description}
-                  onChange={handleChange('description')}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400 resize-none"
-                />
-              </div>
-              <div className="w-full">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Price</label>
-                <input
-                  type="text"
-                  placeholder="Enter amount"
-                  value={form.vehiclePrice}
-                  onChange={handleChange('vehiclePrice')}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
-                />
-              </div>
-              <div className="w-full">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Variant</label>
-                <input
-                  type="text"
-                  placeholder="Enter car variant"
-                  value={form.variant}
-                  onChange={handleChange('variant')}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
-                />
-              </div>
-              <div className="w-full">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Number of Units</label>
-                <input
-                  type="number"
-                  min="1"
-                  placeholder="Enter number of units"
-                  value={form.numberOfUnits}
-                  onChange={handleChange('numberOfUnits')}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Car Specifications Row */}
-          <div className="grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] gap-4 md:gap-8 py-6 w-full">
-            <div>
-              <p className="text-sm font-medium text-gray-700">Input Car Specifications</p>
-            </div>
-            <div className="flex flex-col gap-4 w-full">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Engine Specification</label>
-                <textarea
-                  placeholder="Enter Message..."
-                  rows={4}
-                  value={form.engineSpec}
-                  onChange={handleChange('engineSpec')}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400 resize-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Transmission Specification</label>
-                <textarea
-                  placeholder="Enter Message..."
-                  rows={4}
-                  value={form.transmissionSpec}
-                  onChange={handleChange('transmissionSpec')}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400 resize-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Stock Availability</label>
-                <select
-                  value={form.availability || ''}
-                  onChange={handleChange('availability')}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-400"
-                >
-                  <option value="">Select availability</option>
-                  <option value="AVAILABLE">Available</option>
-                  <option value="NOT_AVAILABLE">Not Available</option>
-                  <option value="COMING_SOON">Coming Soon</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
+    </div>
   );
 };
 
-import * as carApi from '../../api/cars';
-
-// Fetch a single car by ID
-async function fetchCarById(carId) {
-  try {
-    const car = await carApi.getCar(carId);
-    return car;
-  } catch (e) {
-    alert(e.message || 'Failed to fetch car');
-    return null;
-  }
-}
-
-// Update a car by ID
-async function updateCarById(carId, carData) {
-  try {
-    const updated = await carApi.updateCar(carId, carData);
-    return updated;
-  } catch (e) {
-    alert(e.message || 'Failed to update car');
-    return null;
-  }
-}
-
-// Delete a car by ID
-async function deleteCarById(carId) {
-  try {
-    await carApi.deleteCar(carId);
-    return true;
-  } catch (e) {
-    alert(e.message || 'Failed to delete car');
-    return false;
-  }
-}
-
+// ---------- Main CarManagement Component ----------
 const CarManagement = () => {
   const { inventory, addStock, removeStock, setStock } = useCarContext();
   const [vehicles, setVehicles] = useState([]);
@@ -780,8 +713,7 @@ const CarManagement = () => {
   const [pageSize, setPageSize] = useState(10);
   const [pageSizeOpen, setPageSizeOpen] = useState(false);
 
-  // Make fetchVehicles accessible in component scope
-  async function fetchVehicles() {
+  const fetchVehicles = async () => {
     setLoading(true);
     setError(null);
     try {
@@ -797,7 +729,8 @@ const CarManagement = () => {
     } finally {
       setLoading(false);
     }
-  }
+  };
+
   useEffect(() => {
     fetchVehicles();
   }, []);
@@ -826,7 +759,6 @@ const CarManagement = () => {
   };
 
   return (
-    // <div className="p-8 w-full">
     <div className="p-4 sm:p-6 md:p-8 w-full">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
@@ -910,6 +842,15 @@ const CarManagement = () => {
           ) : (
             pageItems.map((vehicle) => {
               const status = statusConfig[vehicle.availability] || statusConfig['AVAILABLE'];
+              // Determine image URL to display
+              let imageUrl = '/empty-cars.svg';
+              if (vehicle.primaryImageUrl) {
+                imageUrl = vehicle.primaryImageUrl;
+              } else if (vehicle.images && Array.isArray(vehicle.images) && vehicle.images[0]) {
+                imageUrl = vehicle.images[0].url;
+              } else if (vehicle.imageUrls && Array.isArray(vehicle.imageUrls) && vehicle.imageUrls[0]) {
+                imageUrl = vehicle.imageUrls[0];
+              }
               return (
                 <div key={vehicle.id} className="border border-gray-200 rounded-xl overflow-hidden">
                   {/* Card Top */}
@@ -917,7 +858,7 @@ const CarManagement = () => {
                     {/* Image */}
                     <div className="w-full md:w-auto flex-shrink-0">
                       <img
-                        src={vehicle.images?.[0]?.url || '/empty-cars.svg'}
+                        src={imageUrl}
                         alt={vehicle.name}
                         className="w-full md:w-44 h-32 object-cover rounded-lg"
                       />
@@ -938,43 +879,31 @@ const CarManagement = () => {
 
                       {/* Specs Grid */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4 w-full">
-
-  <div className="flex flex-col w-full">
-    <p className="text-sm text-gray-400">Base Price</p>
-    <p className="text-sm font-bold text-gray-900">
-      ₦{Number(vehicle.basePrice).toLocaleString()}
-    </p>
-  </div>
-
-  <div className="flex flex-col w-full">
-    <p className="text-sm text-gray-400">Variant</p>
-    <p className="text-sm font-bold text-gray-900">
-      {vehicle.variant || '-'}
-    </p>
-  </div>
-
-  <div className="flex flex-col w-full">
-    <p className="text-sm text-gray-400">Engine</p>
-    <p className="text-sm font-bold text-gray-900">
-      {vehicle.specs?.engine || '-'}
-    </p>
-  </div>
-
-  <div className="flex flex-col w-full">
-    <p className="text-sm text-gray-400">Transmission</p>
-    <p className="text-sm font-bold text-gray-900">
-      {vehicle.specs?.transmission || '-'}
-    </p>
-  </div>
-
-  {/* <div className="flex flex-col w-full">
-    <p className="text-sm text-gray-400">Fuel Type</p>
-    <p className="text-sm font-bold text-gray-900">
-      {vehicle.specs?.fuelType || '-'}
-    </p>
-  </div> */}
-
-</div>
+                        <div className="flex flex-col w-full">
+                          <p className="text-sm text-gray-400">Base Price</p>
+                          <p className="text-sm font-bold text-gray-900">
+                            ₦{Number(vehicle.basePrice).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="flex flex-col w-full">
+                          <p className="text-sm text-gray-400">Variant</p>
+                          <p className="text-sm font-bold text-gray-900">
+                            {vehicle.variant || '-'}
+                          </p>
+                        </div>
+                        <div className="flex flex-col w-full">
+                          <p className="text-sm text-gray-400">Engine</p>
+                          <p className="text-sm font-bold text-gray-900">
+                            {vehicle.specs?.engine || '-'}
+                          </p>
+                        </div>
+                        <div className="flex flex-col w-full">
+                          <p className="text-sm text-gray-400">Transmission</p>
+                          <p className="text-sm font-bold text-gray-900">
+                            {vehicle.specs?.transmission || '-'}
+                          </p>
+                        </div>
+                      </div>
 
                       {/* Inventory Controls */}
                       <div className="flex flex-col md:flex-row items-start gap-3 mt-4 w-full">
@@ -1035,18 +964,18 @@ const CarManagement = () => {
                       className="flex items-center gap-2 border border-gray-200 rounded-lg px-5 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full md:w-auto"
                       onClick={async () => {
                         if (window.confirm('Are you sure you want to delete this vehicle?')) {
-                          const success = await deleteCarById(vehicle.id);
-                          if (success) {
+                          try {
+                            await carApi.deleteCar(vehicle.id);
                             Swal.fire({ icon: 'success', title: 'Success', text: 'Vehicle deleted successfully!' });
                             await fetchVehicles();
-                          } else {
-                            Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to delete vehicle' });
+                          } catch (e) {
+                            Swal.fire({ icon: 'error', title: 'Failed', text: e.message || 'Failed to delete vehicle' });
                           }
                         }
                       }}
                     >
                       <Trash2 size={14} />
-                      DeleteVehicle
+                      Delete Vehicle
                     </button>
                   </div>
                 </div>
