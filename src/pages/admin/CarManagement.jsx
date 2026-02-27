@@ -57,13 +57,26 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
     Array.from(files).forEach((file) => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        newImages.push(e.target.result);
+        newImages.push({ src: e.target.result, file });
         if (newImages.length === files.length) {
           setImagePreviews((prev) => [...prev, ...newImages]);
         }
       };
       reader.readAsDataURL(file);
     });
+  };
+
+  // Remove image from preview and input
+  const handleRemoveImage = (idx) => {
+    setImagePreviews((prev) => prev.filter((_, i) => i !== idx));
+    if (fileInputRef.current) {
+      // Remove file from input field
+      const dt = new DataTransfer();
+      Array.from(fileInputRef.current.files).forEach((file, i) => {
+        if (i !== idx) dt.items.add(file);
+      });
+      fileInputRef.current.files = dt.files;
+    }
   };
 
   const handleDrop = (e) => {
@@ -83,8 +96,19 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
     try {
       let imageUrls = [];
       if (imagePreviews.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
-        const uploadResult = await uploadImagesToCloudinary(Array.from(fileInputRef.current.files));
-        imageUrls = uploadResult.urls || uploadResult;
+        // Only upload files that are still in imagePreviews
+        const filesToUpload = imagePreviews.map(img => img.file);
+        const uploadResult = await uploadImagesToCloudinary(filesToUpload);
+        // Support both single and multiple image upload responses
+        if (uploadResult.imageUrls && Array.isArray(uploadResult.imageUrls)) {
+          imageUrls = uploadResult.imageUrls;
+        } else if (uploadResult.imageUrl) {
+          imageUrls = [uploadResult.imageUrl];
+        } else if (uploadResult.urls && Array.isArray(uploadResult.urls)) {
+          imageUrls = uploadResult.urls;
+        } else if (Array.isArray(uploadResult)) {
+          imageUrls = uploadResult;
+        }
       }
       const carData = {
         name: form.carName,
@@ -156,8 +180,18 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
               >
                 {imagePreviews.length > 0 ? (
                   <div className="flex flex-wrap gap-4">
-                    {imagePreviews.map((src, idx) => (
-                      <img key={idx} src={src} alt={`Preview ${idx + 1}`} className="max-h-40 rounded-lg object-contain" />
+                    {imagePreviews.map((img, idx) => (
+                      <div key={idx} className="relative group">
+                        <img src={img.src} alt={`Preview ${idx + 1}`} className="max-h-40 rounded-lg object-contain" />
+                        <button
+                          type="button"
+                          onClick={e => { e.stopPropagation(); handleRemoveImage(idx); }}
+                          className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 shadow group-hover:opacity-100 opacity-80 hover:bg-red-500 hover:text-white transition-opacity z-10"
+                          title="Remove image"
+                        >
+                          <span style={{fontWeight:'bold',fontSize:'1.1em'}}>×</span>
+                        </button>
+                      </div>
                     ))}
                   </div>
                 ) : (
@@ -367,7 +401,16 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
       let imageUrls = [];
       if (uploadedImages.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
         const uploadResult = await uploadImagesToCloudinary(fileInputRef.current.files);
-        imageUrls = uploadResult.urls || uploadResult;
+        // Support both single and multiple image upload responses
+        if (uploadResult.imageUrls && Array.isArray(uploadResult.imageUrls)) {
+          imageUrls = uploadResult.imageUrls;
+        } else if (uploadResult.imageUrl) {
+          imageUrls = [uploadResult.imageUrl];
+        } else if (uploadResult.urls && Array.isArray(uploadResult.urls)) {
+          imageUrls = uploadResult.urls;
+        } else if (Array.isArray(uploadResult)) {
+          imageUrls = uploadResult;
+        }
       } else {
         imageUrls = uploadedImages;
       }
@@ -381,6 +424,7 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
           engine: form.engineSpec,
           transmission: form.transmissionSpec,
         },
+        images: imageUrls && imageUrls.length > 0 ? imageUrls.map(url => ({ url })) : [],
       };
       await carApi.updateCar(vehicle.id, carData);
       await fetchVehicles();

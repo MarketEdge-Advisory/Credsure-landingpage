@@ -4,8 +4,8 @@
 export async function uploadImagesToCloudinary(files) {
   const formData = new FormData();
   Array.from(files).forEach((file) => {
-    formData.append('file', file);
-  }); // This is correct for FilesInterceptor('file') in backend
+    formData.append('files', file);
+  }); // Changed to 'files' for backend compatibility
   const API_BASE = 'https://credsure-backend-1564d84ae428.herokuapp.com/api/upload/images';
   // Get access token from sessionStorage (adjust if you store it elsewhere)
   let accessToken = '';
