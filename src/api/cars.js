@@ -7,7 +7,7 @@ const API_BASE = 'https://credsure-backend-1564d84ae428.herokuapp.com/api/cars';
 function getAuthHeaders(extra = {}) {
   let accessToken = '';
   try {
-    const user = JSON.parse(sessionStorage.getItem('admin_user'));
+    const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
     accessToken = user?.accessToken || user?.data?.accessToken || '';
   } catch {}
   return accessToken

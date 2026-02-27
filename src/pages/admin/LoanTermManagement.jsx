@@ -14,6 +14,24 @@ const defaultTerms = [
 ];
 
 const LoanTermManagement = () => {
+      // Refresh tenures after create/update/delete
+      const refreshTenures = async () => {
+        setLoading(true);
+        try {
+          const data = await getLoanTenures();
+          setTerms(data.tenures);
+          setError(null);
+        } catch (e) {
+          setError(e.message || 'Failed to load loan tenures');
+        } finally {
+          setLoading(false);
+        }
+      };
+    // ...existing code...
+    const handleCancel = () => {
+      setShowModal(false);
+      setDuration('');
+    };
   const [terms, setTerms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -69,31 +87,29 @@ const LoanTermManagement = () => {
   const handleCreate = async () => {
     setLoading(true);
     try {
-      if (duration.trim()) {
-        await addLoanTenure(duration.trim());
-        await refreshTenures();
-        Swal.fire({ icon: 'success', title: 'Created!', text: 'Loan tenure added successfully.' });
+      const months = parseInt(duration.trim(), 10);
+      if (!duration.trim() || isNaN(months) || months < 1) {
+        setLoading(false);
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Input',
+          text: 'Please enter a valid integer greater than or equal to 1 for months.',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#e53e3e',
+        });
+        return;
       }
+      await addLoanTenure(months);
+      await refreshTenures();
+      Swal.fire({ icon: 'success', title: 'Created!', text: 'Loan tenure added successfully.' });
       setError(null);
     } catch (e) {
       setError(e.message || 'Failed to add loan tenure');
       Swal.fire({ icon: 'error', title: 'Create Failed', text: e.message || 'Failed to add loan tenure.' });
     } finally {
       setLoading(false);
-      setDuration('');
       setShowModal(false);
     }
-  };
-  const refreshTenures = async () => {
-    try {
-      const data = await getLoanTenures();
-      setTerms(data.tenures);
-    } catch {}
-  };
-
-  const handleCancel = () => {
-    setDuration('');
-    setShowModal(false);
   };
 
   return (
@@ -200,7 +216,7 @@ const LoanTermManagement = () => {
         </div>
       )}
     </div>
-  );
+  )
 };
 
 export default LoanTermManagement;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { updateCalculatorConfig } from '../../api/adminConfig';
+import Swal from 'sweetalert2';
 import { Download, CalendarDays, ArrowDown, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 
@@ -65,8 +66,22 @@ const CalculatorInputMgt = () => {
                 insuranceCost: Number(insuranceCost),
               });
               setSuccess('Calculator input updated successfully.');
+              Swal.fire({
+                icon: 'success',
+                title: 'Calculator Updated!',
+                text: 'Calculator input updated successfully.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#2d9de5',
+              });
             } catch (e) {
               setError(e.message || 'Failed to update.');
+              Swal.fire({
+                icon: 'error',
+                title: 'Update Failed',
+                text: e.message || 'Failed to update.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#e53e3e',
+              });
             } finally {
               setLoading(false);
             }
@@ -89,57 +104,57 @@ const CalculatorInputMgt = () => {
               <div className={`mt-4 text-sm font-medium ${error ? 'text-red-600' : 'text-green-600'}`}>{error || success}</div>
             )}
           </div>
-        </form>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-[200px_1fr] md:gap-8">
-          <p className="text-sm font-medium text-gray-700 pt-2">Input calculator details</p>
-          <div className="flex flex-col gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Update down payment (%)</label>
-              <input
-                type="text"
-                placeholder="Enter down payment"
-                value={downPayment}
-                onChange={(e) => setDownPayment(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Update processing fee (%)</label>
-              <input
-                type="text"
-                placeholder="Enter processing fee"
-                value={processingFee}
-                onChange={(e) => setProcessingFee(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Update insurance cost</label>
-              <input
-                type="text"
-                placeholder="Enter insurance cost"
-                value={insuranceCost}
-                onChange={(e) => setInsuranceCost(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
-              />
-            </div>
-            {/* Update button for mobile (bottom, full width) */}
-            <button
-              type="submit"
-              className="block md:hidden w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50"
-              disabled={loading}
-            >
-              {loading ? 'Updating...' : 'Update Details'}
-            </button>
-            {/* Feedback messages for mobile */}
-            <div className="block md:hidden">
-              {(error || success) && (
-                <div className={`mt-4 text-sm font-medium ${error ? 'text-red-600' : 'text-green-600'}`}>{error || success}</div>
-              )}
+          {/* Input fields and mobile button inside form */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[200px_1fr] md:gap-8">
+            <p className="text-sm font-medium text-gray-700 pt-2">Input calculator details</p>
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Update down payment (%)</label>
+                <input
+                  type="text"
+                  placeholder="Enter down payment"
+                  value={downPayment}
+                  onChange={(e) => setDownPayment(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Update processing fee (%)</label>
+                <input
+                  type="text"
+                  placeholder="Enter processing fee"
+                  value={processingFee}
+                  onChange={(e) => setProcessingFee(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Update insurance cost</label>
+                <input
+                  type="text"
+                  placeholder="Enter insurance cost"
+                  value={insuranceCost}
+                  onChange={(e) => setInsuranceCost(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                />
+              </div>
+              {/* Update button for mobile (bottom, full width) */}
+              <button
+                type="submit"
+                className="block md:hidden w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50"
+                disabled={loading}
+              >
+                {loading ? 'Updating...' : 'Update Details'}
+              </button>
+              {/* Feedback messages for mobile */}
+              <div className="block md:hidden">
+                {(error || success) && (
+                  <div className={`mt-4 text-sm font-medium ${error ? 'text-red-600' : 'text-green-600'}`}>{error || success}</div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

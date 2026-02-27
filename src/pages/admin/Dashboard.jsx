@@ -165,8 +165,8 @@ const RecentApplications = () => {
     setLoading(true);
     financeApplicationsApi.getAll()
       .then((res) => {
-        // If backend returns array in data, use it; else wrap single object in array
-        let data = res?.data;
+        // Extract items array from backend response
+        let data = res?.data?.items;
         if (!Array.isArray(data)) data = data ? [data] : [];
         setApplications(data);
       })

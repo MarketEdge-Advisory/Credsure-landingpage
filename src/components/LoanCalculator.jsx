@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ArrowDown, ChevronDown, X } from 'lucide-react';
 import { useCarContext } from '../context/CarContext';
 import Swal from 'sweetalert2';
+// Remove adminConfig import
 
 const LoanCalculator = () => {
   const { selectedCar } = useCarContext();
@@ -11,7 +12,7 @@ const LoanCalculator = () => {
   const [vehiclePrice, setVehiclePrice] = useState(0);
   const [loanTenure, setLoanTenure] = useState('12'); // default 12 months
   const [downPayment, setDownPayment] = useState(0);
-  const interestRate = 10; // 10% annual interest rate
+  // const interestRate = 10; // 10% annual interest rate
   const [showModal, setShowModal] = useState(false);
   const [showEmploymentDropdown, setShowEmploymentDropdown] = useState(false);
  const [formData, setFormData] = useState({
@@ -27,15 +28,32 @@ const [formErrors, setFormErrors] = useState({});
 const [isSubmitting, setIsSubmitting] = useState(false);
   const employmentDropdownRef = useRef(null);
 
-  const tenures = [
-    { label: '6 months', value: 6 },
-    { label: '12 months', value: 12 },
-    { label: '18 months', value: 18 },
-    { label: '24 months', value: 24 },
-    { label: '36 months', value: 36 },
-  ];
+  const [tenures, setTenures] = useState([]);
+  const [interestRate, setInterestRate] = useState(10);
+  const [calculatorConfig, setCalculatorConfig] = useState({ downPaymentPct: 10, processingFeePct: 5, insuranceCost: 1000000 });
 
-  // Fetch cars from backend
+  // Fetch finance config from backend
+  useEffect(() => {
+    const fetchFinanceConfig = async () => {
+      try {
+        const res = await fetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/public/finance');
+        const json = await res.json();
+        const data = json?.data || {};
+        setTenures(Array.isArray(data.loanTenuresInMonths) ? data.loanTenuresInMonths.map(m => ({ label: `${m} months`, value: m })) : []);
+        setInterestRate(data.interestRate?.annualRatePct || 10);
+        setCalculatorConfig({
+          downPaymentPct: data.calculatorConfig?.downPaymentPct ?? 10,
+          processingFeePct: data.calculatorConfig?.processingFeePct ?? 5,
+          insuranceCost: data.calculatorConfig?.insuranceCost ?? 1000000,
+        });
+      } catch (err) {
+        setTenures([]);
+        setInterestRate(10);
+        setCalculatorConfig({ downPaymentPct: 10, processingFeePct: 5, insuranceCost: 1000000 });
+      }
+    };
+    fetchFinanceConfig();
+  }, []);
   useEffect(() => {
     const fetchCars = async () => {
       try {
@@ -56,14 +74,15 @@ const [isSubmitting, setIsSubmitting] = useState(false);
       setSelectedVehicle(selectedCar.name || '');
       const price = selectedCar.basePrice || selectedCar.price || 0;
       setVehiclePrice(price);
-      setDownPayment(price * 0.1); // 10%
+      // Use backend downPaymentPct
+      setDownPayment(price * (calculatorConfig.downPaymentPct / 100));
       setCarId(selectedCar.id || '');
     }
   }, [selectedCar]);
 
   const [monthlyPayment, setMonthlyPayment] = useState(0);
 
-  // Calculate monthly payment whenever vehiclePrice, downPayment, or loanTenure changes
+  // Calculate monthly payment whenever vehiclePrice, downPayment, loanTenure, or interestRate changes
   useEffect(() => {
     if (vehiclePrice && loanTenure) {
       const loanAmount = vehiclePrice - (downPayment || 0);
@@ -77,7 +96,7 @@ const [isSubmitting, setIsSubmitting] = useState(false);
         setMonthlyPayment(0);
       }
     }
-  }, [vehiclePrice, downPayment, loanTenure]);
+  }, [vehiclePrice, downPayment, loanTenure, interestRate]);
 
   // Click outside handler for employment dropdown
   useEffect(() => {

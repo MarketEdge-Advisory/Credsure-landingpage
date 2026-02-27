@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getInterestRateHistory, updateInterestRate } from '../../api/adminConfig';
+import Swal from 'sweetalert2';
 import { Download, CalendarDays, ArrowDownUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 
@@ -27,12 +28,13 @@ const InterestRateManagement = () => {
     setError('');
     getInterestRateHistory()
       .then((res) => {
-        const arr = Array.isArray(res.data) ? res.data : [];
+        // Extract items array from response
+        const arr = Array.isArray(res?.data?.items) ? res.data.items : [];
         setHistoryData(arr.map((item, idx) => ({
           id: item.id || idx,
-          date: item.updatedAt ? new Date(item.updatedAt).toLocaleString() : '',
-          prevRate: item.previousRate ? `${item.previousRate}%` : '',
-          updatedRate: item.updatedRate ? `${item.updatedRate}%` : '',
+          date: item.createdAt ? new Date(item.createdAt).toLocaleString() : '',
+          prevRate: item.previousRatePct !== null && item.previousRatePct !== undefined ? `${item.previousRatePct}%` : '',
+          updatedRate: item.newRatePct !== null && item.newRatePct !== undefined ? `${item.newRatePct}%` : '',
         })));
       })
       .catch((e) => setError(e.message || 'Failed to load history'))
@@ -69,9 +71,23 @@ const InterestRateManagement = () => {
             try {
               await updateInterestRate(Number(interestRate));
               setUpdateSuccess('Interest rate updated successfully.');
+              Swal.fire({
+                icon: 'success',
+                title: 'Interest Rate Updated!',
+                text: 'Interest rate updated successfully.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#2d9de5',
+              });
               fetchHistory();
             } catch (e) {
               setUpdateError(e.message || 'Failed to update.');
+              Swal.fire({
+                icon: 'error',
+                title: 'Update Failed',
+                text: e.message || 'Failed to update.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#e53e3e',
+              });
             } finally {
               setUpdateLoading(false);
             }
@@ -85,45 +101,53 @@ const InterestRateManagement = () => {
           <div className="hidden md:flex flex-col items-end gap-2">
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50"
+              className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
               disabled={updateLoading}
             >
+              {updateLoading && <span className="animate-spin h-5 w-5 border-2 border-white border-t-blue-600 rounded-full inline-block"></span>}
               {updateLoading ? 'Updating...' : 'Update Rates'}
             </button>
             {(updateError || updateSuccess) && (
               <div className={`mt-4 text-sm font-medium ${updateError ? 'text-red-600' : 'text-green-600'}`}>{updateError || updateSuccess}</div>
             )}
           </div>
-          {/* ...existing code... */}
-        </form>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-[200px_1fr] md:gap-8">
-          <p className="text-sm font-medium text-gray-700 pt-2">Input rate details</p>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Interest Rate (%)</label>
-            <input
-              type="text"
-              placeholder="Input interest rate"
-              value={interestRate}
-              onChange={(e) => setInterestRate(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
-            />
-            {/* Update button for mobile (bottom, full width) */}
-            <button
-              type="submit"
-              className="block md:hidden w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50"
-              disabled={updateLoading}
-            >
-              {updateLoading ? 'Updating...' : 'Update Rates'}
-            </button>
-            {/* Feedback messages for mobile */}
-            <div className="block md:hidden">
-              {(updateError || updateSuccess) && (
-                <div className={`mt-4 text-sm font-medium ${updateError ? 'text-red-600' : 'text-green-600'}`}>{updateError || updateSuccess}</div>
-              )}
+          {/* Input and mobile button inside form */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[200px_1fr] md:gap-8">
+            <p className="text-sm font-medium text-gray-700 pt-2">Input rate details</p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Interest Rate (%)</label>
+              <input
+                type="number"
+                min="1"
+                max="100"
+                step="0.01"
+                placeholder="Input interest rate"
+                value={interestRate}
+                onChange={(e) => setInterestRate(e.target.value)}
+                className={`w-full border rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400 ${updateError ? 'border-red-500' : 'border-gray-200'}`}
+              />
+              {/* Update button for mobile (bottom, full width) */}
+              <button
+                type="submit"
+                disabled={updateLoading}
+                className={`md:hidden w-full mt-4 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-center transition-colors
+                  ${updateLoading ? 'bg-blue-400 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}
+                  ${updateError ? 'border-red-500' : 'border-gray-200'}`}
+              >
+                {updateLoading && (
+                  <span className="animate-spin h-5 w-5 border-2 border-white border-t-blue-600 rounded-full inline-block"></span>
+                )}
+                {updateLoading ? 'Updating...' : 'Update Rates'}
+              </button>
+              {/* Feedback messages for mobile */}
+              <div className="block md:hidden">
+                {(updateError || updateSuccess) && (
+                  <div className={`mt-4 text-sm font-medium ${updateError ? 'text-red-600' : 'text-green-600'}`}>{updateError || updateSuccess}</div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </form>
       </div>
 
       {/* History Card */}

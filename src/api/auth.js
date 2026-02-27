@@ -34,8 +34,11 @@ export async function resetPassword({ token, newPassword }) {
 }
 
 export async function getMe() {
+  const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
+  const token = user?.accessToken || '';
   const res = await fetch(`${API_BASE}/me`, {
     method: 'GET',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
     credentials: 'include',
   });
   if (!res.ok) throw new Error('Get user info failed');
@@ -43,9 +46,14 @@ export async function getMe() {
 }
 
 export async function changePassword({ oldPassword, newPassword }) {
+  const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
+  const token = user?.accessToken || '';
   const res = await fetch(`${API_BASE}/change-password`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify({ oldPassword, newPassword })
   });
   if (!res.ok) throw new Error('Change password failed');
