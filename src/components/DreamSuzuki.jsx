@@ -82,7 +82,7 @@ const DreamSuzuki = () => {
           {
             id: 2,
             image: '/Dzire2.svg',
-            title: 'Get Flexible Payment Options for Your Suzuki',
+            title: 'Drive Your Dream Suzuki Today. Pay Monthly from',
             price: cars[1]?.basePrice ? `₦${cars[1].basePrice.toLocaleString()}` : (cars[1]?.bestPrice ? `₦${cars[1].bestPrice.toLocaleString()}` : ''),
             buttonText: 'Check Your Monthly Payment',
             isMandatory: false
@@ -90,7 +90,7 @@ const DreamSuzuki = () => {
           {
             id: 3,
             image: '/Dzire3.svg',
-            title: 'Get Flexible Payment Options for Your Suzuki',
+             title: 'Drive Your Dream Suzuki Today. Pay Monthly from',
             price: cars[2]?.basePrice ? `₦${cars[2].basePrice.toLocaleString()}` : (cars[2]?.bestPrice ? `₦${cars[2].bestPrice.toLocaleString()}` : ''),
             buttonText: 'Check Your Monthly Payment',
             isMandatory: false

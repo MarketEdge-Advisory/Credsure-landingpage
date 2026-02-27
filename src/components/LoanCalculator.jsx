@@ -87,10 +87,18 @@ const [isSubmitting, setIsSubmitting] = useState(false);
     if (vehiclePrice && loanTenure) {
       const loanAmount = vehiclePrice - (downPayment || 0);
       const months = parseInt(loanTenure, 10);
-      const monthlyInterest = interestRate / 100 / 12;
+      const rate = interestRate / 100;
       if (months > 0 && loanAmount >= 0) {
-        const payment = (loanAmount * monthlyInterest * Math.pow(1 + monthlyInterest, months)) /
-                        (Math.pow(1 + monthlyInterest, months) - 1);
+        let payment = 0;
+        if (months <= 6) {
+          // Simple formula for short tenures: add total interest, divide by months
+          payment = ((loanAmount * (1 + rate)) / months);
+        } else {
+          // Standard amortization formula for longer tenures
+          const monthlyInterest = rate / 12;
+          payment = (loanAmount * monthlyInterest * Math.pow(1 + monthlyInterest, months)) /
+                    (Math.pow(1 + monthlyInterest, months) - 1);
+        }
         setMonthlyPayment(Math.round(payment));
       } else {
         setMonthlyPayment(0);
