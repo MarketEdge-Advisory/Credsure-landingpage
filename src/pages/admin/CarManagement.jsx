@@ -50,6 +50,28 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
     return errors;
   };
 
+  // Handle multiple image files
+  const handleNewImageFiles = (files) => {
+    if (!files || files.length === 0) return;
+    const newImages = [];
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        newImages.push(e.target.result);
+        if (newImages.length === files.length) {
+          setImagePreviews((prev) => [...prev, ...newImages]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    handleNewImageFiles(e.dataTransfer.files);
+  };
+
   const handleAddVehicle = async () => {
     setFormError('');
     const errors = validateForm();
@@ -59,10 +81,10 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
       return;
     }
     try {
-      let imageUrl = '';
+      let imageUrls = [];
       if (imagePreviews.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
-        const uploadResult = await uploadImagesToCloudinary([fileInputRef.current.files[0]]);
-        imageUrl = uploadResult?.data?.imageUrl;
+        const uploadResult = await uploadImagesToCloudinary(Array.from(fileInputRef.current.files));
+        imageUrls = uploadResult.urls || uploadResult;
       }
       const carData = {
         name: form.carName,
@@ -74,7 +96,7 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
           engine: form.engineSpec,
           transmission: form.transmissionSpec,
         },
-        images: imageUrl ? [{ url: imageUrl }] : [],
+        images: imageUrls && imageUrls.length > 0 ? imageUrls.map(url => ({ url })) : [],
       };
       await carApi.createCar(carData);
       await fetchVehicles();
@@ -116,6 +138,48 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
           </div>
         </div>
         <div className="divide-y divide-gray-100">
+          {/* Upload Images Row */}
+          <div className="grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] gap-4 md:gap-8 py-6 w-full">
+            <div className="w-full">
+              <p className="text-sm font-medium text-gray-700">Upload Vehicle Images</p>
+            </div>
+            <div className="w-full">
+              <p className="text-sm text-gray-500 mb-2">Click to upload or drag and drop multiple images</p>
+              <div
+                className={`border-2 border-dashed rounded-xl p-6 sm:p-8 md:p-10 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
+                  dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                }`}
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={handleDrop}
+              >
+                {imagePreviews.length > 0 ? (
+                  <div className="flex flex-wrap gap-4">
+                    {imagePreviews.map((src, idx) => (
+                      <img key={idx} src={src} alt={`Preview ${idx + 1}`} className="max-h-40 rounded-lg object-contain" />
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <UploadCloud size={32} className="text-blue-400" />
+                    <p className="text-sm text-gray-500">
+                      <span className="text-blue-500 font-medium">Click to upload</span> or drag and drop
+                    </p>
+                    <p className="text-xs text-gray-400">SVG, PNG, JPG or GIF (max. 800×400px)</p>
+                  </>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => handleNewImageFiles(e.target.files)}
+              />
+            </div>
+          </div>
           {/* Car Details Row */}
           <div className="grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] gap-4 md:gap-8 py-6 w-full">
             <div>

@@ -70,15 +70,32 @@ const DreamSuzuki = () => {
           description: car.description,
           price: car.basePrice || car.bestPrice || car.price
         })));
-        setPromotionalSlides(cars.slice(0, 3).map(car => ({
-          id: car.id,
-          image: (Array.isArray(car.images) && car.images[0]?.url) ? car.images[0].url : '/empty-cars.svg',
-          title: car.name,
-          price: car.basePrice ? `₦${car.basePrice.toLocaleString()}` : (car.bestPrice ? `₦${car.bestPrice.toLocaleString()}` : ''),
-          description: car.description,
-          buttonText: 'Check Your Monthly Payment',
-          isMandatory: false
-        })));
+        setPromotionalSlides([
+          {
+            id: 1,
+            image: '/Dzire1.svg',
+            title: 'Drive Your Dream Suzuki Today. Pay Monthly from',
+            price: cars[0]?.basePrice ? `₦${cars[0].basePrice.toLocaleString()}` : (cars[0]?.bestPrice ? `₦${cars[0].bestPrice.toLocaleString()}` : ''),
+            buttonText: 'Check Your Monthly Payment',
+            isMandatory: false
+          },
+          {
+            id: 2,
+            image: '/Dzire2.svg',
+            title: 'Get Flexible Payment Options for Your Suzuki',
+            price: cars[1]?.basePrice ? `₦${cars[1].basePrice.toLocaleString()}` : (cars[1]?.bestPrice ? `₦${cars[1].bestPrice.toLocaleString()}` : ''),
+            buttonText: 'Check Your Monthly Payment',
+            isMandatory: false
+          },
+          {
+            id: 3,
+            image: '/Dzire3.svg',
+            title: 'Get Flexible Payment Options for Your Suzuki',
+            price: cars[2]?.basePrice ? `₦${cars[2].basePrice.toLocaleString()}` : (cars[2]?.bestPrice ? `₦${cars[2].bestPrice.toLocaleString()}` : ''),
+            buttonText: 'Check Your Monthly Payment',
+            isMandatory: false
+          }
+        ]);
       } catch (e) {
         // fallback or error handling
       }
