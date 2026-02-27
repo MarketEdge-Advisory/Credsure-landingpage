@@ -28,6 +28,7 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
     modelYear: '',
     basePrice: '',
     variant: '',
+    numberOfUnits: '',
     engineSpec: '',
     transmissionSpec: 'Manual',
     availability: '',
@@ -35,6 +36,7 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
   });
   const [formError, setFormError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
+  const [saving, setSaving] = useState(false);
 
   const validateForm = () => {
     const errors = {};
@@ -42,6 +44,7 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
     if (!form.description.trim()) errors.description = 'Description is required.';
     if (!form.basePrice || isNaN(Number(form.basePrice)) || Number(form.basePrice) < 0.01) errors.basePrice = 'Base price must be a number greater than 0.01.';
     if (!form.variant.trim()) errors.variant = 'Variant is required.';
+    if (!form.numberOfUnits || isNaN(Number(form.numberOfUnits)) || Number(form.numberOfUnits) < 1) errors.numberOfUnits = 'Number of units must be at least 1.';
     if (!form.engineSpec.trim()) errors.engineSpec = 'Engine specification is required.';
     if (!form.transmissionSpec.trim()) errors.transmissionSpec = 'Transmission is required.';
     if (!form.availability) errors.availability = 'Availability is required.';
@@ -93,12 +96,14 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
       setFormError('Please correct the errors below.');
       return;
     }
+    setSaving(true);
     try {
       let imageUrls = [];
+      let uploadResult = null;
       if (imagePreviews.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
         // Only upload files that are still in imagePreviews
         const filesToUpload = imagePreviews.map(img => img.file);
-        const uploadResult = await uploadImagesToCloudinary(filesToUpload);
+        uploadResult = await uploadImagesToCloudinary(filesToUpload);
         // Support both single and multiple image upload responses
         if (uploadResult.imageUrls && Array.isArray(uploadResult.imageUrls)) {
           imageUrls = uploadResult.imageUrls;
@@ -110,24 +115,39 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
           imageUrls = uploadResult;
         }
       }
+      // Debug log
+      console.log('Image upload result:', uploadResult);
+      console.log('Image URLs:', imageUrls);
+      if (!imageUrls || imageUrls.length === 0 || !imageUrls[0]) {
+        setFormError('Image upload failed. Please try again.');
+        setSaving(false);
+        return;
+      }
       const carData = {
         name: form.carName,
         description: form.description,
         basePrice: Number(form.basePrice),
         variant: form.variant,
+        numberOfUnits: Number(form.numberOfUnits),
         availability: form.availability,
         specs: {
           engine: form.engineSpec,
           transmission: form.transmissionSpec,
         },
-        images: imageUrls && imageUrls.length > 0 ? imageUrls.map(url => ({ url })) : [],
+        images: imageUrls.map(url => ({ url })),
+        imageUrls: imageUrls,
+        primaryImageUrl: imageUrls[0],
       };
+      // Debug log
+      console.log('Car data to send:', carData);
       await carApi.createCar(carData);
       await fetchVehicles();
       Swal.fire({ icon: 'success', title: 'Success', text: 'Vehicle added successfully!' });
       onBack();
     } catch (e) {
       Swal.fire({ icon: 'error', title: 'Failed', text: e.message || 'Failed to add vehicle' });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -184,13 +204,13 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
                       <div key={idx} className="relative group">
                         <img src={img.src} alt={`Preview ${idx + 1}`} className="max-h-40 rounded-lg object-contain" />
                         <button
-                          type="button"
-                          onClick={e => { e.stopPropagation(); handleRemoveImage(idx); }}
-                          className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 shadow group-hover:opacity-100 opacity-80 hover:bg-red-500 hover:text-white transition-opacity z-10"
-                          title="Remove image"
-                        >
-                          <span style={{fontWeight:'bold',fontSize:'1.1em'}}>×</span>
-                        </button>
+  type="button"
+  onClick={e => { e.stopPropagation(); handleRemoveImage(idx); }}
+  title="Remove image"
+  className="absolute top-1 right-1 w-6 h-6 grid place-items-center bg-white/80 rounded-full shadow hover:bg-red-500 hover:text-white transition z-10"
+>
+  <span className="leading-none">×</span>
+</button>
                       </div>
                     ))}
                   </div>
@@ -264,6 +284,18 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
                 />
                 {fieldErrors.variant && <p className="text-xs text-red-500 mt-1">{fieldErrors.variant}</p>}
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Number of Units</label>
+                <input
+                  type="number"
+                  min="1"
+                  placeholder="Enter number of units"
+                  value={form.numberOfUnits}
+                  onChange={handleChange('numberOfUnits')}
+                  className={`w-full border ${fieldErrors.numberOfUnits ? 'border-red-500' : 'border-gray-200'} rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400`}
+                />
+                {fieldErrors.numberOfUnits && <p className="text-xs text-red-500 mt-1">{fieldErrors.numberOfUnits}</p>}
+              </div>
             </div>
           </div>
           {/* Car Specifications Row */}
@@ -314,9 +346,16 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
         </div>
         <div className='flex w-full justify-end'>
         <button
-            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2"
             onClick={handleAddVehicle}
+            disabled={saving}
           >
+            {saving && (
+              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+              </svg>
+            )}
             Save Details
           </button>
           </div>
@@ -335,9 +374,11 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
     description: '',
     vehiclePrice: '',
     variant: '',
+    numberOfUnits: '',
     engineSpec: '',
     transmissionSpec: '',
   });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!vehicle) return;
@@ -346,6 +387,7 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
       description: vehicle.description || '',
       vehiclePrice: vehicle.basePrice || vehicle.basePrice || '',
       variant: vehicle.variant || '',
+      numberOfUnits: vehicle.numberOfUnits || '',
       engineSpec: vehicle.specs?.engine || vehicle.specification || '',
       transmissionSpec: vehicle.specs?.transmission || vehicle.transmission || '',
     });
@@ -397,6 +439,7 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
 
   // Edit vehicle handler
   const handleEditVehicle = async () => {
+    setSaving(true);
     try {
       let imageUrls = [];
       if (uploadedImages.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
@@ -419,6 +462,7 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
         description: form.description,
         basePrice: form.vehiclePrice,
         variant: form.variant,
+        numberOfUnits: Number(form.numberOfUnits),
         status: form.stockAvailability,
         specs: {
           engine: form.engineSpec,
@@ -432,6 +476,8 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
       onBack();
     } catch (e) {
       Swal.fire({ icon: 'error', title: 'Failed', text: e.message || 'Failed to update vehicle' });
+    } finally {
+      setSaving(false);
     }
   };
   return (
@@ -495,9 +541,16 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
           </div>
         </div>
           <button
-            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2"
             onClick={handleEditVehicle}
+            disabled={saving}
           >
+            {saving && (
+              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+              </svg>
+            )}
             Save Details
           </button>
         </div>
@@ -615,6 +668,17 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
                   placeholder="Enter car variant"
                   value={form.variant}
                   onChange={handleChange('variant')}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                />
+              </div>
+              <div className="w-full">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Number of Units</label>
+                <input
+                  type="number"
+                  min="1"
+                  placeholder="Enter number of units"
+                  value={form.numberOfUnits}
+                  onChange={handleChange('numberOfUnits')}
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
                 />
               </div>

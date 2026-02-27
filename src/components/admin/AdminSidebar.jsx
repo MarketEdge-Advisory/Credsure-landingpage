@@ -101,13 +101,13 @@ const AdminSidebar = ({ open, setOpen }) => {
           className="h-6 w-auto object-contain brightness-0 invert"
         />
         <div className="w-px h-5 bg-white/20" />
-        <div className="bg-white rounded px-1.5 py-0.5 flex items-center">
-          <img
-            src="/suzuki-by-cfao-logo.svg"
-            alt="Suzuki"
-            className="h-5 w-auto object-contain"
-          />
-        </div>
+        <div className="bg-transparent rounded px-1.5 py-0.5 flex items-center">
+  <img
+    src="/suzuki-by-cfao-logo.svg"
+    alt="Suzuki"
+    className="h-5 w-auto object-contain invert"
+  />
+</div>
       </div>
 
       {/* Navigation */}
