@@ -11,6 +11,7 @@ import PlatformSettings from './pages/admin/PlatformSettings';
 import AdminLogin from './pages/admin/AdminLogin';
 import { useAuth } from './context/AuthContext';
 
+
 /** Redirect to login if not authenticated. Optionally restrict to a specific role. */
 const normalizeRole = (role) => {
   if (!role) return '';
