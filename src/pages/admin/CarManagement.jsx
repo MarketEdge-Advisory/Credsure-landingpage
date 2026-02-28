@@ -780,6 +780,53 @@ const CarManagement = () => {
     setPage(1);
   };
 
+  const handleDelete = async (vehicleId) => {
+  // 1. Confirmation dialog
+  const confirmResult = await Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it!'
+  });
+
+  if (!confirmResult.isConfirmed) return;
+
+  // 2. Show loading spinner
+  Swal.fire({
+    title: 'Deleting...',
+    html: 'Please wait while we delete the vehicle',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  try {
+    await carApi.deleteCar(vehicleId);
+    
+    // 3. Success feedback
+    await Swal.fire({
+      icon: 'success',
+      title: 'Deleted!',
+      text: 'Vehicle has been deleted.',
+      timer: 1500,
+      showConfirmButton: false
+    });
+
+    await fetchVehicles(); // refresh list
+  } catch (e) {
+    // 4. Error feedback
+    Swal.fire({
+      icon: 'error',
+      title: 'Failed',
+      text: e.message || 'Failed to delete vehicle'
+    });
+  }
+};
+
   return (
     <div className="p-4 sm:p-6 md:p-8 w-full">
       {/* Page Header */}
@@ -984,17 +1031,7 @@ const CarManagement = () => {
                     </button>
                     <button
                       className="flex items-center gap-2 border border-gray-200 rounded-lg px-5 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full md:w-auto"
-                      onClick={async () => {
-                        if (window.confirm('Are you sure you want to delete this vehicle?')) {
-                          try {
-                            await carApi.deleteCar(vehicle.id);
-                            Swal.fire({ icon: 'success', title: 'Success', text: 'Vehicle deleted successfully!' });
-                            await fetchVehicles();
-                          } catch (e) {
-                            Swal.fire({ icon: 'error', title: 'Failed', text: e.message || 'Failed to delete vehicle' });
-                          }
-                        }
-                      }}
+                      onClick={() => handleDelete(vehicle.id)}
                     >
                       <Trash2 size={14} />
                       Delete Vehicle
