@@ -150,6 +150,13 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
     setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
   };
+  
+const formatNumberWithCommas = (value) => {
+  if (!value && value !== 0) return '';
+  const num = Number(value.toString().replace(/,/g, ''));
+  if (isNaN(num)) return '';
+  return num.toLocaleString('en-US');
+};
 
   return (
     <div className="p-8 w-full">
@@ -254,17 +261,23 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
                 />
                 {fieldErrors.description && <p className="text-xs text-red-500 mt-1">{fieldErrors.description}</p>}
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price (NGN)</label>
-                <input
-                  type="text"
-                  placeholder="Enter amount"
-                  value={form.basePrice}
-                  onChange={handleChange('basePrice')}
-                  className={`w-full border ${fieldErrors.basePrice ? 'border-red-500' : 'border-gray-200'} rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400`}
-                />
-                {fieldErrors.basePrice && <p className="text-xs text-red-500 mt-1">{fieldErrors.basePrice}</p>}
-              </div>
+             <div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">Price (NGN)</label>
+  <input
+    type="text"
+    placeholder="Enter amount"
+    value={form.basePrice ? formatNumberWithCommas(form.basePrice) : ''}
+    onChange={(e) => {
+      const raw = e.target.value.replace(/,/g, '');
+      if (raw === '' || /^\d+$/.test(raw)) {
+        setForm(prev => ({ ...prev, basePrice: raw }));
+        setFieldErrors(prev => ({ ...prev, basePrice: undefined }));
+      }
+    }}
+    className={`w-full border ${fieldErrors.basePrice ? 'border-red-500' : 'border-gray-200'} rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400`}
+  />
+  {fieldErrors.basePrice && <p className="text-xs text-red-500 mt-1">{fieldErrors.basePrice}</p>}
+</div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Variant</label>
                 <input
@@ -429,6 +442,13 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
     setDragOver(false);
     handleNewImageFiles(e.dataTransfer.files);
   };
+
+const formatNumberWithCommas = (value) => {
+  if (!value && value !== 0) return '';
+  const num = Number(value.toString().replace(/,/g, ''));
+  if (isNaN(num)) return '';
+  return num.toLocaleString('en-US');
+};
 
   const handleChange = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -602,16 +622,18 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
                 className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400 resize-none"
               />
             </div>
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Price</label>
-              <input
-                type="text"
-                placeholder="Enter amount"
-                value={form.vehiclePrice}
-                onChange={handleChange('vehiclePrice')}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
-              />
-            </div>
+            <input
+  type="text"
+  placeholder="Enter amount"
+  value={form.vehiclePrice ? formatNumberWithCommas(form.vehiclePrice) : ''}
+  onChange={(e) => {
+    const raw = e.target.value.replace(/,/g, '');
+    if (raw === '' || /^\d+$/.test(raw)) {
+      setForm(prev => ({ ...prev, vehiclePrice: raw }));
+    }
+  }}
+  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+/>
             <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 mb-1">Variant</label>
               <input

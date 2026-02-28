@@ -18,10 +18,9 @@ const Footer = () => {
                                 className="h-8 sm:h-10 w-auto brightness-0 invert"
                             />
                             <img
-                                src="/suzuki-by-cfao-logo.svg"
+                                src="/suzuki-by-cfao-logo.png"
                                 alt="Suzuki Logo"
-                                className="h-8 sm:h-10 w-auto"
-                                style={{ backgroundColor: '#0A2647' }}
+                                className="h-8 sm:h-10 w-auto brightness-0 invert"
                             />
                         </div>
                         <p className="text-xs sm:text-sm text-gray-300">
@@ -76,7 +75,7 @@ const Footer = () => {
                     {/* Credsure Customer Support */}
                     <div className="flex-shrink-0">
                         <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
-                            Credsure Customer Support
+                            CredSure Customer Support
                         </h3>
                         <ul className="space-y-2 sm:space-y-3">
                             <li className="flex items-start gap-2 sm:gap-3">
@@ -164,7 +163,7 @@ const Footer = () => {
                         approval. Actual rates, terms, and down payment
                         requirements may vary based on creditworthiness, income
                         verification, and other eligibility criteria. All
-                        financing is provided by Credsure and subject to their
+                        financing is provided by CredSure and subject to their
                         terms and conditions. CFAO is an authorized Suzuki
                         dealer and facilitates vehicle sales only. Offer valid
                         for Nigerian residents only.
@@ -173,7 +172,7 @@ const Footer = () => {
                 <div className="flex w-full items-center justify-center pt-4 sm:pt-6">
                     <p className="text-[10px] sm:text-xs text-gray-400">
                         {/* &copy; {new Date().getFullYear()} CFAO Motors Nigeria Limited. All rights reserved. | Powered by Credsure. */}
-                        &copy; Credsure -{new Date().getFullYear()}
+                        &copy; CredSure -{new Date().getFullYear()}
                     </p>
                 </div>
             </div>

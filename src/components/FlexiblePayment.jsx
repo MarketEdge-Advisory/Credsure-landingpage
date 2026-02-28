@@ -9,7 +9,7 @@ const FlexiblePayment = () => {
           {/* Left: Heading */}
           <div>
             <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 leading-tight">
-              Buy Suzuki Cars on Flexible Payment Plans | Credsure BNPL.{' '}
+              Buy Suzuki Cars on Flexible Payment Plans | CredSure BNPL.{' '}
               <span className="text-blue-400 italic">Financing Nigeria</span>
             </h2>
           </div>
@@ -17,7 +17,7 @@ const FlexiblePayment = () => {
           {/* Right: Description */}
           <div className="flex items-center">
             <p className="text-xs sm:text-sm md:text-base text-gray-600 leading-relaxed">
-              Get pre-approved for Suzuki car financing in minutes. Flexible monthly payments, transparent terms, and vehicle delivery within 2 weeks. Calculate your payment now with Credsure BNPL.
+              Get pre-approved for Suzuki car financing in minutes. Flexible monthly payments, transparent terms, and vehicle delivery within 2 weeks. Calculate your payment now with CredSure BNPL.
             </p>
           </div>
         </div>

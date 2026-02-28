@@ -41,10 +41,10 @@ const WhyCredsure = () => {
             Financing You Can Trust
           </p>
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 px-4">
-            Why finance with Credsure
+            Why finance with CredSure
           </h2>
           <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-[720px] mx-auto px-4">
-            Get a quick pre-approval, understand your repayments upfront, and move from calculation to delivery faster with Credsure's BNPL financing.
+            Get a quick pre-approval, understand your repayments upfront, and move from calculation to delivery faster with CredSure's BNPL financing.
           </p>
         </div>
 

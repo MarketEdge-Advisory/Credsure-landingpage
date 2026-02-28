@@ -79,12 +79,12 @@ const FAQ = () => {
 
   const faqs = [
     {
-      question: 'Who is eligible for Credsure financing?',
+      question: 'Who is eligible for CredSure financing?',
       answer: 'Nigerian citizens and residents aged 21-65 with a valid ID, stable income, and good credit history are eligible. Self-employed individuals and salaried employees can apply.',
     },
     {
       question: 'What documents do I need to apply?',
-      answer: 'You\'ll need: Valid ID (National ID, Driver\'s License, or International Passport), Proof of income (payslips or bank statements), Utility bill, and passport photographs.',
+      answer: 'You\'ll need: Valid ID (National ID, Driver\'s License, Voters Card, or International Passport), Proof of income (payslips or bank statements), Utility bill, and passport photographs.',
     },
     {
       question: 'How much down payment do I need?',

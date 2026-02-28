@@ -365,7 +365,7 @@ const [isSubmitting, setIsSubmitting] = useState(false);
             <div className="mt-2 sm:mt-4">
               <button 
                 onClick={() => setShowModal(true)}
-                className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 hover:shadow-lg text-xs sm:text-sm md:text-base"
+                className="w-full bg-cyan-500 hover:bg-slate-100 hover:text-black text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 hover:shadow-lg text-xs sm:text-sm md:text-base"
               >
                 Get pre-approved now
               </button>
@@ -463,19 +463,29 @@ const [isSubmitting, setIsSubmitting] = useState(false);
                   </div>
                   {/* Monthly Income */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">Estimated net monthly income*</label>
-                    <input
-                      type="number"
-                      name="monthlyIncome"
-                      value={formData.monthlyIncome}
-                      onChange={handleFormChange}
-                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${formErrors.monthlyIncome ? 'border-red-500' : 'border-gray-300'}`}
-                      placeholder="Enter your monthly income"
-                      min="0"
-                      autoComplete="off"
-                    />
-                    {formErrors.monthlyIncome && <span className="text-xs text-red-500 mt-1 block">{formErrors.monthlyIncome}</span>}
-                  </div>
+  <label className="block text-sm font-medium text-gray-600 mb-2">Estimated net monthly income*</label>
+  <input
+    type="text"
+    name="monthlyIncome"
+    value={formData.monthlyIncome ? Number(formData.monthlyIncome).toLocaleString() : ''}
+    onChange={(e) => {
+      // Remove all non‑digit characters (allow digits only)
+      const rawValue = e.target.value.replace(/\D/g, '');
+      // Create a synthetic event to pass to handleFormChange
+      const syntheticEvent = {
+        target: {
+          name: 'monthlyIncome',
+          value: rawValue,
+        },
+      };
+      handleFormChange(syntheticEvent);
+    }}
+    className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${formErrors.monthlyIncome ? 'border-red-500' : 'border-gray-300'}`}
+    placeholder="Enter your monthly income"
+    autoComplete="off"
+  />
+  {formErrors.monthlyIncome && <span className="text-xs text-red-500 mt-1 block">{formErrors.monthlyIncome}</span>}
+</div>
 
                   {/* Consent Checkbox */}
                   <div className="flex items-center gap-2">
@@ -494,7 +504,7 @@ const [isSubmitting, setIsSubmitting] = useState(false);
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 hover:shadow-lg text-base sm:text-lg"
+                    className="w-full bg-cyan-500 hover:bg-slate-100 hover:text-black text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 hover:shadow-lg text-base sm:text-lg"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? 'Submitting...' : 'Submit Application'}

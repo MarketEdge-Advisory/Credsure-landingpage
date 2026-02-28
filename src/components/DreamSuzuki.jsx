@@ -1,16 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight, MessageCircle, X, Send } from 'lucide-react';
 import { getCars } from '../api/cars';
 
+// Helper to build optimized Cloudinary URL
+const getOptimizedImageUrl = (url, width) => {
+  if (!url) return '';
+  // If it's a local SVG, return as is
+  if (url.startsWith('/')) return url;
+  // Add Cloudinary transformations: auto format, auto quality, resize to width
+  // Assumes URL contains 'upload/' – insert transformation right after 'upload/'
+  const parts = url.split('/upload/');
+  if (parts.length === 2) {
+    return `${parts[0]}/upload/f_auto,q_auto,w_${width}/${parts[1]}`;
+  }
+  return url;
+};
+
 const DreamSuzuki = () => {
-    const carsPerPage = 3;
+  const carsPerPage = 3;
   // Chatbot state
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([
     {
       id: 1,
       type: 'bot',
-      message: 'Hello! Welcome to Credsure Suzuki. How can I help you today?',
+      message: 'Hello! Welcome to CredSure Suzuki. How can I help you today?',
       timestamp: new Date()
     }
   ]);
@@ -58,11 +72,27 @@ const DreamSuzuki = () => {
   const [promotionalSlides, setPromotionalSlides] = useState([]);
   const [carGallery, setCarGallery] = useState([]);
 
+  // Ref to ensure we only preload the first hero image once
+  const preloadedFirstImage = useRef(false);
+  const messagesEndRef = useRef(null);
+
+  // Function to scroll to bottom
+const scrollToBottom = () => {
+  messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+};
+
+// Auto‑scroll whenever chatMessages change
+useEffect(() => {
+  scrollToBottom();
+}, [chatMessages]);
+
   useEffect(() => {
     async function fetchCars() {
       try {
         const response = await getCars();
         const cars = Array.isArray(response?.data) ? response.data : [];
+
+        // Build car gallery with optimized image URLs (handled later in render)
         setCarGallery(cars.map(car => ({
           id: car.id,
           name: car.name,
@@ -70,7 +100,9 @@ const DreamSuzuki = () => {
           description: car.description,
           price: car.basePrice || car.bestPrice || car.price
         })));
-        setPromotionalSlides([
+
+        // Build promotional slides (local SVGs, no optimization needed)
+        const slides = [
           {
             id: 1,
             image: '/Dzire1.svg',
@@ -81,7 +113,7 @@ const DreamSuzuki = () => {
           },
           {
             id: 2,
-            image: '/Dzire2.svg',
+            image: '/Dzire.svg',
             title: 'Drive Your Dream Suzuki Today. Pay Monthly from',
             price: cars[1]?.basePrice ? `₦${cars[1].basePrice.toLocaleString()}` : (cars[1]?.bestPrice ? `₦${cars[1].bestPrice.toLocaleString()}` : ''),
             buttonText: 'Check Your Monthly Payment',
@@ -90,12 +122,23 @@ const DreamSuzuki = () => {
           {
             id: 3,
             image: '/Dzire3.svg',
-             title: 'Drive Your Dream Suzuki Today. Pay Monthly from',
+            title: 'Drive Your Dream Suzuki Today. Pay Monthly from',
             price: cars[2]?.basePrice ? `₦${cars[2].basePrice.toLocaleString()}` : (cars[2]?.bestPrice ? `₦${cars[2].bestPrice.toLocaleString()}` : ''),
             buttonText: 'Check Your Monthly Payment',
             isMandatory: false
           }
-        ]);
+        ];
+        setPromotionalSlides(slides);
+
+        // Preload the first hero image (if available)
+        if (!preloadedFirstImage.current && slides[0]?.image) {
+          const link = document.createElement('link');
+          link.rel = 'preload';
+          link.as = 'image';
+          link.href = slides[0].image;
+          document.head.appendChild(link);
+          preloadedFirstImage.current = true;
+        }
       } catch (e) {
         // fallback or error handling
       }
@@ -103,9 +146,7 @@ const DreamSuzuki = () => {
     fetchCars();
   }, []);
 
-  // Build gallery rows – groups of 3 cars each
-  // Build gallery slides – one car per slide
-  // Limit fleet gallery to 11 cars
+  // Build gallery rows – groups of 3 cars each (here one car per slide for simplicity)
   const galleryRows = carGallery.slice(0, 11).map((car, idx) => ({
     type: 'gallery',
     id: `gallery-slide-${idx}`,
@@ -113,7 +154,6 @@ const DreamSuzuki = () => {
   }));
 
   // Interleaved sequence: [promo1, promo2, promo3, galleryRow1, promo1, promo2, promo3, galleryRow2, ...]
-  // Show promo slides first, then fleet gallery slides (max 11)
   const interleavedSlides = [
     ...promotionalSlides.map(slide => ({ type: 'promo', ...slide })),
     ...galleryRows
@@ -122,10 +162,7 @@ const DreamSuzuki = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Helper function to calculate monthly payment
-  // Formula: (Car Price * 0.018) - basic calculation
-  // Backend can implement more sophisticated calculation with interest rates, terms, etc.
   const calculateMonthlyPayment = (carPrice, months = 60) => {
-    // Simple example: 10% down payment, 60 months, ~8% annual interest
     const downPayment = carPrice * 0.1;
     const loanAmount = carPrice - downPayment;
     const monthlyInterestRate = 0.08 / 12;
@@ -164,19 +201,20 @@ const DreamSuzuki = () => {
       return { success: false, message: 'Cannot remove the mandatory promotional slide' };
     }
     setPromotionalSlides(prev => prev.filter(slide => slide.id !== id));
-    if (currentSlide >= allSlides.length - 1) setCurrentSlide(0);
+    if (currentSlide >= interleavedSlides.length - 1) setCurrentSlide(0);
     return { success: true, message: 'Promotional slide removed successfully' };
   };
 
   // Add new vehicle (max 11)
   const addVehicle = (vehicleData) => {
-    if (vehicleSlides.length < 11) {
+    // Note: original code used vehicleSlides which is undefined; we'll assume it's meant to modify carGallery
+    if (carGallery.length < 11) {
       const newVehicle = {
         id: Date.now(),
         monthlyPayment: calculateMonthlyPayment(vehicleData.price || 0),
         ...vehicleData
       };
-      setVehicleSlides(prev => [...prev, newVehicle]);
+      setCarGallery(prev => [...prev, newVehicle]);
       return { success: true, message: 'Vehicle added successfully', vehicle: newVehicle };
     }
     return { success: false, message: 'Maximum 11 vehicles reached' };
@@ -184,7 +222,7 @@ const DreamSuzuki = () => {
 
   // Update vehicle
   const updateVehicle = (id, updatedData) => {
-    setVehicleSlides(prev => 
+    setCarGallery(prev => 
       prev.map(vehicle => {
         if (vehicle.id === id) {
           const updated = { ...vehicle, ...updatedData };
@@ -202,13 +240,12 @@ const DreamSuzuki = () => {
 
   // Remove vehicle
   const removeVehicle = (id) => {
-    setVehicleSlides(prev => prev.filter(vehicle => vehicle.id !== id));
-    if (currentSlide >= allSlides.length - 1) setCurrentSlide(0);
+    setCarGallery(prev => prev.filter(vehicle => vehicle.id !== id));
+    if (currentSlide >= interleavedSlides.length - 1) setCurrentSlide(0);
     return { success: true, message: 'Vehicle removed successfully' };
   };
 
   // Expose these functions for backend integration
-  // Can be called via props, context, or API
   window.suzukiHeroManager = {
     addPromotionalSlide,
     updatePromotionalSlide,
@@ -278,7 +315,7 @@ const DreamSuzuki = () => {
     }
   };
 
-  // Auto-advance – gallery slides linger a bit longer than promo slides
+  // Auto-advance slides
   useEffect(() => {
     if (interleavedSlides.length > 1) {
       const isGallery = interleavedSlides[currentSlide]?.type === 'gallery';
@@ -299,15 +336,18 @@ const DreamSuzuki = () => {
 
   return (
     <div id="home" className="relative w-full overflow-hidden">
-      {/* ── Single Hero Container – Interleaved Promo + Gallery Slides ── */}
+      {/* Hero Container */}
       <div className="relative min-h-screen w-full bg-[#0f1e3d] mt-16">
 
-        {/* ── PROMO SLIDE: full background image ── */}
-        {!isGallerySlide && (
-          <div
-            key={currentSlideData?.id}
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700"
-            style={{ backgroundImage: `url('${currentSlideData?.image}')` }}
+        {/* ── PROMO SLIDE: full background image as <img> ── */}
+        {!isGallerySlide && currentSlideData && (
+          <img
+            src={currentSlideData.image}
+            alt={currentSlideData.title}
+            className="absolute inset-0 w-full h-full object-cover object-center"
+            loading={currentSlide === 0 ? 'eager' : 'lazy'}
+            decoding="async"
+            fetchpriority={currentSlide === 0 ? 'high' : 'auto'}
           />
         )}
 
@@ -362,41 +402,47 @@ const DreamSuzuki = () => {
                   Find Your Perfect Suzuki
                 </h2>
                 <p className="text-gray-400 mt-3 text-base md:text-lg max-w-xl mx-auto">
-                  Every model available through Credsure flexible financing.
+                  Every model available through CredSure flexible financing.
                 </p>
               </div>
               {/* Single portrait image, centered */}
-              {currentSlideData.cars.map((car) => (
-                <div
-                  key={car.id}
-                  className="relative flex flex-col items-center justify-center mx-auto h-[420px] w-full max-w-[900px] rounded-2xl overflow-hidden group shadow-xl bg-white/10 text"
-                  style={{
-                    backgroundImage: `url('${car.image}')`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
-                >
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-all duration-300 group-hover:via-black/40" />
-                  {/* Caption */}
-                  <div className="absolute bottom-0 left-0 right-0 p-5 text-left">
-                    <h4 className="text-white font-bold text-xl mb-1">{car.name}</h4>
-                    <p className="text-gray-300 text-sm mb-3 md:max-w-[600px]">{car.description}</p>
-                    <span className="text-blue-300 font-semibold text-base block mb-2">
-                      ₦{(car.price / 1000000).toFixed(1)}M
-                    </span>
-                    <button
-                      className="text-xs md:text-sm bg-white/20 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm"
-                      onClick={() => {
-                        const calc = document.querySelector('#calculator');
-                        if (calc) calc.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }}
-                    >
-                      Calculate →
-                    </button>
+              {currentSlideData.cars.map((car) => {
+                // Generate optimized Cloudinary URL (width 900px)
+                const optimizedImage = getOptimizedImageUrl(car.image, 900);
+                return (
+                  <div
+                    key={car.id}
+                    className="relative flex flex-col items-center justify-center mx-auto h-[420px] w-full max-w-[900px] rounded-2xl overflow-hidden group shadow-xl"
+                  >
+                    <img
+                      src={optimizedImage}
+                      alt={car.name}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-all duration-300 group-hover:via-black/40" />
+                    {/* Caption */}
+                    <div className="absolute bottom-0 left-0 right-0 p-5 text-left">
+                      <h4 className="text-white font-bold text-xl mb-1">{car.name}</h4>
+                      <p className="text-gray-300 text-sm mb-3 md:max-w-[600px]">{car.description}</p>
+                      <span className="text-blue-300 font-semibold text-base block mb-2">
+                        ₦{(car.price / 1000000).toFixed(1)}M
+                      </span>
+                      <button
+                        className="text-xs md:text-sm bg-white/20 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm"
+                        onClick={() => {
+                          const calc = document.querySelector('#calculator');
+                          if (calc) calc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }}
+                      >
+                        Calculate →
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               {/* Slide indicator */}
               <p className="text-center text-gray-500 text-sm mt-6">
                 Showing model {currentSlide + 1} of {carGallery.length}
@@ -452,97 +498,99 @@ const DreamSuzuki = () => {
             <p className="text-xs text-gray-300">{isGallerySlide ? 'Fleet' : 'Promo'}</p>
           </div>
 
-          {/* Chatbot */}
-          <div className="fixed bottom-6 right-6 z-50">
-            {/* Chat Window */}
-            {isChatOpen && (
-              <div className="mb-4 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl overflow-hidden animate-[fade-in_0.3s_ease-out] flex flex-col max-h-[calc(100vh-120px)] mt-16">
-                {/* Chat Header */}
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 flex items-center justify-between flex-shrink-0">
-                  <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center">
-                      <MessageCircle className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-sm">Credsure Assistant</h3>
-                      <p className="text-xs text-blue-100">Always here to help</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setIsChatOpen(false)}
-                    className="hover:bg-white/20 p-1 rounded-full transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Chat Messages */}
-                <div className="flex-1 overflow-y-auto p-3 bg-gray-50 space-y-3 min-h-0">
-                  {chatMessages.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div
-                        className={`max-w-[80%] rounded-2xl px-3 py-2 ${
-                          msg.type === 'user'
-                            ? 'bg-blue-600 text-white rounded-br-sm'
-                            : 'bg-white text-gray-800 rounded-bl-sm shadow-sm'
-                        }`}
-                      >
-                        <p className="text-sm">{msg.message}</p>
-                        <p className={`text-xs mt-1 ${msg.type === 'user' ? 'text-blue-100' : 'text-gray-400'}`}>
-                          {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Quick Questions */}
-                <div className="p-2 bg-white border-t border-gray-200 flex-shrink-0">
-                  <p className="text-xs text-gray-600 mb-1.5">Quick questions:</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {faqs.slice(0, 3).map((faq, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleQuickQuestion(faq.question)}
-                        className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full transition-colors"
-                      >
-                        {faq.question.split(' ').slice(0, 3).join(' ')}...
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Chat Input */}
-                <div className="p-3 bg-white border-t border-gray-200 flex-shrink-0">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={userInput}
-                      onChange={(e) => setUserInput(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                      placeholder="Type your message..."
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    />
-                    <button
-                      onClick={handleSendMessage}
-                      className="bg-blue-600 hover:bg-slate-200 hover:text-black text-white p-2 rounded-full transition-colors flex-shrink-0"
-                    >
-                      <Send className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Chat Toggle Button */}
-            <button
-              onClick={() => setIsChatOpen(!isChatOpen)}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
-              aria-label="Toggle chat"
-            >
-              {isChatOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
-            </button>
+          {/* Chatbot (unchanged) */}
+          <div className="fixed bottom-6 right-6 z-[99999]">
+  {/* Chat Window */}
+  {isChatOpen && (
+    <div className="mb-4 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl overflow-hidden animate-[fade-in_0.3s_ease-out] flex flex-col max-h-[calc(100vh-120px)] mt-16 z-[9999]">
+      {/* Chat Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center">
+            <MessageCircle className="w-5 h-5 text-blue-600" />
           </div>
+          <div>
+            <h3 className="font-semibold text-sm">CredSure Assistant</h3>
+            <p className="text-xs text-blue-100">Always here to help</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setIsChatOpen(false)}
+          className="hover:bg-white/20 p-1 rounded-full transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Chat Messages – with scroll anchor */}
+      <div className="flex-1 overflow-y-auto p-3 bg-gray-50 space-y-3 min-h-0">
+        {chatMessages.map((msg) => (
+          <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div
+              className={`max-w-[80%] rounded-2xl px-3 py-2 ${
+                msg.type === 'user'
+                  ? 'bg-blue-600 text-white rounded-br-sm'
+                  : 'bg-white text-gray-800 rounded-bl-sm shadow-sm'
+              }`}
+            >
+              <p className="text-sm">{msg.message}</p>
+              <p className={`text-xs mt-1 ${msg.type === 'user' ? 'text-blue-100' : 'text-gray-400'}`}>
+                {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            </div>
+          </div>
+        ))}
+        {/* Invisible anchor for auto‑scroll */}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Quick Questions */}
+      <div className="p-2 bg-white border-t border-gray-200 flex-shrink-0">
+        <p className="text-xs text-gray-600 mb-1.5">Quick questions:</p>
+        <div className="flex flex-wrap gap-1.5">
+          {faqs.slice(0, 3).map((faq, index) => (
+            <button
+              key={index}
+              onClick={() => handleQuickQuestion(faq.question)}
+              className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full transition-colors"
+            >
+              {faq.question.split(' ').slice(0, 3).join(' ')}...
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Chat Input */}
+      <div className="p-3 bg-white border-t border-gray-200 flex-shrink-0">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            placeholder="Type your message..."
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          />
+          <button
+            onClick={handleSendMessage}
+            className="bg-blue-600 hover:bg-slate-200 hover:text-black text-white p-2 rounded-full transition-colors flex-shrink-0"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* Chat Toggle Button */}
+  <button
+    onClick={() => setIsChatOpen(!isChatOpen)}
+    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
+    aria-label="Toggle chat"
+  >
+    {isChatOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+  </button>
+</div>
         </div>
       </div>
     </div>
