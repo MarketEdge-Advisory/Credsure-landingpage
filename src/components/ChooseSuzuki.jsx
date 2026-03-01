@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Images, ArrowDown } from "lucide-react";
+import { X, Images, ArrowDown, ChevronDown } from "lucide-react";
 import { useCarContext } from "../context/CarContext";
 
 // Helper to optimize Cloudinary URLs
@@ -199,9 +199,10 @@ const ChooseSuzuki = () => {
                       calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                   }}
-                    className="mt-2 w-full bg-cyan-500 py-2 rounded-full hover:bg-slate-200 hover:text-black transition "
+                    className="group mt-2 w-full bg-cyan-500 py-2 rounded-full hover:bg-slate-200 hover:text-black transition "
                   >
                     Calculate Monthly Payment
+                    <ChevronDown className="w-5 h-5 text-white transition-transform duration-300 group-hover:translate-y-1 group-hover:text-slate-800" />
                   </button>
                 </div>
 
@@ -277,9 +278,10 @@ const ChooseSuzuki = () => {
           <div className="text-center mt-8">
             <button
               onClick={handleLoadMore}
-              className="bg-cyan-500 text-white px-6 py-3 rounded-full hover:bg-slate-200 hover:text-black transition"
+              className="group bg-cyan-500 text-white px-6 py-3 rounded-full hover:bg-slate-200 hover:text-black transition"
             >
               Load More
+              <ChevronDown className="w-5 h-5 text-white transition-transform duration-300 group-hover:translate-y-1 group-hover:text-slate-800" />
             </button>
           </div>
         )}

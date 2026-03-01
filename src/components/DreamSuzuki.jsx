@@ -376,7 +376,7 @@ useEffect(() => {
                 </p>
                 <div>
                   <button
-                    className="group flex items-center justify-between gap-2 sm:gap-4 bg-white hover:bg-cyan-400 hover:text-slate-100 text-gray-700 font-medium px-6 sm:px-8 md:px-10 py-3 sm:py-4 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl w-full sm:w-auto sm:min-w-[280px] md:min-w-[320px]"
+                    className="group flex items-center justify-between gap-2 sm:gap-4 bg-cyan-400 hover:bg-slate-100 hover:text-gray-800 text-slate-100 font-medium px-6 sm:px-8 md:px-10 py-3 sm:py-4 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl w-full sm:w-auto sm:min-w-[280px] md:min-w-[320px]"
                     onClick={() => {
                       const calculator = document.querySelector('#calculator');
                       if (calculator) calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -385,7 +385,7 @@ useEffect(() => {
                     <span className="text-sm sm:text-base md:text-lg">
                       {currentSlideData?.buttonText || 'Check Your Monthly Payment'}
                     </span>
-                    <ChevronDown className="w-5 h-5 text-blue-500 transition-transform duration-300 group-hover:translate-y-1 group-hover:text-slate-100" />
+                    <ChevronDown className="w-5 h-5 text-white transition-transform duration-300 group-hover:translate-y-1 group-hover:text-slate-800" />
                   </button>
                 </div>
               </div>

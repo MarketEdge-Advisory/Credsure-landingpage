@@ -27,18 +27,18 @@ const ALL_SECTIONS = [
       { name: 'Car Management', icon: Truck, path: '/admin/car-management' },
     ],
   },
-  {
-    label: 'Credsure Admin',
-    roles: ['credsure'],
-    items: [
-      { name: 'Interest Rate Management', icon: Percent, path: '/admin/interest-rate' },
-      { name: 'Calculator Input Mgt', icon: Calculator, path: '/admin/calculator-input' },
-      { name: 'Loan Term Management', icon: FileText, path: '/admin/loan-term' },
-    ],
-  },
+  // {
+  //   label: 'Credsure Admin',
+  //   roles: ['credsure'],
+  //   items: [
+  //     { name: 'Interest Rate Management', icon: Percent, path: '/admin/interest-rate' },
+  //     { name: 'Calculator Input Mgt', icon: Calculator, path: '/admin/calculator-input' },
+  //     { name: 'Loan Term Management', icon: FileText, path: '/admin/loan-term' },
+  //   ],
+  // },
   {
     label: 'Settings',
-    roles: ['credsure', 'suzuki'],
+   roles: ['credsure'],
     items: [
       { name: 'Platform Settings', icon: Settings, path: '/admin/settings' },
     ],

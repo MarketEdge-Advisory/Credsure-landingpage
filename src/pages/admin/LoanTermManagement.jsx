@@ -1,65 +1,302 @@
+// import React, { useState, useEffect } from 'react';
+// import { getLoanTenures, addLoanTenure, updateLoanTenure, deleteLoanTenure } from '../../api/adminConfig';
+// import { Plus, Trash2, X, CalendarDays } from 'lucide-react';
+// import Swal from 'sweetalert2';
+
+// const defaultTerms = [
+//   { id: 1, label: '3 Months' },
+//   { id: 2, label: '6 Months' },
+//   { id: 3, label: '9 Months' },
+//   { id: 4, label: '12 Months' },
+//   { id: 5, label: '15 Months' },
+//   { id: 6, label: '18 Months' },
+//   { id: 7, label: '24 Months' },
+// ];
+
+// const LoanTermManagement = () => {
+//       // Refresh tenures after create/update/delete
+//       const refreshTenures = async () => {
+//         setLoading(true);
+//         try {
+//           const data = await getLoanTenures();
+//           setTerms(data.tenures);
+//           setError(null);
+//         } catch (e) {
+//           setError(e.message || 'Failed to load loan tenures');
+//         } finally {
+//           setLoading(false);
+//         }
+//       };
+//     // ...existing code...
+//     const handleCancel = () => {
+//       setShowModal(false);
+//       setDuration('');
+//     };
+//   const [terms, setTerms] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+
+//   useEffect(() => {
+//     async function fetchTenures() {
+//       setLoading(true);
+//       try {
+//         const data = await getLoanTenures();
+//         setTerms(data.tenures);
+//         setError(null);
+//       } catch (e) {
+//         setError(e.message || 'Failed to load loan tenures');
+//       } finally {
+//         setLoading(false);
+//       }
+//     }
+//     fetchTenures();
+//   }, []);
+//   const [showModal, setShowModal] = useState(false);
+//   const [duration, setDuration] = useState('');
+
+//   const handleChange = async (id, value) => {
+//     setLoading(true);
+//     try {
+//       await updateLoanTenure(id, { label: value });
+//       await refreshTenures();
+//       setError(null);
+//       Swal.fire({ icon: 'success', title: 'Updated!', text: 'Loan tenure updated successfully.' });
+//     } catch (e) {
+//       setError(e.message || 'Failed to update loan tenure');
+//       Swal.fire({ icon: 'error', title: 'Update Failed', text: e.message || 'Failed to update loan tenure.' });
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleDelete = async (id) => {
+//     setLoading(true);
+//     try {
+//       await deleteLoanTenure(id);
+//       await refreshTenures();
+//       setError(null);
+//       Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Loan tenure deleted successfully.' });
+//     } catch (e) {
+//       setError(e.message || 'Failed to delete loan tenure');
+//       Swal.fire({ icon: 'error', title: 'Delete Failed', text: e.message || 'Failed to delete loan tenure.' });
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleCreate = async () => {
+//     setLoading(true);
+//     try {
+//       const months = parseInt(duration.trim(), 10);
+//       if (!duration.trim() || isNaN(months) || months < 1) {
+//         setLoading(false);
+//         Swal.fire({
+//           icon: 'error',
+//           title: 'Invalid Input',
+//           text: 'Please enter a valid integer greater than or equal to 1 for months.',
+//           confirmButtonText: 'OK',
+//           confirmButtonColor: '#e53e3e',
+//         });
+//         return;
+//       }
+//       await addLoanTenure(months);
+//       await refreshTenures();
+//       Swal.fire({ icon: 'success', title: 'Created!', text: 'Loan tenure added successfully.' });
+//       setError(null);
+//     } catch (e) {
+//       setError(e.message || 'Failed to add loan tenure');
+//       Swal.fire({ icon: 'error', title: 'Create Failed', text: e.message || 'Failed to add loan tenure.' });
+//     } finally {
+//       setLoading(false);
+//       setShowModal(false);
+//     }
+//   };
+
+//   return (
+//     <div className="p-8 w-full">
+//       {/* Page Header */}
+//       <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4">
+//         <div>
+//           <h1 className="text-2xl font-bold text-gray-900">Loan Term Management</h1>
+//           <p className="text-sm text-gray-500 mt-1">Set and modify loan term management.</p>
+//         </div>
+//         <button
+//           onClick={() => setShowModal(true)}
+//           className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors md:text-left text-center w-full md:w-auto justify-center md:justify-start"
+//         >
+//           <Plus size={16} />
+//           Add New Tenure
+//         </button>
+//       </div>
+
+//       {/* Card */}
+//       <div className="bg-white rounded-xl border border-gray-200 p-6">
+//         <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4">
+//           <div>
+//             <p className="font-semibold text-gray-900">Update Loan Term</p>
+//             <p className="text-sm text-gray-400 mt-0.5">Input the details below to modify loan term</p>
+//           </div>
+//           <button className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+//             Save Details
+//           </button>
+//         </div>
+
+//         <div className="grid grid-cols-[200px_1fr] gap-8">
+//           <p className="text-sm font-medium text-gray-700 pt-2">Edit loan term</p>
+//           <div className="flex flex-col gap-3">
+//             {terms.map((term) => (
+//               <div key={term.id} className="flex items-center gap-3">
+//                 <input
+//                   type="text"
+//                   value={term.label}
+//                   onChange={(e) => handleChange(term.id, e.target.value)}
+//                   className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+//                 />
+//                 <button
+//                   onClick={() => handleDelete(term.id)}
+//                   className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+//                 >
+//                   <Trash2 size={18} />
+//                 </button>
+//               </div>
+//             ))}
+//           </div>
+//         </div>
+//       </div>
+//       {/* Modal */}
+//       {showModal && (
+//         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+//           <div className="bg-white rounded-2xl w-full max-w-md mx-4 p-6 relative">
+//             {/* Close */}
+//             <button
+//               onClick={handleCancel}
+//               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+//             >
+//               <X size={18} />
+//             </button>
+
+//             {/* Icon */}
+//             <div className="w-10 h-10 flex items-center justify-center border border-gray-200 rounded-lg mb-4">
+//               <CalendarDays size={20} className="text-gray-600" />
+//             </div>
+
+//             <h2 className="text-xl font-bold text-gray-900 mb-4">Add a New Tenure</h2>
+
+//             {/* Info bar */}
+//             <div className="bg-gray-900 text-white text-sm rounded-xl px-4 py-3 mb-5">
+//               Input the tenure duration in the field below
+//             </div>
+
+//             {/* Input */}
+//             <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+//             <input
+//               type="text"
+//               placeholder="Enter duration"
+//               value={duration}
+//               onChange={(e) => setDuration(e.target.value)}
+//               className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 bg-gray-50 focus:outline-none focus:border-blue-400 mb-6"
+//             />
+
+//             {/* Actions */}
+//             <div className="flex items-center justify-end gap-3">
+//               <button
+//                 onClick={handleCancel}
+//                 className="px-5 py-2.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+//               >
+//                 Cancel
+//               </button>
+//               <button
+//                 onClick={handleCreate}
+//                 className="px-5 py-2.5 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+//               >
+//                 Create
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   )
+// };
+
+// export default LoanTermManagement;
 import React, { useState, useEffect } from 'react';
-import { getLoanTenures, addLoanTenure, updateLoanTenure, deleteLoanTenure } from '../../api/adminConfig';
-import { Plus, Trash2, X, CalendarDays } from 'lucide-react';
+import { getLoanTenures, addLoanTenure, updateLoanTenure, deleteLoanTenure, getActivityLogs } from '../../api/adminConfig';
+import { Plus, Trash2, X, CalendarDays, History, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import Swal from 'sweetalert2';
 
-const defaultTerms = [
-  { id: 1, label: '3 Months' },
-  { id: 2, label: '6 Months' },
-  { id: 3, label: '9 Months' },
-  { id: 4, label: '12 Months' },
-  { id: 5, label: '15 Months' },
-  { id: 6, label: '18 Months' },
-  { id: 7, label: '24 Months' },
-];
+const PAGE_SIZES = [5, 10, 20];
 
 const LoanTermManagement = () => {
-      // Refresh tenures after create/update/delete
-      const refreshTenures = async () => {
-        setLoading(true);
-        try {
-          const data = await getLoanTenures();
-          setTerms(data.tenures);
-          setError(null);
-        } catch (e) {
-          setError(e.message || 'Failed to load loan tenures');
-        } finally {
-          setLoading(false);
-        }
-      };
-    // ...existing code...
-    const handleCancel = () => {
-      setShowModal(false);
-      setDuration('');
-    };
   const [terms, setTerms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    async function fetchTenures() {
-      setLoading(true);
-      try {
-        const data = await getLoanTenures();
-        setTerms(data.tenures);
-        setError(null);
-      } catch (e) {
-        setError(e.message || 'Failed to load loan tenures');
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchTenures();
-  }, []);
+  const [historyLogs, setHistoryLogs] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState('');
+
   const [showModal, setShowModal] = useState(false);
   const [duration, setDuration] = useState('');
 
-  const handleChange = async (id, value) => {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [pageSizeOpen, setPageSizeOpen] = useState(false);
+
+  // Safe arrays
+  const safeTerms = Array.isArray(terms) ? terms : [];
+  const safeHistoryLogs = Array.isArray(historyLogs) ? historyLogs : [];
+
+  const refreshTenures = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getLoanTenures();
+      setTerms(data.tenures || []);
+    } catch (e) {
+      setError(e.message || 'Failed to load loan tenures');
+      setTerms([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchHistory = async () => {
+    setHistoryLoading(true);
+    setHistoryError('');
+    try {
+      const data = await getActivityLogs({ page: 1, pageSize: 100 });
+      const items = Array.isArray(data?.items) ? data.items : [];
+      const tenureCreations = items.filter(log => log?.action === 'ADD_LOAN_TENURE');
+      setHistoryLogs(tenureCreations);
+    } catch (e) {
+      setHistoryError(e.message || 'Failed to load history');
+      setHistoryLogs([]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshTenures();
+    fetchHistory();
+  }, []);
+
+  const handleCancel = () => {
+    setShowModal(false);
+    setDuration('');
+  };
+
+  const handleChange = async (id, newMonths) => {
+    if (!newMonths || newMonths < 1) {
+      Swal.fire({ icon: 'error', title: 'Invalid Input', text: 'Months must be a positive number.' });
+      return;
+    }
     setLoading(true);
     try {
-      await updateLoanTenure(id, { label: value });
+      await updateLoanTenure(id, { months: newMonths });
       await refreshTenures();
-      setError(null);
+      await fetchHistory();
       Swal.fire({ icon: 'success', title: 'Updated!', text: 'Loan tenure updated successfully.' });
     } catch (e) {
       setError(e.message || 'Failed to update loan tenure');
@@ -74,7 +311,7 @@ const LoanTermManagement = () => {
     try {
       await deleteLoanTenure(id);
       await refreshTenures();
-      setError(null);
+      await fetchHistory();
       Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Loan tenure deleted successfully.' });
     } catch (e) {
       setError(e.message || 'Failed to delete loan tenure');
@@ -94,15 +331,13 @@ const LoanTermManagement = () => {
           icon: 'error',
           title: 'Invalid Input',
           text: 'Please enter a valid integer greater than or equal to 1 for months.',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#e53e3e',
         });
         return;
       }
       await addLoanTenure(months);
       await refreshTenures();
+      await fetchHistory();
       Swal.fire({ icon: 'success', title: 'Created!', text: 'Loan tenure added successfully.' });
-      setError(null);
     } catch (e) {
       setError(e.message || 'Failed to add loan tenure');
       Swal.fire({ icon: 'error', title: 'Create Failed', text: e.message || 'Failed to add loan tenure.' });
@@ -112,13 +347,23 @@ const LoanTermManagement = () => {
     }
   };
 
+  // Pagination
+  const totalEntries = safeHistoryLogs.length;
+  const totalPages = Math.max(1, Math.ceil(totalEntries / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const startIdx = (safePage - 1) * pageSize;
+  const pageItems = safeHistoryLogs.slice(startIdx, startIdx + pageSize);
+
+  // Show a warning if terms are empty but history exists
+  const showTermsWarning = !loading && !error && safeTerms.length === 0 && safeHistoryLogs.length > 0;
+
   return (
     <div className="p-8 w-full">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Loan Term Management</h1>
-          <p className="text-sm text-gray-500 mt-1">Set and modify loan term management.</p>
+          <p className="text-sm text-gray-500 mt-1">Create, edit, and delete loan terms.</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
@@ -129,86 +374,174 @@ const LoanTermManagement = () => {
         </button>
       </div>
 
-      {/* Card */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4">
-          <div>
-            <p className="font-semibold text-gray-900">Update Loan Term</p>
-            <p className="text-sm text-gray-400 mt-0.5">Input the details below to modify loan term</p>
-          </div>
-          <button className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
-            Save Details
-          </button>
+      {/* Editable Terms Card */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <div className="mb-6">
+          <p className="font-semibold text-gray-900">Current Loan Terms</p>
+          <p className="text-sm text-gray-400 mt-0.5">Edit or delete existing terms</p>
+          {showTermsWarning && (
+            <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+              ⚠️ The list of terms is empty, but history shows that terms have been created. 
+              This may indicate a problem with the API response. Check the browser console for details.
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-[200px_1fr] gap-8">
-          <p className="text-sm font-medium text-gray-700 pt-2">Edit loan term</p>
+          <p className="text-sm font-medium text-gray-700 pt-2">Term (months)</p>
           <div className="flex flex-col gap-3">
-            {terms.map((term) => (
-              <div key={term.id} className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={term.label}
-                  onChange={(e) => handleChange(term.id, e.target.value)}
-                  className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
-                />
-                <button
-                  onClick={() => handleDelete(term.id)}
-                  className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            ))}
+            {loading ? (
+              <div className="text-center py-4 text-gray-500">Loading...</div>
+            ) : error ? (
+              <div className="text-center py-4 text-red-500">{error}</div>
+            ) : safeTerms.length === 0 ? (
+              <div className="text-center py-4 text-gray-400">No loan terms found. Add one using the button above.</div>
+            ) : (
+              safeTerms.map((term) => (
+                <div key={term.id} className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    min="1"
+                    value={term.id}
+                    onChange={(e) => handleChange(term.id, parseInt(e.target.value, 10))}
+                    className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                  />
+                  <button
+                    onClick={() => handleDelete(term.id)}
+                    className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
-      {/* Modal */}
+
+      {/* History Card (unchanged) */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <History size={20} className="text-gray-500" />
+          <p className="font-semibold text-gray-900">Creation History</p>
+        </div>
+        <p className="text-sm text-gray-400 mt-0.5 mb-6">Timeline of when loan terms were created</p>
+
+        {/* History Table */}
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="border-b border-gray-100">
+              <tr>
+                <th className="text-left pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Date Created</th>
+                <th className="text-left pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Created By</th>
+                <th className="text-left pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Duration (months)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {historyLoading ? (
+                <tr><td colSpan="3" className="py-8 text-center text-gray-400">Loading history...</td></tr>
+              ) : historyError ? (
+                <tr><td colSpan="3" className="py-8 text-center text-red-500">{historyError}</td></tr>
+              ) : pageItems.length === 0 ? (
+                <tr><td colSpan="3" className="py-8 text-center text-gray-400">No creation history found.</td></tr>
+              ) : (
+                pageItems.map((log) => (
+                  <tr key={log.id} className="hover:bg-gray-50">
+                    <td className="py-3 text-gray-700">{new Date(log.createdAt).toLocaleString()}</td>
+                    <td className="py-3 text-gray-700">{log.actorEmail || 'System'}</td>
+                    <td className="py-3 text-gray-700">
+                      {log.metadata?.months || log.entityId || '—'} months
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination (same as before) */}
+        {!historyLoading && !historyError && safeHistoryLogs.length > 0 && (
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+            <p className="text-sm text-gray-500">
+              Showing {startIdx + 1}–{Math.min(startIdx + pageSize, totalEntries)} of {totalEntries} entries
+            </p>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-500">Show</span>
+              <div className="relative">
+                <button
+                  onClick={() => setPageSizeOpen((o) => !o)}
+                  className="flex items-center gap-1.5 border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  {pageSize}
+                  <ChevronDown size={13} />
+                </button>
+                {pageSizeOpen && (
+                  <div className="absolute bottom-full mb-1 left-0 bg-white border border-gray-200 rounded-md shadow-md z-10 min-w-full">
+                    {PAGE_SIZES.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => { setPageSize(s); setPage(1); setPageSizeOpen(false); }}
+                        className={`block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 ${s === pageSize ? 'text-blue-500 font-medium' : 'text-gray-700'}`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <span className="text-sm text-gray-500">entries</span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={safePage === 1}
+                  className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                <span className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-sm text-gray-700 font-medium bg-white">
+                  {safePage}
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safePage === totalPages}
+                  className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Add Modal (unchanged) */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-2xl w-full max-w-md mx-4 p-6 relative">
-            {/* Close */}
-            <button
-              onClick={handleCancel}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-            >
+            <button onClick={handleCancel} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
               <X size={18} />
             </button>
-
-            {/* Icon */}
             <div className="w-10 h-10 flex items-center justify-center border border-gray-200 rounded-lg mb-4">
               <CalendarDays size={20} className="text-gray-600" />
             </div>
-
             <h2 className="text-xl font-bold text-gray-900 mb-4">Add a New Tenure</h2>
-
-            {/* Info bar */}
             <div className="bg-gray-900 text-white text-sm rounded-xl px-4 py-3 mb-5">
               Input the tenure duration in the field below
             </div>
-
-            {/* Input */}
-            <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Duration (months)</label>
             <input
-              type="text"
-              placeholder="Enter duration"
+              type="number"
+              min="1"
+              placeholder="e.g., 12"
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
               className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 bg-gray-50 focus:outline-none focus:border-blue-400 mb-6"
             />
-
-            {/* Actions */}
             <div className="flex items-center justify-end gap-3">
-              <button
-                onClick={handleCancel}
-                className="px-5 py-2.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
+              <button onClick={handleCancel} className="px-5 py-2.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50">
                 Cancel
               </button>
-              <button
-                onClick={handleCreate}
-                className="px-5 py-2.5 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
-              >
+              <button onClick={handleCreate} className="px-5 py-2.5 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg">
                 Create
               </button>
             </div>
@@ -216,7 +549,7 @@ const LoanTermManagement = () => {
         </div>
       )}
     </div>
-  )
+  );
 };
 
 export default LoanTermManagement;
