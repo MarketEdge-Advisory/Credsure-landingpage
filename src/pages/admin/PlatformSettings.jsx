@@ -24,35 +24,35 @@ const PlatformSettings = () => {
 
   return (
     <div>
-      <div className="grid grid-cols-2 md:flex border-b border-gray-300">
+      <div className="grid grid-cols-2 md:flex border-b border-gray-300 px-13 mt-6">
         <button
           onClick={() => setActiveTab('interest')}
-          className={`px-5 py-2.5 border-0 cursor-pointer outline-none ${
-            activeTab === 'interest' ? 'bg-gray-300' : 'bg-transparent'
+          className={`px-5 py-2.5 border-0 cursor-pointer outline-none rounded-md ${
+            activeTab === 'interest' ? 'bg-gray-900 text-white' : 'bg-transparent'
           }`}
         >
           Interest Rate
         </button>
         <button
           onClick={() => setActiveTab('term')}
-          className={`px-5 py-2.5 border-0 cursor-pointer outline-none ${
-            activeTab === 'term' ? 'bg-gray-300' : 'bg-transparent'
+          className={`px-5 py-2.5 border-0 cursor-pointer outline-none rounded-md ${
+            activeTab === 'term' ? 'bg-gray-900 text-white' : 'bg-transparent'
           }`}
         >
           Loan Term
         </button>
         <button
           onClick={() => setActiveTab('calculator')}
-          className={`px-5 py-2.5 border-0 cursor-pointer outline-none ${
-            activeTab === 'calculator' ? 'bg-gray-300' : 'bg-transparent'
+          className={`px-5 py-2.5 border-0 cursor-pointer outline-none rounded-md ${
+            activeTab === 'calculator' ? 'bg-gray-900 text-white' : 'bg-transparent'
           }`}
         >
           Loan Calculator
         </button>
         <button
           onClick={() => setActiveTab('audit')}
-          className={`px-5 py-2.5 border-0 cursor-pointer outline-none ${
-            activeTab === 'audit' ? 'bg-gray-300' : 'bg-transparent'
+          className={`px-5 py-2.5 border-0 cursor-pointer outline-none rounded-md ${
+            activeTab === 'audit' ? 'bg-gray-900 text-white' : 'bg-transparent'
           }`}
         >
           Audit Log
