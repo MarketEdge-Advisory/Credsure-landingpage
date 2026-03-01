@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, CheckCircle2, BadgeCheck, CreditCard, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
+import { Users, CheckCircle2, BadgeCheck, CreditCard, Calendar, TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -342,14 +342,20 @@ const RecentApplications = () => {
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">Loading...</td>
-              </tr>
-            ) : paginated.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">No results found.</td>
-              </tr>
-            ) : (
+               <tr>
+    <td colSpan={6} className="py-10 text-center">
+      <div className="flex justify-center items-center">
+        <Loader2 size={48} className="text-gray-500 animate-spin" />
+      </div>
+    </td>
+  </tr>
+) : paginated.length === 0 ? (
+  <tr>
+    <td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">
+      No results found.
+    </td>
+  </tr>
+) : (
               paginated.map((row) => (
                 <tr key={row.id} className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors">
                   <td className="px-6 py-4 text-blue-500 font-medium">{row.name}</td>

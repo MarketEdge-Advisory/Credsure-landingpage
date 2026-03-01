@@ -10,6 +10,7 @@ import LoanTermManagement from './pages/admin/LoanTermManagement';
 import PlatformSettings from './pages/admin/PlatformSettings';
 import AdminLogin from './pages/admin/AdminLogin';
 import { useAuth } from './context/AuthContext';
+import ProfileSettings from './pages/admin/ProfileSettings';
 
 
 /** Redirect to login if not authenticated. Optionally restrict to a specific role. */
@@ -48,6 +49,7 @@ function App() {
 
           {/* Shared by both roles */}
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="profile-settings" element={<ProfileSettings />} />
           <Route path="settings" element={<PlatformSettings />} />
 
           {/* Suzuki admin only */}

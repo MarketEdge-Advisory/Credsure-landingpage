@@ -70,13 +70,25 @@ export async function updateCarPrice(carId, price) {
   return res.json();
 }
 
-export async function updateCarImages(carId, images) {
-  const formData = new FormData();
-  images.forEach((img) => formData.append('images', img));
+// export async function updateCarImages(carId, images) {
+//   const formData = new FormData();
+//   images.forEach((img) => formData.append('images', img));
+//   const res = await fetch(`${API_BASE}/${carId}/images`, {
+//     method: 'PATCH',
+//     headers: getAuthHeaders(),
+//     body: formData
+//   });
+//   if (!res.ok) throw new Error('Failed to update images');
+//   return res.json();
+// }
+
+// Replace the current updateCarImages with this version
+export async function updateCarImages(carId, data) {
+  // data should be an object like { images: [{ url: '...' }] }
   const res = await fetch(`${API_BASE}/${carId}/images`, {
     method: 'PATCH',
-    headers: getAuthHeaders(),
-    body: formData
+    headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(data)
   });
   if (!res.ok) throw new Error('Failed to update images');
   return res.json();

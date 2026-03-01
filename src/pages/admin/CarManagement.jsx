@@ -1113,7 +1113,8 @@ import * as XLSX from 'xlsx';
 import { uploadImagesToCloudinary } from '../../api/upload';
 import {
   Plus, Search, Pencil, Trash2, Download, CalendarDays, ChevronDown,
-  ChevronLeft, ChevronRight, ArrowLeft, UploadCloud, Minus, FileSpreadsheet
+  ChevronLeft, ChevronRight, ArrowLeft, UploadCloud, Minus, FileSpreadsheet,
+  Loader2
 } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 import { useCarContext } from '../../context/CarContext';
@@ -1764,28 +1765,56 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
   });
   const [saving, setSaving] = useState(false);
 
+  // useEffect(() => {
+  //   if (!vehicle) return;
+  //   setForm({
+  //     carName: vehicle.name || '',
+  //     description: vehicle.description || '',
+  //     vehiclePrice: vehicle.basePrice || '',
+  //     variant: vehicle.variant || '',
+  //     numberOfUnits: vehicle.numberOfUnits || '',
+  //     engineSpec: vehicle.specs?.engine || '',
+  //     transmissionSpec: vehicle.specs?.transmission || '',
+  //     availability: vehicle.availability || '',
+  //   });
+  //   if (vehicle.images && Array.isArray(vehicle.images)) {
+  //     setExistingImageUrls(vehicle.images.map(img => img.url));
+  //   } else if (vehicle.imageUrls && Array.isArray(vehicle.imageUrls)) {
+  //     setExistingImageUrls(vehicle.imageUrls);
+  //   } else if (vehicle.primaryImageUrl) {
+  //     setExistingImageUrls([vehicle.primaryImageUrl]);
+  //   } else {
+  //     setExistingImageUrls([]);
+  //   }
+  // }, [vehicle]);
+
   useEffect(() => {
-    if (!vehicle) return;
-    setForm({
-      carName: vehicle.name || '',
-      description: vehicle.description || '',
-      vehiclePrice: vehicle.basePrice || '',
-      variant: vehicle.variant || '',
-      numberOfUnits: vehicle.numberOfUnits || '',
-      engineSpec: vehicle.specs?.engine || '',
-      transmissionSpec: vehicle.specs?.transmission || '',
-      availability: vehicle.availability || '',
-    });
-    if (vehicle.images && Array.isArray(vehicle.images)) {
-      setExistingImageUrls(vehicle.images.map(img => img.url));
-    } else if (vehicle.imageUrls && Array.isArray(vehicle.imageUrls)) {
-      setExistingImageUrls(vehicle.imageUrls);
-    } else if (vehicle.primaryImageUrl) {
-      setExistingImageUrls([vehicle.primaryImageUrl]);
-    } else {
-      setExistingImageUrls([]);
-    }
-  }, [vehicle]);
+  if (!vehicle) return;
+  setForm({
+    carName: vehicle.name || '',
+    description: vehicle.description || '',
+    vehiclePrice: vehicle.basePrice || '',
+    variant: vehicle.variant || '',
+    numberOfUnits: vehicle.numberOfUnits || '',
+    engineSpec: vehicle.specs?.engine || '',
+    transmissionSpec: vehicle.specs?.transmission || '',
+    availability: vehicle.availability || '',
+  });
+
+  // Filter out any fake image URLs that contain "example.com"
+  if (vehicle.images && Array.isArray(vehicle.images)) {
+    const realUrls = vehicle.images
+      .map(img => img.url)
+      .filter(url => !url.includes('example.com'));
+    setExistingImageUrls(realUrls);
+  } else if (vehicle.imageUrls && Array.isArray(vehicle.imageUrls)) {
+    setExistingImageUrls(vehicle.imageUrls.filter(url => !url.includes('example.com')));
+  } else if (vehicle.primaryImageUrl) {
+    setExistingImageUrls([vehicle.primaryImageUrl].filter(url => !url.includes('example.com')));
+  } else {
+    setExistingImageUrls([]);
+  }
+}, [vehicle]);
 
   const handleNewImageFiles = (files) => {
     if (!files || files.length === 0) return;
@@ -1818,50 +1847,117 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
   const handleChange = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
-  const handleEditVehicle = async () => {
-    setSaving(true);
-    try {
-      let finalImageUrls = [...existingImageUrls];
-      if (newImageFiles.length > 0) {
-        const uploadResult = await uploadImagesToCloudinary(newImageFiles);
-        const resultData = uploadResult?.data || uploadResult;
-        let newUrls = [];
-        if (resultData.imageUrls && Array.isArray(resultData.imageUrls)) {
-          newUrls = resultData.imageUrls;
-        } else if (resultData.imageUrl) {
-          newUrls = [resultData.imageUrl];
-        } else if (resultData.urls && Array.isArray(resultData.urls)) {
-          newUrls = resultData.urls;
-        } else if (Array.isArray(resultData)) {
-          newUrls = resultData;
-        }
-        finalImageUrls = [...finalImageUrls, ...newUrls];
+  // const handleEditVehicle = async () => {
+  //   setSaving(true);
+  //   try {
+  //     let finalImageUrls = [...existingImageUrls];
+  //     if (newImageFiles.length > 0) {
+  //       const uploadResult = await uploadImagesToCloudinary(newImageFiles);
+  //       const resultData = uploadResult?.data || uploadResult;
+  //       let newUrls = [];
+  //       if (resultData.imageUrls && Array.isArray(resultData.imageUrls)) {
+  //         newUrls = resultData.imageUrls;
+  //       } else if (resultData.imageUrl) {
+  //         newUrls = [resultData.imageUrl];
+  //       } else if (resultData.urls && Array.isArray(resultData.urls)) {
+  //         newUrls = resultData.urls;
+  //       } else if (Array.isArray(resultData)) {
+  //         newUrls = resultData;
+  //       }
+  //       finalImageUrls = [...finalImageUrls, ...newUrls];
+  //     }
+
+  //     const carData = {
+  //       name: form.carName,
+  //       description: form.description,
+  //       basePrice: Number(form.vehiclePrice),
+  //       variant: form.variant,
+  //       numberOfUnits: Number(form.numberOfUnits),
+  //       availability: form.availability,
+  //       specs: {
+  //         engine: form.engineSpec,
+  //         transmission: form.transmissionSpec,
+  //       },
+  //       images: finalImageUrls.map(url => ({ url })),
+  //     };
+
+  //     await carApi.updateCar(vehicle.id, carData);
+  //     await fetchVehicles();
+  //     Swal.fire({ icon: 'success', title: 'Success', text: 'Vehicle updated successfully!' });
+  //     onBack();
+  //   } catch (e) {
+  //     Swal.fire({ icon: 'error', title: 'Failed', text: e.message || 'Failed to update vehicle' });
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // };
+
+
+
+ const handleEditVehicle = async () => {
+  setSaving(true);
+  try {
+    // 1. Upload new images to Cloudinary
+    let finalImageUrls = [...existingImageUrls];
+    if (newImageFiles.length > 0) {
+      const uploadResult = await uploadImagesToCloudinary(newImageFiles);
+      const resultData = uploadResult?.data || uploadResult;
+      let newUrls = [];
+      if (resultData.imageUrls && Array.isArray(resultData.imageUrls)) {
+        newUrls = resultData.imageUrls;
+      } else if (resultData.imageUrl) {
+        newUrls = [resultData.imageUrl];
+      } else if (resultData.urls && Array.isArray(resultData.urls)) {
+        newUrls = resultData.urls;
+      } else if (Array.isArray(resultData)) {
+        newUrls = resultData;
       }
-
-      const carData = {
-        name: form.carName,
-        description: form.description,
-        basePrice: Number(form.vehiclePrice),
-        variant: form.variant,
-        numberOfUnits: Number(form.numberOfUnits),
-        availability: form.availability,
-        specs: {
-          engine: form.engineSpec,
-          transmission: form.transmissionSpec,
-        },
-        images: finalImageUrls.map(url => ({ url })),
-      };
-
-      await carApi.updateCar(vehicle.id, carData);
-      await fetchVehicles();
-      Swal.fire({ icon: 'success', title: 'Success', text: 'Vehicle updated successfully!' });
-      onBack();
-    } catch (e) {
-      Swal.fire({ icon: 'error', title: 'Failed', text: e.message || 'Failed to update vehicle' });
-    } finally {
-      setSaving(false);
+      finalImageUrls = [...finalImageUrls, ...newUrls];
     }
-  };
+
+    // 2. Basic car data (without availability & images)
+    const basicCarData = {
+      name: form.carName,
+      description: form.description,
+      basePrice: Number(form.vehiclePrice),
+      variant: form.variant,
+      numberOfUnits: Number(form.numberOfUnits),
+      specs: {
+        engine: form.engineSpec,
+        transmission: form.transmissionSpec,
+      },
+    };
+
+    // 3. Update basic details
+    await carApi.updateCar(vehicle.id, basicCarData);
+
+    // 4. Update availability if changed
+    if (form.availability !== vehicle.availability) {
+      await carApi.updateCarAvailability(vehicle.id, form.availability);
+    }
+
+    // 5. Update images if changed
+    const originalUrls = vehicle.images?.map(img => img.url) || [];
+    const imagesChanged = JSON.stringify(finalImageUrls.sort()) !== JSON.stringify(originalUrls.sort());
+    if (imagesChanged) {
+      if (finalImageUrls.length === 0) {
+        Swal.fire({ icon: 'error', title: 'Cannot remove all images', text: 'At least one image is required.' });
+        setSaving(false);
+        return;
+      }
+      // Send as { images: [{ url: '...' }, ...] }
+      await carApi.updateCarImages(vehicle.id, { images: finalImageUrls.map(url => ({ url })) });
+    }
+
+    await fetchVehicles();
+    Swal.fire({ icon: 'success', title: 'Success', text: 'Vehicle updated successfully!' });
+    onBack();
+  } catch (e) {
+    Swal.fire({ icon: 'error', title: 'Failed', text: e.message || 'Failed to update vehicle' });
+  } finally {
+    setSaving(false);
+  }
+};
 
   return (
     <div className="p-8 w-full">
@@ -2254,14 +2350,14 @@ const CarManagement = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={() => setShowImportForm(true)}
-            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors w-full sm:w-auto justify-center"
+            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-2 py-2 rounded-lg transition-colors w-full sm:w-auto justify-center"
           >
             <FileSpreadsheet size={16} />
             Import from Excel
           </button>
           <button
             onClick={() => setShowAddForm(true)}
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors w-full sm:w-auto justify-center"
+            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-2 py-2 rounded-lg transition-colors w-full sm:w-auto justify-center"
           >
             <Plus size={16} />
             Add New Vehicle
@@ -2333,7 +2429,7 @@ const CarManagement = () => {
               <div className="relative w-full sm:w-auto">
                 <button
                   onClick={() => setShowDatePicker((o) => !o)}
-                  className="flex items-center gap-2 border border-gray-200 rounded-sm px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full sm:w-auto justify-center"
+                  className="flex items-center gap-1 border border-gray-200 rounded-sm px-2 py-2.5 text-xs text-gray-700 hover:bg-gray-50 transition-colors w-full sm:w-auto justify-center"
                 >
                   <CalendarDays size={15} />
                   Custom Date
@@ -2352,25 +2448,18 @@ const CarManagement = () => {
         <div className="flex flex-col gap-4">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
-              <img src="/empty-cars.svg" alt="Loading vehicles" className="w-32 h-32 mb-6 opacity-70 animate-pulse" />
-              <h2 className="text-lg font-semibold text-gray-700 mb-2">Loading vehicles...</h2>
+              <Loader2 size={48} className="text-gray-500 animate-spin mb-6" />
+              {/* <h2 className="text-lg font-semibold text-gray-700 mb-2">Loading vehicles...</h2> */}
               <p className="text-gray-500 mb-4">Please wait while we fetch your inventory.</p>
             </div>
-          ) : pageItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16">
-              <img src="/empty-cars.svg" alt="No vehicles" className="w-32 h-32 mb-6 opacity-70" />
-              <h2 className="text-lg font-semibold text-gray-700 mb-2">No vehicles found</h2>
-              <p className="text-gray-500 mb-4">You haven't added any cars yet. Start by adding your first vehicle to manage inventory, pricing, and details.</p>
-              <button
-                onClick={() => setShowAddForm(true)}
-                className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-6 py-3 rounded-lg transition-colors shadow-md"
-              >
-                <Plus size={18} className="inline-block mr-2" /> Add New Vehicle
-              </button>
-            </div>
-          ) : (
-            pageItems.map((vehicle) => {
+          ): pageItems.length === 0 ? (
+  <div className="px-6 py-10 text-center text-gray-400 text-sm">
+    No results found.
+  </div>
+) : (
+            pageItems.map((vehicle, index) => {
               const status = statusConfig[vehicle.availability] || statusConfig['AVAILABLE'];
+              // const sNo = startIdx + index + 1;
               let imageUrl = '/empty-cars.svg';
               if (vehicle.primaryImageUrl) {
                 imageUrl = vehicle.primaryImageUrl;
@@ -2445,8 +2534,8 @@ const CarManagement = () => {
 
                       {/* Inventory Controls */}
                       <div className="flex flex-col md:flex-row items-start gap-3 mt-4 w-full">
-                        <p className="text-sm text-gray-400 font-medium text-left">Inventory:</p>
-                        <div className="flex items-center gap-2 w-full">
+                        {/* <p className="text-sm text-gray-400 font-medium text-left">Inventory:</p> */}
+                        {/* <div className="flex items-center gap-2 w-full">
                           <button
                             onClick={() => removeStock(vehicle.id)}
                             className="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 hover:bg-red-50 hover:border-red-300 text-gray-500 hover:text-red-500 transition-colors"
@@ -2477,6 +2566,12 @@ const CarManagement = () => {
                           }`}>
                             {(inventory[vehicle.id] ?? 0) === 0 ? 'Out of stock' : `${inventory[vehicle.id] ?? 0} in stock`}
                           </span>
+                        </div> */}
+                        <div className="flex flex-col w-full">
+                          <p className="text-sm text-gray-400">Number of Units</p>
+                          <p className="text-sm font-bold text-gray-900">
+                            {vehicle.numberOfUnits || '-'}
+                          </p>
                         </div>
                       </div>
                     </div>
