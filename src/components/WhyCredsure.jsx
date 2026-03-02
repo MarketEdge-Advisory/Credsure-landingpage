@@ -18,7 +18,7 @@ const WhyCredsure = () => {
     {
       icon: <img src='/calendar.svg' alt='calendar' className="w-8 h-8 text-blue-600" strokeWidth={2} />,
       title: 'Flexible Payment Terms',
-      description: 'Choose payment plans from 6 to 24 months that fit your budget and lifestyle.',
+      description: 'Choose payment plans from 6 to 36 months that fit your budget and lifestyle.',
     },
     {
       icon: <img src='/truck.svg' alt='truck' className="w-8 h-8 text-blue-600" strokeWidth={2} />,

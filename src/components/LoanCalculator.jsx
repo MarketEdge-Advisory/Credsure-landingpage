@@ -150,8 +150,16 @@ const [isSubmitting, setIsSubmitting] = useState(false);
   const downPaymentPercentage = vehiclePrice ? ((downPayment / vehiclePrice) * 100).toFixed(0) : 0;
 
   const handleFormChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setFormErrors({ ...formErrors, [e.target.name]: undefined });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    // Remove error if value is now valid
+    let valid = true;
+    if (name === 'fullName' && !value.trim()) valid = false;
+    if (name === 'phone' && (!value.trim() || !/^\d{10,}$/.test(value.trim()))) valid = false;
+    if (name === 'email' && (!value.trim() || !/^\S+@\S+\.\S+$/.test(value.trim()))) valid = false;
+    if (name === 'employmentStatus' && !value) valid = false;
+    if (name === 'monthlyIncome' && (!value.trim() || isNaN(Number(value)) || Number(value) <= 0)) valid = false;
+    setFormErrors({ ...formErrors, [name]: valid ? undefined : formErrors[name] });
   };
 
   const handleSubmit = async (e) => {
@@ -161,13 +169,14 @@ const [isSubmitting, setIsSubmitting] = useState(false);
     const errors = {};
     if (!formData.fullName.trim()) errors.fullName = 'Full name is required';
     if (!formData.phone.trim()) errors.phone = 'Phone number is required';
-    else if (!/^\d{10,}$/.test(formData.phone.trim())) errors.phone = 'Enter a valid phone number';
+    else if (!/^[\d]{10,}$/.test(formData.phone.trim())) errors.phone = 'Enter a valid phone number';
     if (!formData.email.trim()) errors.email = 'Email address is required';
     else if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) errors.email = 'Enter a valid email address';
     if (!formData.employmentStatus) errors.employmentStatus = 'Employment status is required';
     if (!formData.monthlyIncome.trim()) errors.monthlyIncome = 'Monthly income is required';
     else if (isNaN(Number(formData.monthlyIncome)) || Number(formData.monthlyIncome) <= 0) errors.monthlyIncome = 'Enter a valid income';
     if (!carId) errors.carId = 'Could not determine the selected vehicle.';
+    if (!formData.agreeToContact) errors.agreeToContact = 'You must consent to be contacted.';
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) {
       setIsSubmitting(false);
@@ -325,7 +334,7 @@ const [isSubmitting, setIsSubmitting] = useState(false);
                 />
               </div>
               <p className="text-gray-400 text-xs m-0 bg-[#0D2A46] rounded-full px-3 py-2">
-                Slider Range: 0% - 100% of vehicle price
+                Slider Range: 10% - 100% of vehicle price
               </p>
             </div>
           </div>
@@ -349,7 +358,7 @@ const [isSubmitting, setIsSubmitting] = useState(false);
                   </li> */}
                   <li className="text-gray-300 text-xs flex items-start">
                     <span className="mr-2">•</span>
-                    <span>1 Year Free Maintenance Service Plan or 15,000KM, whichever comes first</span>
+                    <span>1 Year Free Maintenance Service Plan or 15,000 Km, whichever comes first</span>
                   </li>
                   <li className="text-gray-300 text-xs flex items-start">
                     <span className="mr-2">•</span>
@@ -357,15 +366,22 @@ const [isSubmitting, setIsSubmitting] = useState(false);
                   </li>
                   <li className="text-gray-300 text-xs flex items-start">
                     <span className="mr-2">•</span>
-                    <span>New Vehicle purchase comes with a 3-Year Warranty or 100,000KM, whichever comes first</span>
+                    <span>New Vehicle purchase comes with a 3-Year Warranty or 100,000 Km, whichever comes first</span>
                   </li>
                 </ul>
               </div>
             {/* Get Approved Button */}
             <div className="mt-2 sm:mt-4">
-              <button 
+              <button
                 onClick={() => setShowModal(true)}
-                className="w-full bg-cyan-500 hover:bg-slate-100 hover:text-black text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 hover:shadow-lg text-xs sm:text-sm md:text-base"
+                className="w-full bg-cyan-500 hover:bg-slate-100 hover:text-black text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 hover:shadow-lg text-xs sm:text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={
+                  !selectedVehicle ||
+                  !loanTenure ||
+                  !downPayment ||
+                  !vehiclePrice ||
+                  Number(downPayment) < vehiclePrice * 0.1
+                }
               >
                 Get pre-approved now
               </button>
@@ -493,13 +509,21 @@ const [isSubmitting, setIsSubmitting] = useState(false);
                       type="checkbox"
                       name="agreeToContact"
                       checked={formData.agreeToContact}
-                      onChange={(e) => setFormData({ ...formData, agreeToContact: e.target.checked })}
-                      className="h-4 w-4 text-cyan-500 border-gray-300 rounded focus:ring-cyan-500"
+                      onChange={(e) => {
+                        setFormData({ ...formData, agreeToContact: e.target.checked });
+                        if (e.target.checked && formErrors.agreeToContact) {
+                          setFormErrors({ ...formErrors, agreeToContact: undefined });
+                        }
+                      }}
+                      className={`h-4 w-4 text-cyan-500 border-gray-300 rounded focus:ring-cyan-500 ${formErrors.agreeToContact ? 'ring-2 ring-red-500' : ''}`}
                     />
                     <label className="text-gray-600 text-sm">
                       I consent to be contacted regarding this loan application.
                     </label>
                   </div>
+                  {formErrors.agreeToContact && (
+                    <span className="text-xs text-red-500 mt-1 block">{formErrors.agreeToContact}</span>
+                  )}
 
                   {/* Submit Button */}
                   <button

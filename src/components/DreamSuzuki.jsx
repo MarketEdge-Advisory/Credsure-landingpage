@@ -337,7 +337,7 @@ useEffect(() => {
   return (
     <div id="home" className="relative w-full overflow-hidden">
       {/* Hero Container */}
-      <div className="relative min-h-screen w-full bg-[#0f1e3d] mt-16">
+      <div className={`relative min-h-screen w-full mt-16${isGallerySlide ? '' : ' bg-[#0f1e3d]'}`}> 
 
         {/* ── PROMO SLIDE: full background image as <img> ── */}
         {!isGallerySlide && currentSlideData && (
@@ -350,15 +350,7 @@ useEffect(() => {
             fetchpriority={currentSlide === 0 ? 'high' : 'auto'}
           />
         )}
-
-        {/* Overlay – darker for gallery so cards pop */}
-        <div
-          className={`absolute inset-0 transition-all duration-700 ${
-            isGallerySlide
-              ? 'bg-[#0a1628]'
-              : 'bg-gradient-to-r from-black/60 via-black/40 to-transparent'
-          }`}
-        />
+        {/* Overlay removed for both promo and gallery cards */}
 
         {/* Content */}
         <div className="relative z-10 flex min-h-screen items-center justify-center">
@@ -412,7 +404,7 @@ useEffect(() => {
                 return (
                   <div
                     key={car.id}
-                    className="relative flex flex-col items-center justify-center mx-auto h-[420px] w-full max-w-[900px] rounded-2xl overflow-hidden group shadow-xl"
+                    className="absolute inset-0 w-full h-full flex flex-col items-center justify-center overflow-hidden group"
                   >
                     <img
                       src={optimizedImage}
@@ -421,8 +413,6 @@ useEffect(() => {
                       loading="lazy"
                       decoding="async"
                     />
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-all duration-300 group-hover:via-black/40" />
                     {/* Caption */}
                     <div className="absolute bottom-0 left-0 right-0 p-5 text-left">
                       <h4 className="text-white font-bold text-xl mb-1">{car.name}</h4>

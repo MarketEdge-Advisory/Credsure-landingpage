@@ -17,11 +17,21 @@ const FAQ = () => {
   });
 
   const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'message') {
+      // Limit to 500 words
+      const words = value.trim().split(/\s+/);
+      if (words.length > 500) {
+        setFormErrors({ ...formErrors, message: 'Message cannot exceed 500 words.' });
+        return;
+      } else {
+        setFormErrors({ ...formErrors, message: undefined });
+      }
+    }
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
-    setFormErrors({ ...formErrors, [e.target.name]: undefined });
   };
 
   const handleSubmit = (e) => {
@@ -277,13 +287,18 @@ const FAQ = () => {
                       Message (Optional)
                     </label>
                     <textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={handleFormChange}
-                      rows="4"
-                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 resize-none"
-                      placeholder="How can we help you?"
-                    />
+                        name="message"
+                        value={formData.message}
+                        onChange={handleFormChange}
+                        rows="4"
+                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 resize-none"
+                        placeholder="How can we help you?"
+                      />
+                    {/* Word count and error */}
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-xs text-gray-400">{formData.message.trim() ? formData.message.trim().split(/\s+/).length : 0}/500 words</span>
+                      {formErrors.message && <span className="text-xs text-red-500">{formErrors.message}</span>}
+                    </div>
                   </div>
 
                   {/* Submit Button */}

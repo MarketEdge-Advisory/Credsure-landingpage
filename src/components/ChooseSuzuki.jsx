@@ -28,7 +28,7 @@ const ChooseSuzuki = () => {
   };
 
   // Monthly calculation
-  const calculateMonthly = (price, months = 60) => {
+  const calculateMonthly = (price, months = 36) => {
     if (!price) return "₦0";
 
     const downPayment = price * 0.1;
@@ -164,7 +164,7 @@ const ChooseSuzuki = () => {
                 />
 
                 {/* overlay */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/70 to-black/20"></div>
+                {/* <div className="absolute inset-0 bg-gradient-to-b from-black/70 to-black/20"></div> */}
 
                 {/* Image icon */}
                 {car.images?.length > 0 && (
@@ -177,16 +177,16 @@ const ChooseSuzuki = () => {
                 )}
 
                 {/* Price */}
-                {/* <div className="absolute top-4 right-4 z-10 bg-[#1a2942] text-white p-3 rounded ">
-                  {car.showFrom && (
+                <div className="absolute top-4 right-4 z-10 bg-[#1a2942] text-white p-3 rounded ">
+                  {/* {car.showFrom && (
                     <p>
                       From: <strong>{car.priceFormatted}</strong>
                     </p>
-                  )}
+                  )} */}
                   <p>
-                    Monthly: <strong>{car.monthlyFormatted}</strong>
+                    Monthly from: <strong>{car.monthlyFormatted}</strong>
                   </p>
-                </div> */}
+                </div>
 
                 {/* Bottom */}
                 <div className="absolute bottom-0 z-10 p-4 text-white w-full">
