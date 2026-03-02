@@ -11,7 +11,7 @@ import PlatformSettings from './pages/admin/PlatformSettings';
 import AdminLogin from './pages/admin/AdminLogin';
 import { useAuth } from './context/AuthContext';
 import ProfileSettings from './pages/admin/ProfileSettings';
-import CarDetailsPage from "./components/CarDetailsPage";
+import CarDetailsPage from "./pages/CarDetailsPage";
 
 
 /** Redirect to login if not authenticated. Optionally restrict to a specific role. */

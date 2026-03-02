@@ -11,7 +11,7 @@ import {
   Info
 } from 'lucide-react';
 import { getCar } from '../api/cars';
-import Header from './Header';
+import Header from '../components/Header';
 
 // Helper to optimize Cloudinary URLs
 const optimizeImageUrl = (url, width = 900) => {
