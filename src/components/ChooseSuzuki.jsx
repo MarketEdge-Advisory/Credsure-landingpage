@@ -177,7 +177,7 @@ const ChooseSuzuki = () => {
                 )}
 
                 {/* Price */}
-                <div className="absolute top-4 right-4 z-10 bg-[#1a2942] text-white p-3 rounded ">
+                {/* <div className="absolute top-4 right-4 z-10 bg-[#1a2942] text-white p-3 rounded ">
                   {car.showFrom && (
                     <p>
                       From: <strong>{car.priceFormatted}</strong>
@@ -186,7 +186,7 @@ const ChooseSuzuki = () => {
                   <p>
                     Monthly: <strong>{car.monthlyFormatted}</strong>
                   </p>
-                </div>
+                </div> */}
 
                 {/* Bottom */}
                 <div className="absolute bottom-0 z-10 p-4 text-white w-full">
@@ -199,7 +199,7 @@ const ChooseSuzuki = () => {
                       calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                   }}
-                    className="group mt-2 w-full bg-cyan-500 py-2 rounded-full hover:bg-slate-200 hover:text-black transition "
+                    className="group gap-4 mt-2 w-full bg-cyan-500 py-2 rounded-full hover:bg-slate-200 hover:text-black transition flex items-center justify-center"
                   >
                     Calculate Monthly Payment
                     <ChevronDown className="w-5 h-5 text-white transition-transform duration-300 group-hover:translate-y-1 group-hover:text-slate-800" />
@@ -275,10 +275,10 @@ const ChooseSuzuki = () => {
 
         {/* Load more */}
         {visibleCars < cars.length && (
-          <div className="text-center mt-8">
+          <div className="text-center mt-8 flex w-full items-center justify-center">
             <button
               onClick={handleLoadMore}
-              className="group bg-cyan-500 text-white px-6 py-3 rounded-full hover:bg-slate-200 hover:text-black transition"
+              className="group gap-2 flex bg-cyan-500 text-white px-6 py-3 rounded-full hover:bg-slate-200 hover:text-black transition items-center"
             >
               Load More
               <ChevronDown className="w-5 h-5 text-white transition-transform duration-300 group-hover:translate-y-1 group-hover:text-slate-800" />
