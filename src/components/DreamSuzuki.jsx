@@ -33,8 +33,8 @@ const DreamSuzuki = () => {
   // FAQ Database
   const faqs = [
     {
-      question: 'How does the CredSure car Loan work?',
-      answer: 'Our CredSure car Loan program allows you to drive your dream Suzuki with flexible monthly payments starting from ₦1,700,000. You pay a down payment and spread the remaining cost over 12-36 months.'
+      question: 'How does the CredSure Car Loan work?',
+      answer: 'Our CredSure Car Loan program allows you to drive your dream Suzuki with flexible monthly payments starting from ₦1,700,000. You pay a down payment and spread the remaining cost over 12-36 months.'
     },
     {
       question: 'What documents do I need?',

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { getCars } from '../api/cars';
+import { useNavigate } from 'react-router-dom';
 
 const Header = ({ onCarSelect = () => {} }) => { // Accept callback prop
   const [activeLink, setActiveLink] = useState('Home');
@@ -9,6 +10,7 @@ const Header = ({ onCarSelect = () => {} }) => { // Accept callback prop
   const [cars, setCars] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const searchRef = useRef(null);
+  const navigate = useNavigate();
 
   // Fetch cars on mount
   useEffect(() => {
@@ -59,7 +61,9 @@ const Header = ({ onCarSelect = () => {} }) => { // Accept callback prop
   const handleCarSelect = (car) => {
     setSearchValue(car.name);        // Optionally fill input with selected name
     setShowDropdown(false);           // Close dropdown
-    onCarSelect(car);                 // Notify parent component
+    if (car.id || car._id) {
+      navigate(`/car/${car.id || car._id}`);
+    }
   };
 
   // Handle Enter key press

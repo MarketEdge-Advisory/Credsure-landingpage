@@ -44,7 +44,7 @@ const WhyCredsure = () => {
             Why finance with CredSure
           </h2>
           <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-[720px] mx-auto px-4">
-            Get a quick pre-approval, understand your repayments upfront, and move from calculation to delivery faster with CredSure's car Loans financing.
+            Get a quick pre-approval, understand your repayments upfront, and move from calculation to delivery faster with CredSure's Car Loans financing.
           </p>
         </div>
 

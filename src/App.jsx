@@ -11,6 +11,7 @@ import PlatformSettings from './pages/admin/PlatformSettings';
 import AdminLogin from './pages/admin/AdminLogin';
 import { useAuth } from './context/AuthContext';
 import ProfileSettings from './pages/admin/ProfileSettings';
+import CarDetailsPage from './components/Cardetailspage';
 
 
 /** Redirect to login if not authenticated. Optionally restrict to a specific role. */
@@ -35,6 +36,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/car/:id" element={<CarDetailsPage />} />
 
         {/* Admin routes – all require authentication */}
         <Route

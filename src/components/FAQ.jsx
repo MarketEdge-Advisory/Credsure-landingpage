@@ -98,7 +98,7 @@ const FAQ = () => {
     },
     {
       question: 'How much down payment do I need?',
-      answer: 'Down payment starts from ₦500,000 and can go up to 100% of the vehicle price. The amount affects your monthly payments and loan approval.',
+      answer: 'Down payment starts from ₦1,700,000 and can go up to 100% of the vehicle price. The amount affects your monthly payments and loan approval.',
     },
     {
       question: 'What loan tenures are available?',
