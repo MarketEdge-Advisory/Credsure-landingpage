@@ -155,7 +155,11 @@ const [isSubmitting, setIsSubmitting] = useState(false);
     // Remove error if value is now valid
     let valid = true;
     if (name === 'fullName' && !value.trim()) valid = false;
-    if (name === 'phone' && (!value.trim() || !/^\d{10,}$/.test(value.trim()))) valid = false;
+    if (name === 'phone') {
+    const digits = value.replace(/\D/g, ''); // remove non-digits
+    // Nigerian mobile numbers: 11 digits, start with 0, second digit 7/8/9
+    if (!digits || !/^0[789]\d{9}$/.test(digits)) valid = false;
+  }
     if (name === 'email' && (!value.trim() || !/^\S+@\S+\.\S+$/.test(value.trim()))) valid = false;
     if (name === 'employmentStatus' && !value) valid = false;
     if (name === 'monthlyIncome' && (!value.trim() || isNaN(Number(value)) || Number(value) <= 0)) valid = false;
@@ -168,8 +172,14 @@ const [isSubmitting, setIsSubmitting] = useState(false);
     // Validate fields
     const errors = {};
     if (!formData.fullName.trim()) errors.fullName = 'Full name is required';
-    if (!formData.phone.trim()) errors.phone = 'Phone number is required';
-    else if (!/^[\d]{10,}$/.test(formData.phone.trim())) errors.phone = 'Enter a valid phone number';
+    if (!formData.phone.trim()) {
+    errors.phone = 'Phone number is required';
+  } else {
+    const digits = formData.phone.replace(/\D/g, '');
+    if (!/^0[789]\d{9}$/.test(digits)) {
+      errors.phone = 'Enter a valid Nigerian phone number (e.g., 08031234567)';
+    }
+  }
     if (!formData.email.trim()) errors.email = 'Email address is required';
     else if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) errors.email = 'Enter a valid email address';
     if (!formData.employmentStatus) errors.employmentStatus = 'Employment status is required';
@@ -288,7 +298,7 @@ const [isSubmitting, setIsSubmitting] = useState(false);
                   }}
                   className="w-full bg-gray-100 text-gray-700 px-3 py-3 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 >
-                  <option value="">Select vehicle model</option>
+                  {/* <option value="">Select vehicle model</option> */}
                   {cars.map(car => <option key={car.id} value={car.name}>{car.name}</option>)}
                 </select>
                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
@@ -440,6 +450,7 @@ const [isSubmitting, setIsSubmitting] = useState(false);
                       className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${formErrors.phone ? 'border-red-500' : 'border-gray-300'}`}
                       placeholder="Enter your phone number"
                       autoComplete="off"
+                      maxLength="11" 
                     />
                     {formErrors.phone && <span className="text-xs text-red-500 mt-1 block">{formErrors.phone}</span>}
                   </div>

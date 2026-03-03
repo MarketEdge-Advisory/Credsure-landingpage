@@ -32,6 +32,10 @@ const FAQ = () => {
       ...formData,
       [name]: value,
     });
+     setFormErrors((prevErrors) => ({
+    ...prevErrors,
+    [name]: undefined,
+  }));
   };
 
   const handleSubmit = (e) => {
@@ -40,10 +44,16 @@ const FAQ = () => {
     // Validate fields
     const errors = {};
     if (!formData.fullName.trim()) errors.fullName = 'Full name is required';
-    if (!formData.phone.trim()) errors.phone = 'Phone number is required';
-    else if (!/^\d{10,}$/.test(formData.phone.trim())) errors.phone = 'Enter a valid phone number';
+    if (!formData.phone.trim()) {
+    errors.phone = 'Phone number is required';
+  } else {
+    const digits = formData.phone.replace(/\D/g, '');
+    if (!/^0[789]\d{9}$/.test(digits)) {
+      errors.phone = 'Enter a valid Nigerian phone number (e.g., 08031234567)';
+    }
+  }
     if (!formData.email.trim()) errors.email = 'Email address is required';
-    else if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) errors.email = 'Enter a valid email address';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) errors.email = 'Enter a valid email address';
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) {
       setIsSubmitting(false);
@@ -256,6 +266,7 @@ const FAQ = () => {
                       type="tel"
                       name="phone"
                       value={formData.phone}
+                      maxLength="11" 
                       onChange={handleFormChange}
                       className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${formErrors.phone ? 'border-red-500' : 'border-gray-300'}`}
                       placeholder="Enter your phone number"
