@@ -24,7 +24,7 @@ const Footer = () => {
                             />
                         </div>
                         <p className="text-xs sm:text-sm text-gray-300">
-                           CredSure Loans by Afridev & CFAO Suzuki, partnering
+                           CredSure Loans by Afridev & Suzuki by CFAO, partnering
                             together to make vehicle ownership accessible to
                             everyone.
                         </p>
@@ -41,12 +41,12 @@ const Footer = () => {
                             >
                                 <FiInstagram className="w-5 h-5" />
                             </a>
-                            <a
+                            {/* <a
                                 href="#"
                                 className=" bg-[#011F3D] rounded-full flex items-center justify-center hover:bg-white hover:text-[#0A2647] transition-colors group p-2"
                             >
                                 <PiTwitterLogo className="w-5 h-5" />
-                            </a>
+                            </a> */}
                         </div>
                     </div>
 

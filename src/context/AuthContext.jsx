@@ -9,26 +9,23 @@ export const useAuth = () => {
   return ctx;
 };
 
+const SUPER_ADMIN_EMAIL = 'owner@marketedge.com';
+const SUPER_ADMIN_PASSWORD = 'StrongPass123';
+
+const normalizeRole = (role) => {
+  if (!role) return '';
+  const normalized = String(role).toLowerCase();
+  if (normalized.includes('super')) return 'super';
+  if (normalized.includes('suzuki')) return 'suzuki';
+  if (normalized.includes('credsure')) return 'credsure';
+  return normalized;
+};
+
 /**
  * Hard-coded admin accounts.
  * role: 'credsure' | 'suzuki'
  */
-const ACCOUNTS = [
-  {
-    email: 'credsure@admin.com',
-    password: 'Credsure@2026',
-    role: 'credsure',
-    name: 'Credsure Admin',
-    initials: 'CA',
-  },
-  {
-    email: 'suzuki@admin.com',
-    password: 'Suzuki@2026',
-    role: 'suzuki',
-    name: 'Suzuki Admin',
-    initials: 'SA',
-  },
-];
+
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
@@ -43,29 +40,56 @@ export const AuthProvider = ({ children }) => {
 
   // LOGIN
   const login = async (email, password) => {
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+
+    if (normalizedEmail === SUPER_ADMIN_EMAIL && password === SUPER_ADMIN_PASSWORD) {
+      const localSuperAdmin = {
+        email: SUPER_ADMIN_EMAIL,
+        role: 'super',
+        name: 'Super Admin',
+        initials: 'OA',
+      };
+
+      setUser(localSuperAdmin);
+      sessionStorage.setItem('admin_user', JSON.stringify(localSuperAdmin));
+      return { ok: true };
+    }
+
     try {
       const data = await authApi.loginAdmin({ email, password });
       // Support various backend response shapes
       let userObj = data.user || data.data?.user || data.data || data;
       let accessToken = data.accessToken || data.data?.accessToken || data.token || '';
       if (!accessToken && userObj && userObj.accessToken) accessToken = userObj.accessToken;
+
+      const role = normalizeRole(userObj?.role);
+      const userEmail = String(userObj?.email || '').toLowerCase();
+
       // Map correct name/initials based on email or role
       let mapped = { ...userObj };
-      if (userObj.email === 'credsure@admin.com' || userObj.role === 'credsure') {
+      if (userEmail === 'support@credsureloans.com' || role === 'credsure') {
         mapped.name = 'Credsure Admin';
         mapped.initials = 'CA';
         mapped.role = 'credsure';
-      } else if (userObj.email === 'suzuki@admin.com' || userObj.role === 'suzuki') {
+      } else if (userEmail === 'suzukisalesng@cfao.com' || role === 'suzuki') {
         mapped.name = 'Suzuki Admin';
         mapped.initials = 'SA';
         mapped.role = 'suzuki';
+      } else if (userEmail === SUPER_ADMIN_EMAIL || role === 'super') {
+        mapped.name = 'Super Admin';
+        mapped.initials = 'OA';
+        mapped.role = 'super';
+      } else {
+        mapped.name = mapped.name || 'Admin';
+        mapped.initials = mapped.initials || 'A';
       }
+
       if (accessToken) mapped.accessToken = accessToken;
       setUser(mapped);
       sessionStorage.setItem('admin_user', JSON.stringify(mapped));
       return { ok: true };
     } catch (e) {
-      return { ok: false, message: e.message || 'Login failed' };
+      return { ok: false, message: e.message || 'Invalid email or password' };
     }
   };
 

@@ -15,14 +15,14 @@ import { useAuth } from '../../context/AuthContext';
 const ALL_SECTIONS = [
   {
     label: 'Overview',
-    roles: ['credsure', 'suzuki'],
+    roles: ['credsure', 'suzuki', 'super'],
     items: [
       { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
     ],
   },
   {
     label: 'Suzuki Admin',
-    roles: ['suzuki'],
+    roles: ['suzuki', 'super'],
     items: [
       { name: 'Car Management', icon: Truck, path: '/admin/car-management' },
     ],
@@ -38,7 +38,7 @@ const ALL_SECTIONS = [
   // },
   {
     label: 'Settings',
-   roles: ['credsure'],
+   roles: ['credsure', 'super'],
     items: [
       { name: 'Platform Settings', icon: Settings, path: '/admin/settings' },
     ],
@@ -57,6 +57,7 @@ const AdminSidebar = ({ open, setOpen }) => {
   const getNormalizedRole = (role) => {
     if (!role) return '';
     const r = role.toLowerCase();
+    if (r.includes('super')) return 'super';
     if (r.includes('suzuki')) return 'suzuki';
     if (r.includes('credsure')) return 'credsure';
     return r;

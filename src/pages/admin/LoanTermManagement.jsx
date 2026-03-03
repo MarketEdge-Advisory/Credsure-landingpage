@@ -77,7 +77,7 @@ const LoanTermManagement = () => {
       await fetchHistory();
       Swal.fire({ icon: 'success', title: 'Updated!', text: 'Loan tenure updated successfully.' });
     } catch (e) {
-      setError(e.message || 'Failed to update loan tenure');
+      setError(null);
       Swal.fire({ icon: 'error', title: 'Update Failed', text: e.message || 'Failed to update loan tenure.' });
     } finally {
       setLoading(false);

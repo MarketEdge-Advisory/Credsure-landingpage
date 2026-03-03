@@ -9,7 +9,16 @@ export async function loginAdmin({ email, password }) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password })
   });
-  if (!res.ok) throw new Error('Login failed');
+  if (!res.ok) {
+    let message = 'Login failed';
+    try {
+      const payload = await res.json();
+      message = payload?.message || payload?.error || message;
+    } catch {
+      // Keep default message when response is not JSON
+    }
+    throw new Error(message);
+  }
   return res.json();
 }
 

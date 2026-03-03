@@ -65,7 +65,6 @@ const CalculatorInputMgt = () => {
                 processingFeePct: Number(processingFee),
                 insuranceCost: Number(insuranceCost),
               });
-              setSuccess('Calculator input updated successfully.');
               Swal.fire({
                 icon: 'success',
                 title: 'Calculator Updated!',

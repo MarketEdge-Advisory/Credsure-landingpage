@@ -18,15 +18,32 @@ import CarDetailsPage from "./pages/CarDetailsPage";
 const normalizeRole = (role) => {
   if (!role) return '';
   const r = role.toLowerCase();
+  if (r.includes('super')) return 'super';   
   if (r.includes('suzuki')) return 'suzuki';
   if (r.includes('credsure')) return 'credsure';
   return r;
 };
 
+// const ProtectedRoute = ({ children, allowedRole }) => {
+//   const { user } = useAuth();
+//   if (!user) return <Navigate to="/admin/login" replace />;
+//   if (allowedRole && normalizeRole(user.role) !== allowedRole) return <Navigate to="/admin/dashboard" replace />;
+//   return children;
+// };
+
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { user } = useAuth();
   if (!user) return <Navigate to="/admin/login" replace />;
-  if (allowedRole && normalizeRole(user.role) !== allowedRole) return <Navigate to="/admin/dashboard" replace />;
+
+  const userRole = normalizeRole(user.role);
+
+  // Super admin can access all protected routes
+  if (userRole === 'super') return children;
+
+  if (allowedRole && userRole !== allowedRole) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+
   return children;
 };
 

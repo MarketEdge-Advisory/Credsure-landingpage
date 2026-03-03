@@ -322,11 +322,11 @@ export default function AdminLogin() {
   const navigate = useNavigate();
   const { login, user } = useAuth();
 
-  if (user) return <Navigate to="/admin/dashboard" replace />;
-
   useEffect(() => {
     document.title = pageTitles[step];
   }, [step]);
+
+  if (user) return <Navigate to="/admin/dashboard" replace />;
 
   const handleLogin = async (email, password) => {
     const result = await login(email, password);
