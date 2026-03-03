@@ -168,11 +168,10 @@ export async function updateLoanTenure(months, data) {
   if (!res.ok) throw new Error('Failed to update loan tenure');
   return res.json();
 }
-
 export async function deleteLoanTenure(months) {
   const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
   const token = user?.accessToken || '';
-  const res = await fetch(`https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/${months}`, {
+  const res = await fetch(`https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/loan-tenures/${months}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${token}`,
