@@ -9,8 +9,8 @@ export const useAuth = () => {
   return ctx;
 };
 
-const SUPER_ADMIN_EMAIL = 'owner@marketedge.com';
-const SUPER_ADMIN_PASSWORD = 'StrongPass123';
+const SUPER_ADMIN_EMAIL = 'agency@marketedgeadvisory.com';
+const SUPER_ADMIN_PASSWORD = 'MarketEdge123';
 
 const normalizeRole = (role) => {
   if (!role) return '';
@@ -136,6 +136,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     sessionStorage.removeItem('admin_user');
+    sessionStorage.removeItem('access_token');
   };
 
   return (
