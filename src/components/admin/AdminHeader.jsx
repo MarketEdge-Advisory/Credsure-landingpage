@@ -22,8 +22,7 @@ const AdminHeader = ({ onHamburgerClick }) => {
 
   const handleLogout = () => {
     // Remove auth data
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+   sessionStorage.clear();
 
     // Optional: clear everything
     // localStorage.clear();
