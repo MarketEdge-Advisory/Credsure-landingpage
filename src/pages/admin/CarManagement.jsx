@@ -468,7 +468,8 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
       }
 
       if (!imageUrls || imageUrls.length === 0 || !imageUrls[0]) {
-        setFormError('Image upload failed. Please try again.');
+         Swal.fire({ icon: 'error', title: 'Failed', text: 'Image upload failed. Please try again.' });
+        // setFormError('Image upload failed. Please try again.');
         setSaving(false);
         return;
       }

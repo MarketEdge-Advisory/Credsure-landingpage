@@ -70,7 +70,7 @@ const InterestRateManagement = () => {
             setUpdateSuccess('');
             try {
               await updateInterestRate(Number(interestRate));
-              setUpdateSuccess('Interest rate updated successfully.');
+              setUpdateSuccess(null);
               Swal.fire({
                 icon: 'success',
                 title: 'Interest Rate Updated!',
@@ -80,7 +80,7 @@ const InterestRateManagement = () => {
               });
               fetchHistory();
             } catch (e) {
-              setUpdateError(e.message || 'Failed to update.');
+              setUpdateError(null);
               Swal.fire({
                 icon: 'error',
                 title: 'Update Failed',

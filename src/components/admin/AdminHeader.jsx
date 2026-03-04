@@ -66,7 +66,7 @@ const AdminHeader = ({ onHamburgerClick }) => {
       {/* Right side */}
       <div className="flex items-center gap-4">
         {/* Bell */}
-        <div className="relative">
+        {/* <div className="relative">
           <button
             onClick={() => { setNotifOpen((o) => !o); setDropdownOpen(false); }}
             className="relative p-1.5 rounded-full hover:bg-gray-100 transition-colors"
@@ -75,10 +75,10 @@ const AdminHeader = ({ onHamburgerClick }) => {
             {unreadCount > 0 && (
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-white" />
             )}
-          </button>
+          </button> */}
 
           {/* Notifications panel */}
-          {notifOpen && (
+          {/* {notifOpen && (
             <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 pb-2 border-b border-gray-100">
                 Notifications
@@ -101,7 +101,7 @@ const AdminHeader = ({ onHamburgerClick }) => {
               ))}
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* User menu */}
         <div className="relative">

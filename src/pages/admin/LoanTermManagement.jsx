@@ -92,7 +92,7 @@ const LoanTermManagement = () => {
       await fetchHistory();
       Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Loan tenure deleted successfully.' });
     } catch (e) {
-      setError(e.message || 'Failed to delete loan tenure');
+      setError(null);
       Swal.fire({ icon: 'error', title: 'Delete Failed', text: e.message || 'Failed to delete loan tenure.' });
     } finally {
       setLoading(false);
@@ -127,7 +127,7 @@ const LoanTermManagement = () => {
       await fetchHistory();
       Swal.fire({ icon: 'success', title: 'Created!', text: 'Loan tenure added successfully.' });
     } catch (e) {
-      setError(e.message || 'Failed to add loan tenure');
+      setError(null);
       Swal.fire({ icon: 'error', title: 'Create Failed', text: e.message || 'Failed to add loan tenure.' });
     } finally {
       setLoading(false);

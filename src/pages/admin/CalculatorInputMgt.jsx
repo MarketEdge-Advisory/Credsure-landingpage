@@ -102,9 +102,9 @@ const CalculatorInputMgt = () => {
         confirmButtonText: 'OK',
         confirmButtonColor: '#2d9de5',
       });
-      setSuccess('Updated successfully.');
+      setSuccess(null);
     } catch (e) {
-      setError(e.message || 'Failed to update.');
+      // setError(e.message || 'Failed to update.');
       Swal.fire({
         icon: 'error',
         title: 'Update Failed',

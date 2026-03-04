@@ -431,7 +431,7 @@ const ChooseSuzuki = () => {
                 <img
                   src={car.image}
                   alt={car.name}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover object-center"
                   loading="lazy"
                   decoding="async"
                 />

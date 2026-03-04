@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
         email: SUPER_ADMIN_EMAIL,
         role: 'super',
         name: 'Super Admin',
-        initials: 'OA',
+        initials: 'AM',
       };
 
       setUser(localSuperAdmin);
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
         mapped.role = 'suzuki';
       } else if (userEmail === SUPER_ADMIN_EMAIL || role === 'super') {
         mapped.name = 'Super Admin';
-        mapped.initials = 'OA';
+        mapped.initials = 'AM';
         mapped.role = 'super';
       } else {
         mapped.name = mapped.name || 'Admin';
