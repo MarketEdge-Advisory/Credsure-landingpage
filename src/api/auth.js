@@ -54,7 +54,11 @@ export async function getMe() {
   return res.json();
 }
 
-export async function changePassword({ oldPassword, newPassword }) {
+export async function changePassword({ oldPassword: currentPassword, newPassword }) {
+  // Validate inputs
+  if (!currentPassword?.trim()) throw new Error('Current password is required');
+  if (!newPassword?.trim()) throw new Error('New password is required');
+
   const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
   const token = user?.accessToken || '';
   const res = await fetch(`${API_BASE}/change-password`, {
@@ -63,9 +67,17 @@ export async function changePassword({ oldPassword, newPassword }) {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify({ oldPassword, newPassword })
+    body: JSON.stringify({ 
+      currentPassword,      // ✅ renamed from oldPassword
+      newPassword 
+    }),
   });
-  if (!res.ok) throw new Error('Change password failed');
+
+  // Improved error handling
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Change password failed');
+  }
   return res.json();
 }
 

@@ -188,7 +188,7 @@ const LoanTermManagement = () => {
               safeTerms.map((term) => (
                 <div key={term.id} className="flex items-center gap-3">
                   <input
-                    type="number"
+                    type="text"
                     min="1"
                     value={term.id}
                     onChange={(e) => handleChange(term.id, parseInt(e.target.value, 10))}

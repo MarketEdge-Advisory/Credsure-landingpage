@@ -126,10 +126,10 @@ const AuditLog = () => {
             </p>
           </div>
           <div className="flex gap-3">
-            <button className="flex items-center gap-2 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+            {/* <button className="flex items-center gap-2 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
               <Download size={15} />
               Export
-            </button>
+            </button> */}
             <div className="relative">
               <button
                 onClick={() => setShowDatePicker((o) => !o)}

@@ -163,7 +163,7 @@ const InterestRateManagement = () => {
               <Download size={15} />
               Download
             </button>
-            <div className="relative">
+            {/* <div className="relative">
               <button
                 onClick={() => setShowDatePicker((o) => !o)}
                 className="flex items-center gap-2 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -176,7 +176,7 @@ const InterestRateManagement = () => {
                 onClose={() => setShowDatePicker(false)}
                 onApply={(range) => setDateRange(range)}
               />
-            </div>
+            </div> */}
           </div>
         </div>
 

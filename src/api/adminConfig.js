@@ -238,3 +238,23 @@ export async function getActivityLogs({ page = 1, pageSize = 10, startDate, endD
     total: response.data?.length || 0 // If your API doesn't return total, we'll use client-side pagination
   };
 }
+
+/**
+ * Fetch calculator update history with pagination
+ * @param {Object} params - { page, limit }
+ * @returns {Promise<Object>} API response with items and pagination
+ */
+export async function getCalculatorHistory({ page = 1, limit = 10 }) {
+  const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
+  const token = user?.accessToken || '';
+  const params = new URLSearchParams();
+  params.append('page', page);
+  params.append('limit', limit);
+  const res = await fetch(`https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/calculator/history?${params.toString()}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error('Failed to fetch calculator history');
+  return res.json();
+}

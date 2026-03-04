@@ -1307,12 +1307,12 @@ const CarManagement = () => {
                 </button>
                 {downloadMenuOpen && (
                   <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-20">
-                    <button
+                    {/* <button
                       onClick={() => downloadVehicles(pageItems, 'filtered_vehicles.xlsx')}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       Download All (Filtered)
-                    </button>
+                    </button> */}
                     <button
                       onClick={() => {
                         const selectedVehicles = vehicles.filter(v => selectedIds.has(v.id));
@@ -1325,7 +1325,7 @@ const CarManagement = () => {
                   </div>
                 )}
               </div>
-              <div className="relative w-full sm:w-auto">
+              {/* <div className="relative w-full sm:w-auto">
                 <button
                   onClick={() => setShowDatePicker((o) => !o)}
                   className="flex items-center gap-1 border border-gray-200 rounded-sm px-2 py-2.5 text-xs text-gray-700 hover:bg-gray-50 transition-colors w-full sm:w-auto justify-center"
@@ -1338,7 +1338,7 @@ const CarManagement = () => {
                   onClose={() => setShowDatePicker(false)}
                   onApply={(range) => setDateRange(range)}
                 />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
