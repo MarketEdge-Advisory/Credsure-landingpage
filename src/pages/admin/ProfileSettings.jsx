@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { changePassword } from '../../api/auth';
-import { Monitor, MoreVertical } from 'lucide-react';
+import { Eye, EyeOff, Monitor, MoreVertical } from 'lucide-react';
 
 const ProfileSettings = () => {
   const [sessions, setSessions] = useState([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
   const [sessionsError, setSessionsError] = useState(null);
+   const [showPassword, setShowPassword] = useState(false);
+   const [showPasswordCurrent, setShowPasswordCurrent] = useState(false);
+   const [showPasswordNew, setShowPasswordNew] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   // Fetch sessions from backend
   useEffect(() => {
@@ -45,15 +56,6 @@ const ProfileSettings = () => {
 
     fetchSessions();
   }, []);
-
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-  const [fieldErrors, setFieldErrors] = useState({});
 
   return (
     <div className="p-8 w-full">
@@ -160,13 +162,13 @@ const ProfileSettings = () => {
           <div className="flex flex-col gap-4">
 
             {/* Current Password */}
-            <div>
+            <div className='relative'>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Current Password
               </label>
 
               <input
-                type="password"
+                type={showPasswordCurrent ? "text" : "password"}
                 value={currentPassword}
                 onChange={(e) => {
                   setCurrentPassword(e.target.value);
@@ -181,7 +183,12 @@ const ProfileSettings = () => {
                     : 'border-gray-200'
                 } rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-400`}
               />
-
+ <span
+      className="absolute inset-y-0 right-3 top-5 flex items-center cursor-pointer text-gray-500"
+      onClick={() => setShowPasswordCurrent(!showPasswordCurrent)}
+    >
+      {showPasswordCurrent ? <Eye size={18} /> : <EyeOff size={18} />}
+    </span>
               {fieldErrors.currentPassword && (
                 <p className="text-xs text-red-500 mt-1">
                   {fieldErrors.currentPassword}
@@ -190,43 +197,53 @@ const ProfileSettings = () => {
             </div>
 
             {/* New Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                New Password
-              </label>
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    New Password
+  </label>
 
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => {
-                  setNewPassword(e.target.value);
-                  setFieldErrors((prev) => ({
-                    ...prev,
-                    newPassword: undefined,
-                  }));
-                }}
-                className={`w-full border ${
-                  fieldErrors.newPassword
-                    ? 'border-red-500'
-                    : 'border-gray-200'
-                } rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-400`}
-              />
+  {/* Wrap input + icon together */}
+  <div className="relative">
+    <input
+      type={showPasswordNew ? "text" : "password"}
+      value={newPassword}
+      onChange={(e) => {
+        setNewPassword(e.target.value);
+        setFieldErrors((prev) => ({
+          ...prev,
+          newPassword: undefined,
+        }));
+      }}
+      className={`w-full border ${
+        fieldErrors.newPassword
+          ? "border-red-500"
+          : "border-gray-200"
+      } rounded-lg px-4 py-2.5 pr-10 text-sm text-gray-700 focus:outline-none focus:border-blue-400`}
+    />
 
-              {fieldErrors.newPassword && (
-                <p className="text-xs text-red-500 mt-1">
-                  {fieldErrors.newPassword}
-                </p>
-              )}
-            </div>
+    <span
+      className="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-500"
+      onClick={() => setShowPasswordNew(!showPasswordNew)}
+    >
+      {showPasswordNew ? <Eye size={18} /> : <EyeOff size={18} />}
+    </span>
+  </div>
+
+  {fieldErrors.newPassword && (
+    <p className="text-xs text-red-500 mt-1">
+      {fieldErrors.newPassword}
+    </p>
+  )}
+</div>
 
             {/* Confirm Password */}
-            <div>
+            <div className='relative'>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Confirm Password
               </label>
 
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => {
                   setConfirmPassword(e.target.value);
@@ -241,7 +258,12 @@ const ProfileSettings = () => {
                     : 'border-gray-200'
                 } rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-400`}
               />
-
+ <span
+      className="absolute inset-y-0 right-3 top-5 flex items-center cursor-pointer text-gray-500"
+      onClick={() => setShowPassword(!showPassword)}
+    >
+      {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+    </span>
               {fieldErrors.confirmPassword && (
                 <p className="text-xs text-red-500 mt-1">
                   {fieldErrors.confirmPassword}
