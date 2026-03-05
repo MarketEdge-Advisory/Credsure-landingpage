@@ -236,7 +236,7 @@ const RecentApplications = () => {
           <h2 className="text-base font-bold text-gray-900">Recent Pre-Approval Applications</h2>
           <p className="text-gray-400 text-sm mt-0.5">Latest processed pre-approval applications</p>
         </div>
-        <div className="w-full flex items-center justify-between flex-wrap">
+        <div className="w-full flex items-center justify-between flex-wrap gap-4">
           {/* Search */}
           <div className="relative">
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -310,6 +310,7 @@ const RecentApplications = () => {
       {/* Collapsible Filters */}
       {showFilters && (
         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 animate-fade-in">
+           <div className="overflow-x-auto"> 
           <table className="w-full text-sm">
             <thead>
               <tr>
@@ -335,6 +336,7 @@ const RecentApplications = () => {
             </tbody>
           </table>
         </div>
+         </div>
       )}
 
       {/* Table + footer in shared horizontal scroll */}
