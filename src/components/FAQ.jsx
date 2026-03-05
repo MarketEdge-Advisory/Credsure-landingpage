@@ -62,7 +62,7 @@ const FAQ = () => {
         title: 'Form Error',
         text: 'Please correct the highlighted fields.',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#e53e3e',
+        confirmButtonColor: '#2e9fe6',
       });
       return;
     }
@@ -75,7 +75,7 @@ const FAQ = () => {
         title: 'Inquiry Sent!',
         text: 'Your inquiry has been sent to both CredSure and Suzuki. We will contact you within 24-48 hours.',
         confirmButtonText: 'Got it',
-        confirmButtonColor: '#2d9de5',
+        confirmButtonColor: '#2e9fe6',
       });
       setShowModal(false);
       setFormData({
@@ -91,7 +91,7 @@ const FAQ = () => {
         title: 'Submission Failed',
         text: err.message || 'An error occurred. Please try again.',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#e53e3e',
+        confirmButtonColor: '#2e9fe6',
       });
     }
     setIsSubmitting(false);

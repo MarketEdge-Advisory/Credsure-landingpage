@@ -101,7 +101,7 @@ const CarDetailsPage = () => {
           <ArrowLeft className="w-5 h-5 mr-2" />
           Back to vehicles
         </button>
-<h1 className="text-gl md:text-xl font-bold text-blue-500 mb-4">{car.name}</h1>
+<h1 className="text-gl md:text-xl font-bold text-blue-500 mb-4">{`${car.name} ${car.variant}`}</h1>
         {/* Main card with carousel and details */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
           <div className="flex flex-col w-full">

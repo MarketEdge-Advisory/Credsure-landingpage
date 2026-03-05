@@ -266,7 +266,7 @@ const LoanCalculator = () => {
         title: 'Submission Received!',
         text: 'Our representative will contact you shortly.',
         confirmButtonText: 'Got it',
-        confirmButtonColor: '#2d9de5',
+        confirmButtonColor: '#2e9fe6',
       });
 
       setShowModal(false);
@@ -285,7 +285,7 @@ const LoanCalculator = () => {
         title: 'Submission Failed',
         text: err.message || 'An error occurred. Please try again.',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#e53e3e',
+        confirmButtonColor: '#2e9fe6',
       });
     }
     setIsSubmitting(false);

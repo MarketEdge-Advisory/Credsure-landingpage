@@ -73,6 +73,16 @@ const ProfileSettings = () => {
       errors.newPassword = 'New password is required.';
     if (!confirmPassword.trim())
       errors.confirmPassword = 'Please confirm your new password.';
+
+    // Password strength validation
+    if (newPassword && newPassword.length < 8) {
+      errors.newPassword = 'Password must be at least 8 characters long.';
+    } else if (newPassword && !/(?=.*[A-Z])/.test(newPassword)) {
+      errors.newPassword = 'Password must contain at least one uppercase letter.';
+    } else if (newPassword && !/(?=.*\d)/.test(newPassword)) {
+      errors.newPassword = 'Password must contain at least one number.';
+    }
+
     if (newPassword && confirmPassword && newPassword !== confirmPassword) {
       errors.confirmPassword = 'New passwords do not match.';
     }
@@ -95,6 +105,7 @@ const ProfileSettings = () => {
         icon: 'error',
         title: 'Validation Error',
         text: 'Please correct the errors in the form.',
+        confirmButtonColor:'#2e9fe6',
       });
       setLoading(false);
       return;
@@ -174,7 +185,7 @@ const ProfileSettings = () => {
         <form
           id="passwordForm"
           className="grid grid-cols-1 gap-4 pb-8 border-b border-gray-100 md:grid-cols-[200px_1fr] md:gap-8"
-          onSubmit={handleSubmit}   // ✅ moved out of JSX
+          onSubmit={handleSubmit}
         >
           <p className="text-sm font-medium text-gray-700 pt-2">
             Input password details
@@ -225,7 +236,7 @@ const ProfileSettings = () => {
                 } rounded-lg px-4 py-2.5 pr-10 text-sm text-gray-700 focus:outline-none focus:border-blue-400`}
               />
               <span
-                className="absolute inset-y-0 right-3 top-8 flex items-center cursor-pointer text-gray-500"
+                className="absolute inset-y-0 right-3 top-0 flex items-center cursor-pointer text-gray-500"
                 onClick={toggleNew}
               >
                 {showPasswordNew ? <Eye size={18} /> : <EyeOff size={18} />}
@@ -233,6 +244,10 @@ const ProfileSettings = () => {
               {fieldErrors.newPassword && (
                 <p className="text-xs text-red-500 mt-1">{fieldErrors.newPassword}</p>
               )}
+              {/* Password requirements hint */}
+              <p className="text-xs text-gray-400 mt-1">
+                Password must be at least 8 characters, contain at least one uppercase letter and one number.
+              </p>
             </div>
 
             {/* Confirm Password */}
@@ -252,7 +267,7 @@ const ProfileSettings = () => {
                 } rounded-lg px-4 py-2.5 pr-10 text-sm text-gray-700 focus:outline-none focus:border-blue-400`}
               />
               <span
-                className="absolute inset-y-0 right-3 top-8 flex items-center cursor-pointer text-gray-500"
+                className="absolute inset-y-0 right-3 top-5 flex items-center cursor-pointer text-gray-500"
                 onClick={toggleConfirm}
               >
                 {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
@@ -283,7 +298,7 @@ const ProfileSettings = () => {
         <div className="pt-6">
           <div className="flex items-start justify-between mb-1">
             <div>
-              <p className="font-semibold text-gray-900">Where you're logged in</p>
+              {/* <p className="font-semibold text-gray-900">Where you're logged in</p> */}
               <p className="text-sm text-gray-400 mt-0.5">
                 We'll alert you via{' '}
                 <span className="text-blue-500">cresdsuresuzuki@gmail.com</span>{' '}
@@ -291,11 +306,11 @@ const ProfileSettings = () => {
               </p>
             </div>
             <button className="text-gray-400 hover:text-gray-600 transition-colors mt-1">
-              <MoreVertical size={18} />
+              {/* <MoreVertical size={18} /> */}
             </button>
           </div>
 
-          <div className="mt-5 flex flex-col divide-y divide-gray-100">
+          {/* <div className="mt-5 flex flex-col divide-y divide-gray-100">
             {sessionsLoading ? (
               <div className="py-4 text-gray-400 text-sm">Loading sessions...</div>
             ) : sessionsError ? (
@@ -326,7 +341,7 @@ const ProfileSettings = () => {
                 </div>
               ))
             )}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

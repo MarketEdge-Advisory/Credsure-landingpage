@@ -446,7 +446,7 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
     const errors = validateForm();
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) {
-      setFormError('Please correct the errors below.');
+      setFormError('Please ensure to fill all fields.');
       return;
     }
     setSaving(true);

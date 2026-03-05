@@ -16,19 +16,14 @@ const AdminHeader = ({ onHamburgerClick }) => {
   const { pathname } = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
    const navigate = useNavigate();
+   
 
-  const handleLogout = () => {
-    // Remove auth data
-   sessionStorage.clear();
-
-    // Optional: clear everything
-    // localStorage.clear();
-
-    // Redirect to login page
-    navigate("/");
+   const handleLogout = () => {
+    logout();
+    navigate('/admin/login', { replace: true });
   };
 
   // Derive current page label from pathname
