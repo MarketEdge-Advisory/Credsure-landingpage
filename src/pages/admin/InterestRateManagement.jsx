@@ -117,7 +117,7 @@ const InterestRateManagement = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Interest Rate (%)</label>
               <input
-                type="number"
+                type="text"
                 min="1"
                 max="100"
                 step="0.01"
