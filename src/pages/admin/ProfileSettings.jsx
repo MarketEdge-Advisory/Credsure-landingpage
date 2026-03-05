@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { changePassword } from '../../api/auth';
 import { Eye, EyeOff, Monitor, MoreVertical } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 // Helper to retrieve token from various storage locations
 const getToken = () => {
@@ -33,6 +34,7 @@ const ProfileSettings = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
+  const navigate = useNavigate()
 
   // ─── Helper: Fetch Sessions ──────────────────────────────
   const fetchSessions = async () => {
@@ -107,7 +109,7 @@ if (newPassword && newPassword.length < 8) {
         icon: 'error',
         title: 'Validation Error',
         text: 'Please correct the errors in the form.',
-        confirmButtonColor:'#2e9fe6',
+        confirmButtonColor:'#1e3f6e'
       });
       setLoading(false);
       return;
@@ -125,17 +127,20 @@ if (newPassword && newPassword.length < 8) {
         icon: 'success',
         title: 'Password Changed!',
         text: 'Your password has been updated successfully.',
+        confirmButtonColor:'#1e3f6e'
       });
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
       setFieldErrors({});
+       navigate('/admin/dashboard');
     } catch (e) {
       setError();
       Swal.fire({
         icon: 'error',
         title: 'Error',
         text: e.message || 'Failed to change password',
+        confirmButtonColor:'#1e3f6e'
       });
     } finally {
       setLoading(false);

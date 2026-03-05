@@ -685,7 +685,7 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
                   onChange={handleChange('availability')}
                   className={`w-full border ${fieldErrors.availability ? 'border-red-500' : 'border-gray-200'} rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-400`}
                 >
-                  <option value="">Select availability</option>
+                  {/* <option value="">Select availability</option> */}
                   <option value="AVAILABLE">Available</option>
                   <option value="NOT_AVAILABLE">Not Available</option>
                   <option value="COMING_SOON">Coming Soon</option>
@@ -840,7 +840,7 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
     const imagesChanged = JSON.stringify(finalImageUrls.sort()) !== JSON.stringify(originalUrls.sort());
     if (imagesChanged) {
       if (finalImageUrls.length === 0) {
-        Swal.fire({ icon: 'error', title: 'Cannot remove all images', text: 'At least one image is required.' });
+        Swal.fire({ icon: 'error', title: 'Cannot remove all images', text: 'At least one image is required.', confirmButtonColor:'#1e3f6e' });
         setSaving(false);
         return;
       }
@@ -849,10 +849,10 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
     }
 
     await fetchVehicles();
-    Swal.fire({ icon: 'success', title: 'Success', text: 'Vehicle updated successfully!' });
+    Swal.fire({ icon: 'success', title: 'Success', text: 'Vehicle updated successfully!', confirmButtonColor:'#1e3f6e' });
     onBack();
   } catch (e) {
-    Swal.fire({ icon: 'error', title: 'Failed', text: e.message || 'Failed to update vehicle' });
+    Swal.fire({ icon: 'error', title: 'Failed', text: e.message || 'Failed to update vehicle', confirmButtonColor:'#1e3f6e' });
   } finally {
     setSaving(false);
   }
@@ -1046,7 +1046,7 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
                 onChange={handleChange('availability')}
                 className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-400"
               >
-                <option value="">Select availability</option>
+                {/* <option value="">Select availability</option> */}
                 <option value="AVAILABLE">Available</option>
                 <option value="NOT_AVAILABLE">Not Available</option>
                 <option value="COMING_SOON">Coming Soon</option>
@@ -1151,7 +1151,7 @@ const CarManagement = () => {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
+      confirmButtonColor:'#1e3f6e',
       confirmButtonText: 'Yes, delete it!'
     });
 
@@ -1186,7 +1186,8 @@ const CarManagement = () => {
       Swal.fire({
         icon: 'error',
         title: 'Failed',
-        text: e.message || 'Failed to delete vehicle'
+        text: e.message || 'Failed to delete vehicle',
+        confirmButtonColor:'#1e3f6e'
       });
     }
   };
@@ -1212,7 +1213,7 @@ const CarManagement = () => {
   // ---------- Download handler ----------
   const downloadVehicles = (vehiclesToDownload, filename = 'vehicles.xlsx') => {
     if (vehiclesToDownload.length === 0) {
-      Swal.fire({ icon: 'info', title: 'No vehicles', text: 'There are no vehicles to download.' });
+      Swal.fire({ icon: 'info', title: 'No vehicles', text: 'There are no vehicles to download.', confirmButtonColor:'#1e3f6e' });
       return;
     }
 

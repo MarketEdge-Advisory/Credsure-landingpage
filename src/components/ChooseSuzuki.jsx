@@ -393,6 +393,15 @@ const ChooseSuzuki = () => {
     setVisibleCars(cars.length);
   };
 
+const formatStatus = (status) => {
+  if (!status) return '';
+  return status
+    .toLowerCase()                // convert whole string to lowercase
+    .split('_')                   // split by underscore
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // capitalize each word
+    .join(' ');                   // join with space
+};
+
   if (loading) {
     return <p className="text-center py-20">Loading vehicles...</p>;
   }
@@ -451,14 +460,18 @@ const ChooseSuzuki = () => {
 
                 {/* Price */}
                 <div className="absolute top-4 right-4 z-10 bg-[#1a2942] text-white p-3 rounded">
-                  <p>
-                    Monthly from: <strong>{car.monthlyFormatted}</strong>
-                  </p>
-                </div>
+  {car.availability === 'COMING_SOON' || car.availability === 'NOT_AVAILABLE' ? (
+    <p>{formatStatus(car.availability)}</p>
+  ) : (
+    <p>
+      Monthly from: <strong>{car.monthlyFormatted}</strong>
+    </p>
+  )}
+</div>
 
                 {/* Bottom */}
                 <div className="absolute bottom-0 z-10 p-4 text-white w-full">
-                  <h3 className="text-xl font-bold">{car.name}</h3>
+                  <h3 className="text-xl font-bold">{`${car.name} ${car.variant}`}</h3>
                   <button
                     onClick={() => {
                       selectCar(car);

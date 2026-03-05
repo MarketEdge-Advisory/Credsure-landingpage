@@ -76,7 +76,7 @@ const CalculatorInputMgt = () => {
           title: 'Failed to Load Config',
           text: e.message || 'Unable to fetch calculator configuration.',
           confirmButtonText: 'OK',
-          confirmButtonColor: '#e53e3e',
+         confirmButtonColor:'#1e3f6e'
         });
       } finally {
         setFetching(false);
@@ -123,7 +123,7 @@ const CalculatorInputMgt = () => {
         title: 'Calculator Updated!',
         text: 'Calculator input updated successfully.',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#2d9de5',
+        confirmButtonColor:'#1e3f6e'
       });
       setSuccess(null);
       setPage(1); // refresh first page to see latest update
@@ -133,7 +133,7 @@ const CalculatorInputMgt = () => {
         title: 'Update Failed',
         text: e.message || 'Failed to update.',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#e53e3e',
+        confirmButtonColor:'#1e3f6e'
       });
     } finally {
       setLoading(false);

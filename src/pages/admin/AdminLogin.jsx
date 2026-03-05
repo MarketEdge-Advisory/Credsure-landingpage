@@ -89,7 +89,7 @@ const PrimaryBtn = ({ children, onClick, type = 'button' }) => (
   <button
     type={type}
     onClick={onClick}
-    className="w-full bg-[#2d9de5] hover:bg-[#1e8fd4] text-white font-semibold py-2.5 sm:py-3 rounded-lg transition-colors text-xs sm:text-sm mt-1"
+    className="w-full bg-[#2d9de5] hover:bg-[#1e3f6e] cursor-pointer text-white font-semibold py-2.5 sm:py-3 rounded-lg transition-colors text-xs sm:text-sm mt-1"
   >
     {children}
   </button>

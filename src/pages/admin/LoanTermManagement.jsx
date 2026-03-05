@@ -67,7 +67,7 @@ const LoanTermManagement = () => {
 
   const handleChange = async (id, newMonths) => {
     if (!newMonths || newMonths < 1) {
-      Swal.fire({ icon: 'error', title: 'Invalid Input', text: 'Months must be a positive number.' });
+      Swal.fire({ icon: 'error', title: 'Invalid Input', text: 'Months must be a positive number.', confirmButtonColor:'#1e3f6e' });
       return;
     }
     setLoading(true);
@@ -75,10 +75,10 @@ const LoanTermManagement = () => {
       await updateLoanTenure(id, { months: newMonths });
       await refreshTenures();
       await fetchHistory();
-      Swal.fire({ icon: 'success', title: 'Updated!', text: 'Loan tenure updated successfully.' });
+      Swal.fire({ icon: 'success', title: 'Updated!', text: 'Loan tenure updated successfully.', confirmButtonColor:'#1e3f6e' });
     } catch (e) {
       setError(null);
-      Swal.fire({ icon: 'error', title: 'Update Failed', text: e.message || 'Failed to update loan tenure.' });
+      Swal.fire({ icon: 'error', title: 'Update Failed', text: e.message || 'Failed to update loan tenure.', confirmButtonColor:'#1e3f6e' });
     } finally {
       setLoading(false);
     }
@@ -90,10 +90,10 @@ const LoanTermManagement = () => {
       await deleteLoanTenure(id);
       await refreshTenures();
       await fetchHistory();
-      Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Loan tenure deleted successfully.' });
+      Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Loan tenure deleted successfully.', confirmButtonColor:'#1e3f6e' });
     } catch (e) {
       setError(null);
-      Swal.fire({ icon: 'error', title: 'Delete Failed', text: e.message || 'Failed to delete loan tenure.' });
+      Swal.fire({ icon: 'error', title: 'Delete Failed', text: e.message || 'Failed to delete loan tenure.', confirmButtonColor:'#1e3f6e' });
     } finally {
       setLoading(false);
     }
@@ -109,6 +109,7 @@ const LoanTermManagement = () => {
           icon: 'error',
           title: 'Invalid Input',
           text: 'Please enter a valid integer greater than or equal to 1 for months.',
+          confirmButtonColor:'#1e3f6e'
         });
         return;
       }
@@ -119,16 +120,17 @@ const LoanTermManagement = () => {
           icon: 'warning',
           title: 'Duplicate Term',
           text: `A loan term for ${months} months already exists.`,
+          confirmButtonColor:'#1e3f6e'
         });
         return;
       }
       await addLoanTenure(months);
       await refreshTenures();
       await fetchHistory();
-      Swal.fire({ icon: 'success', title: 'Created!', text: 'Loan tenure added successfully.' });
+      Swal.fire({ icon: 'success', title: 'Created!', text: 'Loan tenure added successfully.', confirmButtonColor:'#1e3f6e' });
     } catch (e) {
       setError(null);
-      Swal.fire({ icon: 'error', title: 'Create Failed', text: e.message || 'Failed to add loan tenure.' });
+      Swal.fire({ icon: 'error', title: 'Create Failed', text: e.message || 'Failed to add loan tenure.', confirmButtonColor:'#1e3f6e' });
     } finally {
       setLoading(false);
       setShowModal(false);

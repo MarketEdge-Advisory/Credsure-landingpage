@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getActivityLogs } from '../../api/adminConfig';
-import { ChevronLeft, ChevronRight, ChevronDown, Download, CalendarDays, Eye } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, CalendarDays, Eye } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 import Swal from 'sweetalert2';
 
@@ -16,6 +16,10 @@ const AuditLog = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
 
+  // Sorting is fixed: newest first (descending by createdAt)
+  const sortBy = 'createdAt';
+  const sortOrder = 'desc';
+
   const fetchLogs = async () => {
     setLoading(true);
     setError('');
@@ -26,7 +30,14 @@ const AuditLog = () => {
         startDate: dateRange.startDate,
         endDate: dateRange.endDate,
       });
-      setLogs(data.items || []);
+
+      // Client‑side sorting fallback (ensures correct order)
+      const sorted = (data.items || []).sort((a, b) => {
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+      });
+      setLogs(sorted);
     } catch (err) {
       setError(err.message || 'Failed to load activity logs');
     } finally {
@@ -39,6 +50,7 @@ const AuditLog = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, pageSize, dateRange]);
 
+  // Pagination calculations (client‑side)
   const totalEntries = logs.length;
   const totalPages = Math.max(1, Math.ceil(totalEntries / pageSize));
   const safePage = Math.min(page, totalPages);
@@ -78,35 +90,36 @@ const AuditLog = () => {
       title: 'Activity Details',
       html: `
         <div class="text-left space-y-2">
-          <div class="flex border-b pb-1">
-            <span class="font-semibold w-24">User:</span>
+          <div class="flex pb-1 font-normal text-sm">
+            <span class="font-normal text-sm w-24">User:</span>
             <span>${log.actorEmail || 'System'}</span>
           </div>
-          <div class="flex border-b pb-1">
-            <span class="font-semibold w-24">Role:</span>
+          <div class="flex pb-1 font-normal text-sm">
+            <span class="font-normal text-sm w-24">Role:</span>
             <span>${log.actorRole || '—'}</span>
           </div>
-          <div class="flex border-b pb-1">
-            <span class="font-semibold w-24">Action:</span>
+          <div class="flex pb-1 font-normal text-sm">
+            <span class="font-normal text-sm w-24">Action:</span>
             <span>${formatAction(log.action)}</span>
           </div>
-          <div class="flex border-b pb-1">
-            <span class="font-semibold w-24">Entity:</span>
+          <div class="flex pb-1 font-normal text-sm">
+            <span class="font-normal text-sm w-24">Entity:</span>
             <span>${log.entityType || '—'}</span>
           </div>
-          <div class="flex border-b pb-1">
-            <span class="font-semibold w-24">Timestamp:</span>
+          <div class="flex pb-1 font-normal text-sm">
+            <span class="font-normal text-sm w-24">Timestamp:</span>
             <span>${new Date(log.createdAt).toLocaleString()}</span>
           </div>
           <div class="flex pt-1">
-            <span class="font-semibold w-24">Details:</span>
-            <span class="flex-1 break-words">${detailsText}</span>
+            <span class="font-normal text-sm w-24">Details:</span>
+            <span class="flex-1 break-words font-normal text-sm">${detailsText}</span>
           </div>
         </div>
       `,
       confirmButtonText: 'Close',
       width: '500px',
       heightAuto: true,
+      confirmButtonColor:'#1e3f6e'
     });
   };
 
@@ -126,11 +139,7 @@ const AuditLog = () => {
             </p>
           </div>
           <div className="flex gap-3">
-            {/* <button className="flex items-center gap-2 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-              <Download size={15} />
-              Export
-            </button> */}
-            <div className="relative">
+            {/* <div className="relative">
               <button
                 onClick={() => setShowDatePicker((o) => !o)}
                 className="flex items-center gap-2 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -141,9 +150,12 @@ const AuditLog = () => {
               <DateRangePicker
                 isOpen={showDatePicker}
                 onClose={() => setShowDatePicker(false)}
-                onApply={(range) => setDateRange(range)}
+                onApply={(range) => {
+                  setDateRange(range);
+                  setPage(1); // reset to first page when filter changes
+                }}
               />
-            </div>
+            </div> */}
           </div>
         </div>
 

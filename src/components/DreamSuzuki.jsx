@@ -96,6 +96,7 @@ useEffect(() => {
         setCarGallery(cars.map(car => ({
           id: car.id,
           name: car.name,
+          variant:car.variant,
           image: (Array.isArray(car.images) && car.images[0]?.url) ? car.images[0].url : '/empty-cars.svg',
           description: car.description,
           price: car.basePrice || car.bestPrice || car.price
@@ -415,7 +416,7 @@ useEffect(() => {
                     />
                     {/* Caption */}
                     <div className="absolute bottom-0 left-0 right-0 p-5 text-left">
-                      <h4 className="text-white font-bold text-xl mb-1">{car.name}</h4>
+                      <h4 className="text-white font-bold text-xl mb-1">{`${car.name} ${car.variant}`}</h4>
                       <p className="text-gray-300 text-sm mb-3 md:max-w-[600px]">{car.description}</p>
                       <span className="text-blue-300 font-semibold text-base block mb-2">
                         ₦{(car.price / 1000000).toFixed(1)}M

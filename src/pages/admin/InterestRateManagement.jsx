@@ -67,7 +67,7 @@ const InterestRateManagement = () => {
         title: 'Interest Rate Updated!',
         text: 'Interest rate updated successfully.',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#2e9fe6',
+        confirmButtonColor:'#1e3f6e'
       });
       fetchHistory(page, pageSize); // Refresh current page
       setInterestRate(''); // Clear input
@@ -77,7 +77,7 @@ const InterestRateManagement = () => {
         title: 'Update Failed',
         text: e.message || 'Failed to update.',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#2e9fe6',
+        confirmButtonColor:'#1e3f6e'
       });
     } finally {
       setUpdateLoading(false);

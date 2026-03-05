@@ -234,7 +234,7 @@ const LoanCalculator = () => {
         title: 'Form Error',
         text: 'Please correct the highlighted fields.',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#e53e3e',
+        confirmButtonColor:'#1e3f6e'
       });
       return;
     }
@@ -266,7 +266,7 @@ const LoanCalculator = () => {
         title: 'Submission Received!',
         text: 'Our representative will contact you shortly.',
         confirmButtonText: 'Got it',
-        confirmButtonColor: '#2e9fe6',
+        confirmButtonColor:'#1e3f6e'
       });
 
       setShowModal(false);
@@ -285,7 +285,7 @@ const LoanCalculator = () => {
         title: 'Submission Failed',
         text: err.message || 'An error occurred. Please try again.',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#2e9fe6',
+        confirmButtonColor:'#1e3f6e'
       });
     }
     setIsSubmitting(false);
@@ -343,11 +343,11 @@ const LoanCalculator = () => {
                     setVehiclePrice(price);
                     setDownPayment(price * 0.1);
                   }}
-                  className="w-full bg-gray-100 text-gray-700 px-3 py-3 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="w-full overflow-auto scrollbar-hide bg-gray-100 text-gray-700 px-3 py-3 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 >
                   {cars.map((car) => (
                     <option key={car.id} value={car.name}>
-                      {car.name}
+                      {`${car.name} ${car.variant}`}
                     </option>
                   ))}
                 </select>
@@ -479,7 +479,7 @@ const LoanCalculator = () => {
             onClick={() => setShowModal(false)}
           >
             <div
-              className="bg-white rounded-lg max-w-2xl w-full relative max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-lg max-w-2xl w-full relative max-h-[90vh] overflow-y-auto scrollbar-hide"
               onClick={(e) => e.stopPropagation()}
             >
               <button
