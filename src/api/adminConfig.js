@@ -72,19 +72,6 @@ export async function updateInterestRate(rate) {
   return res.json();
 }
 
-// export async function getLoanTenures() {
-//   const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
-//   const token = user?.accessToken || '';
-//   const res = await fetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config', {
-//     headers: {
-//       'Authorization': `Bearer ${token}`,
-//     },
-//   });
-//   if (!res.ok) throw new Error('Failed to fetch loan tenures');
-//   return res.json();
-// }
-
-
 export async function getLoanTenures() {
   const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
   const token = user?.accessToken || '';
@@ -180,31 +167,6 @@ export async function deleteLoanTenure(months) {
   if (!res.ok) throw new Error('Failed to delete loan tenure');
   return res.json();
 }
-
-// /**
-//  * Fetch audit logs with pagination and optional date filtering
-//  * @param {Object} params - { page, pageSize, startDate, endDate }
-//  * @returns {Promise<{ items: Array, total: number }>}
-//  */
-// export async function getAuditLogs({ page = 1, pageSize = 10, startDate, endDate } = {}) {
-//   const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
-//   const token = user?.accessToken || '';
-//   const params = new URLSearchParams();
-//   params.append('page', page);
-//   params.append('limit', pageSize);
-//   if (startDate) params.append('startDate', startDate);
-//   if (endDate) params.append('endDate', endDate);
-
-//   const res = await fetch(`https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/audit-logs?${params.toString()}`, {
-//     headers: {
-//       'Authorization': `Bearer ${token}`,
-//     },
-//   });
-//   if (!res.ok) throw new Error('Failed to fetch audit logs');
-//   return res.json();
-// }
-
-// Add to your adminConfig.js
 
 /**
  * Fetch activity logs with pagination and optional date filtering

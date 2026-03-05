@@ -9,8 +9,8 @@ export const useAuth = () => {
   return ctx;
 };
 
-const SUPER_ADMIN_EMAIL = 'agency@marketedgeadvisory.com';
-const SUPER_ADMIN_PASSWORD = 'MarketEdge123';
+// const SUPER_ADMIN_EMAIL = 'agency@marketedgeadvisory.com';
+// const SUPER_ADMIN_PASSWORD = 'MarketEdge123';
 
 const normalizeRole = (role) => {
   if (!role) return '';
@@ -26,7 +26,6 @@ const normalizeRole = (role) => {
  * role: 'credsure' | 'suzuki'
  */
 
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     try {
@@ -37,24 +36,9 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-
   // LOGIN
   const login = async (email, password) => {
     const normalizedEmail = String(email || '').trim().toLowerCase();
-
-    if (normalizedEmail === SUPER_ADMIN_EMAIL && password === SUPER_ADMIN_PASSWORD) {
-      const localSuperAdmin = {
-        email: SUPER_ADMIN_EMAIL,
-        role: 'super',
-        name: 'Super Admin',
-        initials: 'AM',
-      };
-
-      setUser(localSuperAdmin);
-      sessionStorage.setItem('admin_user', JSON.stringify(localSuperAdmin));
-      return { ok: true };
-    }
-
     try {
       const data = await authApi.loginAdmin({ email, password });
       // Support various backend response shapes
@@ -75,7 +59,7 @@ export const AuthProvider = ({ children }) => {
         mapped.name = 'Suzuki Admin';
         mapped.initials = 'SA';
         mapped.role = 'suzuki';
-      } else if (userEmail === SUPER_ADMIN_EMAIL || role === 'super') {
+      } else if (userEmail === 'agency@marketedgeadvisory.com' || role === 'super') {
         mapped.name = 'Super Admin';
         mapped.initials = 'AM';
         mapped.role = 'super';
