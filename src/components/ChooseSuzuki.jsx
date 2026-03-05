@@ -487,7 +487,7 @@ const ChooseSuzuki = () => {
                       <X size={18} />
                     </button>
 
-                    <h3 className="text-white text-xl font-bold mb-4">{car.name}</h3>
+                    <h3 className="text-white text-xl font-bold mb-4">{`${car.name} ${car.variant}`}</h3>
 
                     {/* Scrollable variants container with hidden scrollbar */}
                     <div

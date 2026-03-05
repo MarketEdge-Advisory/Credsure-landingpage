@@ -154,6 +154,10 @@ const CalculatorInputMgt = () => {
   const safePage = Math.min(page, totalPages || 1);
   const startIdx = (safePage - 1) * pageSize;
 
+  const Spinner = () => (
+  <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+);
+
   return (
     <div className="p-8 w-full">
       <h1 className="text-2xl font-bold text-gray-900">Calculator Input Management</h1>
@@ -161,8 +165,59 @@ const CalculatorInputMgt = () => {
 
       {/* ── Update Card ── (unchanged) */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-        {/* ... keep existing update form (same as before) ... */}
+  <div className="bg-white rounded-xl  p-6 mb-6">
+  <form onSubmit={handleSubmit} className="space-y-4 justify-center items-center flex flex-col"> 
+    <div className="flex flex-col space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Down Payment (%)
+        </label>
+        <input
+          type="text"
+          value={downPayment}
+          onChange={(e) => setDownPayment(e.target.value)}
+          className="w-full max-w-md border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          required
+        />
       </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Processing Fee (%)
+        </label>
+        <input
+          type="text"
+          value={processingFee}
+          onChange={(e) => setProcessingFee(e.target.value)}
+          className="w-full max-w-md border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Insurance Cost
+        </label>
+        <input
+          type="text"
+          value={insuranceCost}
+          onChange={(e) => setInsuranceCost(e.target.value)}
+          className="w-full max-w-md border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          required
+        />
+      </div>
+    </div>
+    <div className="flex justify-start"> {/* Align button to the left as well */}
+      <button
+        type="submit"
+        disabled={loading}
+        className="relative bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+      >
+        {loading && <Spinner />}
+        Update Calculator
+      </button>
+    </div>
+  </form>
+</div>
+</div>
 
       {/* ── History Table Card ── (updated columns) */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
