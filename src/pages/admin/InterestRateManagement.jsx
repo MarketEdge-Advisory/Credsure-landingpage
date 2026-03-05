@@ -3,8 +3,7 @@ import { getInterestRateHistory, updateInterestRate } from '../../api/adminConfi
 import Swal from 'sweetalert2';
 import { Download, CalendarDays, ArrowDownUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
-
-// historyData will be fetched from backend
+import { convertToCSV, downloadCSV } from '../../utils/csvExport';
 
 const PAGE_SIZES = [10, 20, 50];
 
@@ -22,34 +21,89 @@ const InterestRateManagement = () => {
   const [historyData, setHistoryData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [totalEntries, setTotalEntries] = useState(0);
 
-  const fetchHistory = () => {
+  // Fetch history with pagination parameters
+  const fetchHistory = (pageNum, size) => {
     setLoading(true);
     setError('');
-    getInterestRateHistory()
+    getInterestRateHistory(pageNum, size)
       .then((res) => {
-        // Extract items array from response
-        const arr = Array.isArray(res?.data?.items) ? res.data.items : [];
-        setHistoryData(arr.map((item, idx) => ({
+        console.log('API response:', res); // Debug: see the structure
+
+        // Extract items and total from the response
+        const items = res?.data?.items || [];
+        const total = res?.data?.pagination?.total || items.length;
+
+        const mapped = items.map((item, idx) => ({
           id: item.id || idx,
           date: item.createdAt ? new Date(item.createdAt).toLocaleString() : '',
-          prevRate: item.previousRatePct !== null && item.previousRatePct !== undefined ? `${item.previousRatePct}%` : '',
-          updatedRate: item.newRatePct !== null && item.newRatePct !== undefined ? `${item.newRatePct}%` : '',
-        })));
+          prevRate: item.previousRatePct !== null ? `${item.previousRatePct}%` : '',
+          updatedRate: item.newRatePct !== null ? `${item.newRatePct}%` : '',
+        }));
+
+        setHistoryData(mapped);
+        setTotalEntries(total);
       })
       .catch((e) => setError(e.message || 'Failed to load history'))
       .finally(() => setLoading(false));
   };
 
+  // Initial fetch and fetch on page/pageSize change
   useEffect(() => {
-    fetchHistory();
-  }, []);
+    fetchHistory(page, pageSize);
+  }, [page, pageSize]);
 
-  const totalEntries = historyData.length;
+  // After updating interest rate, refetch the current page
+  const handleUpdateSubmit = async (e) => {
+    e.preventDefault();
+    setUpdateLoading(true);
+    setUpdateError('');
+    setUpdateSuccess('');
+    try {
+      await updateInterestRate(Number(interestRate));
+      Swal.fire({
+        icon: 'success',
+        title: 'Interest Rate Updated!',
+        text: 'Interest rate updated successfully.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#2e9fe6',
+      });
+      fetchHistory(page, pageSize); // Refresh current page
+      setInterestRate(''); // Clear input
+    } catch (e) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: e.message || 'Failed to update.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#2e9fe6',
+      });
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
   const totalPages = Math.max(1, Math.ceil(totalEntries / pageSize));
   const safePage = Math.min(page, totalPages);
-  const startIdx = (safePage - 1) * pageSize;
-  const pageItems = historyData.slice(startIdx, startIdx + pageSize);
+
+  // Ensure page stays within bounds when totalPages changes
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [totalPages, page]);
+
+  const handleDownload = () => {
+    const headers = ['Date Modified', 'Previous Rate', 'Updated Rate'];
+    const dataForExport = historyData.map(row => ({
+      'Date Modified': row.date,
+      'Previous Rate': row.prevRate,
+      'Updated Rate': row.updatedRate,
+    }));
+    const csv = convertToCSV(dataForExport, headers);
+    downloadCSV(csv, 'interest-rate-history.csv');
+  };
 
   return (
     <div className="p-8 w-full">
@@ -63,35 +117,7 @@ const InterestRateManagement = () => {
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
         <form
           className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            setUpdateLoading(true);
-            setUpdateError('');
-            setUpdateSuccess('');
-            try {
-              await updateInterestRate(Number(interestRate));
-              setUpdateSuccess(null);
-              Swal.fire({
-                icon: 'success',
-                title: 'Interest Rate Updated!',
-                text: 'Interest rate updated successfully.',
-                confirmButtonText: 'OK',
-                confirmButtonColor: '#2e9fe6',
-              });
-              fetchHistory();
-            } catch (e) {
-              setUpdateError(null);
-              Swal.fire({
-                icon: 'error',
-                title: 'Update Failed',
-                text: e.message || 'Failed to update.',
-                confirmButtonText: 'OK',
-                confirmButtonColor: '#2e9fe6',
-              });
-            } finally {
-              setUpdateLoading(false);
-            }
-          }}
+          onSubmit={handleUpdateSubmit}
         >
           <div>
             <p className="font-semibold text-gray-900">Update Interest Rate</p>
@@ -159,10 +185,14 @@ const InterestRateManagement = () => {
             <p className="text-sm text-gray-400 mt-0.5">View and track all previous interest rate changes</p>
           </div>
           <div className="flex gap-3">
-            <button className="flex items-center gap-2 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+            <button
+              className="flex items-center gap-2 border cursor-pointer border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={handleDownload}
+            >
               <Download size={15} />
               Download
             </button>
+            {/* Optional Date Picker – uncomment if needed */}
             {/* <div className="relative">
               <button
                 onClick={() => setShowDatePicker((o) => !o)}
@@ -201,10 +231,10 @@ const InterestRateManagement = () => {
               <div className="py-8 text-center text-gray-400 text-sm">Loading...</div>
             ) : error ? (
               <div className="py-8 text-center text-red-500 text-sm">{error}</div>
-            ) : pageItems.length === 0 ? (
+            ) : historyData.length === 0 ? (
               <div className="py-8 text-center text-gray-400 text-sm">No history found.</div>
             ) : (
-              pageItems.map((row) => (
+              historyData.map((row) => (
                 <div key={row.id} className="grid grid-cols-3 py-4">
                   <span className="text-sm text-gray-700">{row.date}</span>
                   <span className="text-sm text-gray-700">{row.prevRate}</span>
@@ -218,7 +248,9 @@ const InterestRateManagement = () => {
         {/* Pagination */}
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
           <p className="text-sm text-gray-500">
-            Showing {startIdx + 1}–{Math.min(startIdx + pageSize, totalEntries)} of {totalEntries} entries
+            {totalEntries === 0
+              ? 'Showing 0 entries'
+              : `Showing ${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, totalEntries)} of ${totalEntries} entries`}
           </p>
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-500">Show</span>
@@ -235,7 +267,11 @@ const InterestRateManagement = () => {
                   {PAGE_SIZES.map((s) => (
                     <button
                       key={s}
-                      onClick={() => { setPageSize(s); setPage(1); setPageSizeOpen(false); }}
+                      onClick={() => {
+                        setPageSize(s);
+                        setPage(1);
+                        setPageSizeOpen(false);
+                      }}
                       className={`block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 ${s === pageSize ? 'text-blue-500 font-medium' : 'text-gray-700'}`}
                     >
                       {s}
