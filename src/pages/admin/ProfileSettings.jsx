@@ -75,13 +75,15 @@ const ProfileSettings = () => {
       errors.confirmPassword = 'Please confirm your new password.';
 
     // Password strength validation
-    if (newPassword && newPassword.length < 8) {
-      errors.newPassword = 'Password must be at least 8 characters long.';
-    } else if (newPassword && !/(?=.*[A-Z])/.test(newPassword)) {
-      errors.newPassword = 'Password must contain at least one uppercase letter.';
-    } else if (newPassword && !/(?=.*\d)/.test(newPassword)) {
-      errors.newPassword = 'Password must contain at least one number.';
-    }
+if (newPassword && newPassword.length < 8) {
+  errors.newPassword = 'Password must be at least 8 characters long.';
+} else if (newPassword && !/(?=.*[A-Z])/.test(newPassword)) {
+  errors.newPassword = 'Password must contain at least one uppercase letter.';
+} else if (newPassword && !/(?=.*\d)/.test(newPassword)) {
+  errors.newPassword = 'Password must contain at least one number.';
+} else if (newPassword && !/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(newPassword)) {
+  errors.newPassword = 'Password must contain at least one special character.';
+}
 
     if (newPassword && confirmPassword && newPassword !== confirmPassword) {
       errors.confirmPassword = 'New passwords do not match.';
@@ -246,7 +248,7 @@ const ProfileSettings = () => {
               )}
               {/* Password requirements hint */}
               <p className="text-xs text-gray-400 mt-1">
-                Password must be at least 8 characters, contain at least one uppercase letter and one number.
+                Password must be at least 8 characters, contain at least one uppercase letter, one number and one special character.
               </p>
             </div>
 
