@@ -119,16 +119,13 @@ const LoginStep = ({ onForgot, onSuccess }) => {
 
     const handleLogin = async () => {
         setError('');
-        console.log('🔐 [LoginStep] Attempting login with email:', email);
         if (!email.trim() || !password.trim()) {
             setError('Please enter your email and password.');
-            console.warn('🔐 [LoginStep] Validation failed: empty email or password');
             return;
         }
         setLoading(true);
         const result = await onSuccess(email, password);
         setLoading(false);
-        console.log('🔐 [LoginStep] Login result:', result);
         if (!result.ok) setError(result.message);
     };
 
@@ -190,19 +187,15 @@ const ForgotStep = ({ onBack, onProceed }) => {
 
     const handleProceed = async () => {
         setError('');
-        console.log('📧 [ForgotStep] Proceeding with email:', email);
         if (!email.trim()) {
             setError('Please enter your email address.');
-            console.warn('📧 [ForgotStep] Validation failed: empty email');
             return;
         }
         setLoading(true);
         try {
             await forgotPassword(email);
-            console.log('📧 [ForgotStep] Forgot password request sent for:', email);
             onProceed(email);
         } catch (e) {
-            console.error('📧 [ForgotStep] Error:', e.message);
             setError(e.message || 'Failed to send reset code. Try again.');
         } finally {
             setLoading(false);
@@ -274,19 +267,15 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
     const handleProceed = async () => {
         setError('');
         const otp = digits.join('');
-        console.log('🔢 [VerifyStep] OTP entered:', otp, '| For email:', email);
         if (otp.length < 6) {
             setError('Please enter the complete 6-digit code.');
-            console.warn('🔢 [VerifyStep] Validation failed: incomplete OTP');
             return;
         }
         setLoading(true);
         try {
             // OTP is verified as part of resetPassword — just proceed to reset step
-            console.log('🔢 [VerifyStep] OTP verified, proceeding to reset step');
             onProceed(otp);
         } catch (e) {
-            console.error('🔢 [VerifyStep] Error:', e.message);
             setError(e.message || 'Invalid or expired code. Try again.');
         } finally {
             setLoading(false);
@@ -350,30 +339,23 @@ const ResetStep = ({ email, otp, onBack, onDone }) => {
 
     const handleReset = async () => {
         setError('');
-        console.log('🔒 [ResetStep] Attempting password reset for email:', email, '| OTP:', otp);
         if (!newPwd.trim() || !confirmPwd.trim()) {
             setError('Please fill in both password fields.');
-            console.warn('🔒 [ResetStep] Validation failed: empty password fields');
             return;
         }
         if (newPwd !== confirmPwd) {
             setError('Passwords do not match.');
-            console.warn('🔒 [ResetStep] Validation failed: passwords do not match');
             return;
         }
         if (newPwd.length < 8) {
             setError('Password must be at least 8 characters.');
-            console.warn('🔒 [ResetStep] Validation failed: password too short');
             return;
         }
         setLoading(true);
         try {
-            console.log('🔒 [ResetStep] Payload being sent:', { code: otp, newPassword: newPwd });
             await resetPassword({ code: otp, newPassword: newPwd });
-            console.log('🔒 [ResetStep] Password reset successful, redirecting to login');
             onDone();
         } catch (e) {
-            console.error('🔒 [ResetStep] Error:', e.message);
             setError(e.message || 'Failed to reset password. Try again.');
         } finally {
             setLoading(false);
@@ -444,11 +426,8 @@ export default function AdminLogin() {
     if (user) return <Navigate to="/admin/dashboard" replace />;
 
     const handleLogin = async (email, password) => {
-        console.log('🚀 [AdminLogin] Login initiated for:', email);
         const result = await login(email, password);
-        console.log('🚀 [AdminLogin] Login result:', result);
         if (result.ok) {
-            console.log('🚀 [AdminLogin] Login successful, navigating to dashboard');
             navigate('/admin/dashboard', { replace: true });
         }
         return result;
@@ -459,7 +438,6 @@ export default function AdminLogin() {
             {step === STEPS.login && (
                 <LoginStep
                     onForgot={() => {
-                        console.log('🔀 [AdminLogin] Step: login → forgot');
                         setStep(STEPS.forgot);
                     }}
                     onSuccess={handleLogin}
@@ -468,11 +446,9 @@ export default function AdminLogin() {
             {step === STEPS.forgot && (
                 <ForgotStep
                     onBack={() => {
-                        console.log('🔀 [AdminLogin] Step: forgot → login');
                         setStep(STEPS.login);
                     }}
                     onProceed={(email) => {
-                        console.log('🔀 [AdminLogin] Step: forgot → verify | email saved:', email);
                         setUserEmail(email);
                         setStep(STEPS.verify);
                     }}
@@ -482,11 +458,9 @@ export default function AdminLogin() {
                 <VerifyStep
                     email={userEmail}
                     onBack={() => {
-                        console.log('🔀 [AdminLogin] Step: verify → login');
                         setStep(STEPS.login);
                     }}
                     onProceed={(otp) => {
-                        console.log('🔀 [AdminLogin] Step: verify → reset | otp saved:', otp);
                         setUserOtp(otp);
                         setStep(STEPS.reset);
                     }}
@@ -497,11 +471,9 @@ export default function AdminLogin() {
                     email={userEmail}
                     otp={userOtp}
                     onBack={() => {
-                        console.log('🔀 [AdminLogin] Step: reset → login');
                         setStep(STEPS.login);
                     }}
                     onDone={() => {
-                        console.log('🔀 [AdminLogin] Step: reset → login (done)');
                         setStep(STEPS.login);
                     }}
                 />
