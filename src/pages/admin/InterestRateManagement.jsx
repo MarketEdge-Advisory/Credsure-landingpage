@@ -131,7 +131,7 @@ const InterestRateManagement = () => {
               disabled={updateLoading}
             >
               {updateLoading && <span className="animate-spin h-5 w-5 border-2 border-white border-t-blue-600 rounded-full inline-block"></span>}
-              {updateLoading ? 'Updating...' : 'Update Rates'}
+              {updateLoading ? 'Updating...' : 'Update Rate'}
             </button>
             {(updateError || updateSuccess) && (
               <div className={`mt-4 text-sm font-medium ${updateError ? 'text-red-600' : 'text-green-600'}`}>{updateError || updateSuccess}</div>
@@ -163,7 +163,7 @@ const InterestRateManagement = () => {
                 {updateLoading && (
                   <span className="animate-spin h-5 w-5 border-2 border-white border-t-blue-600 rounded-full inline-block"></span>
                 )}
-                {updateLoading ? 'Updating...' : 'Update Rates'}
+                {updateLoading ? 'Updating...' : 'Update Rate'}
               </button>
               {/* Feedback messages for mobile */}
               <div className="block md:hidden">

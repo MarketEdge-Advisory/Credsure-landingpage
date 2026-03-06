@@ -269,7 +269,7 @@ const handleDownload = () => {
             </svg>
             <input
               type="text"
-              placeholder="Search name, status, vehicle..."
+              placeholder="Search name, vehicle..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl w-64 focus:outline-none focus:border-blue-400 bg-gray-50"
@@ -360,7 +360,7 @@ const handleDownload = () => {
                 { label: 'Vehicle Selected', key: 'vehicle' },
                 { label: 'Vehicle Amount',   key: 'amount' },
                 { label: 'Down Payment',     key: 'down' },
-                { label: 'Status',           key: 'status' },
+                // { label: 'Status',           key: 'status' },
               ].map(({ label, key }) => (
                 <th
                   key={key}
@@ -395,11 +395,11 @@ const handleDownload = () => {
                   <td className="px-6 py-4 text-gray-700">{row.vehicle}</td>
                   <td className="px-6 py-4 text-gray-700">{row.amount}</td>
                   <td className="px-6 py-4 text-gray-700">{row.down}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-block px-3 py-1 rounded-md text-xs font-semibold ${statusStyle[row.status] ?? ''}`}>
-                      {row.status}
-                    </span>
-                  </td>
+                  {/*<td className="px-6 py-4">*/}
+                  {/*  <span className={`inline-block px-3 py-1 rounded-md text-xs font-semibold ${statusStyle[row.status] ?? ''}`}>*/}
+                  {/*    {row.status}*/}
+                  {/*  </span>*/}
+                  {/*</td>*/}
                 </tr>
               ))
             )}
