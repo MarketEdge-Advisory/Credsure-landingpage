@@ -398,8 +398,8 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
     const errors = {};
     if (!form.carName.trim()) errors.carName = 'Car name is required.';
     if (!form.description.trim()) errors.description = 'Description is required.';
-    if (!form.basePrice || isNaN(Number(form.basePrice)) || Number(form.basePrice) < 0.01)
-      errors.basePrice = 'Base price must be a number greater than 0.01.';
+    // if (!form.basePrice || isNaN(Number(form.basePrice)) || Number(form.basePrice) < 0.01)
+    //   errors.basePrice = 'Base price must be a number greater than 0.01.';
     if (!form.variant.trim()) errors.variant = 'Variant is required.';
     if (!form.numberOfUnits || isNaN(Number(form.numberOfUnits)) || Number(form.numberOfUnits) < 1)
       errors.numberOfUnits = 'Number of units must be at least 1.';
@@ -441,63 +441,72 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
     handleNewImageFiles(e.dataTransfer.files);
   };
 
-  const handleAddVehicle = async () => {
-    setFormError('');
-    const errors = validateForm();
-    setFieldErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      setFormError('Please ensure to fill all fields.');
-      return;
-    }
-    setSaving(true);
-    try {
-      let imageUrls = [];
-      if (imagePreviews.length > 0 && fileInputRef.current && fileInputRef.current.files.length > 0) {
-        const filesToUpload = imagePreviews.map(img => img.file);
-        const uploadResult = await uploadImagesToCloudinary(filesToUpload);
-        const resultData = uploadResult?.data || uploadResult;
-        if (resultData.imageUrls && Array.isArray(resultData.imageUrls)) {
-          imageUrls = resultData.imageUrls;
-        } else if (resultData.imageUrl) {
-          imageUrls = [resultData.imageUrl];
-        } else if (resultData.urls && Array.isArray(resultData.urls)) {
-          imageUrls = resultData.urls;
-        } else if (Array.isArray(resultData)) {
-          imageUrls = resultData;
+    const handleAddVehicle = async () => {
+        setFormError('');
+        const errors = validateForm();
+        setFieldErrors(errors);
+        if (Object.keys(errors).length > 0) {
+            setFormError('Please ensure to fill all fields.');
+            return;
         }
-      }
 
-      if (!imageUrls || imageUrls.length === 0 || !imageUrls[0]) {
-         Swal.fire({ icon: 'error', title: 'Failed', text: 'Image upload failed. Please try again.' });
-        // setFormError('Image upload failed. Please try again.');
-        setSaving(false);
-        return;
-      }
+        // ✅ Check imagePreviews instead of fileInputRef
+        if (imagePreviews.length === 0) {
+            Swal.fire({ icon: 'error', title: 'No Images', text: 'Please upload at least one image.' });
+            return;
+        }
 
-      const carData = {
-        name: form.carName,
-        description: form.description,
-        basePrice: Number(form.basePrice),
-        variant: form.variant,
-        numberOfUnits: Number(form.numberOfUnits),
-        availability: form.availability,
-        specs: {
-          engine: form.engineSpec,
-          transmission: form.transmissionSpec,
-        },
-        images: imageUrls.map(url => ({ url })),
-      };
+        setSaving(true);
+        try {
+            let imageUrls = [];
 
-      await carApi.createCar(carData);
-      await fetchVehicles();
-      Swal.fire({ icon: 'success', title: 'Success', text: 'Vehicle added successfully!' });
-      onBack();
-    } catch (e) {
-      Swal.fire({ icon: 'error', title: 'Failed', text: e.message || 'Failed to add vehicle' });
-    } finally {
-      setSaving(false);
-    }
-  };
+            // ✅ Always use imagePreviews files — works for both click and drag-and-drop
+            const filesToUpload = imagePreviews.map(img => img.file).filter(Boolean);
+
+            if (filesToUpload.length > 0) {
+                const uploadResult = await uploadImagesToCloudinary(filesToUpload);
+                const resultData = uploadResult?.data || uploadResult;
+                if (resultData.imageUrls && Array.isArray(resultData.imageUrls)) {
+                    imageUrls = resultData.imageUrls;
+                } else if (resultData.imageUrl) {
+                    imageUrls = [resultData.imageUrl];
+                } else if (resultData.urls && Array.isArray(resultData.urls)) {
+                    imageUrls = resultData.urls;
+                } else if (Array.isArray(resultData)) {
+                    imageUrls = resultData;
+                }
+            }
+
+            if (!imageUrls || imageUrls.length === 0 || !imageUrls[0]) {
+                Swal.fire({ icon: 'error', title: 'Failed', text: 'Image upload failed. Please try again.' });
+                setSaving(false);
+                return;
+            }
+
+            const carData = {
+                name: form.carName,
+                description: form.description,
+                ...(form.basePrice ? { basePrice: Number(form.basePrice) } : {}), // ✅ omit if empty
+                variant: form.variant,
+                numberOfUnits: Number(form.numberOfUnits),
+                availability: form.availability,
+                specs: {
+                    engine: form.engineSpec,
+                    transmission: form.transmissionSpec,
+                },
+                images: imageUrls.map(url => ({ url })),
+            };
+
+            await carApi.createCar(carData);
+            await fetchVehicles();
+            Swal.fire({ icon: 'success', title: 'Success', text: 'Vehicle added successfully!' });
+            onBack();
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'Failed', text: e.message || 'Failed to add vehicle' });
+        } finally {
+            setSaving(false);
+        }
+    };
 
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -814,18 +823,17 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
       finalImageUrls = [...finalImageUrls, ...newUrls];
     }
 
-    // 2. Basic car data (without availability & images)
-    const basicCarData = {
-      name: form.carName,
-      description: form.description,
-      basePrice: Number(form.vehiclePrice),
-      variant: form.variant,
-      numberOfUnits: Number(form.numberOfUnits),
-      specs: {
-        engine: form.engineSpec,
-        transmission: form.transmissionSpec,
-      },
-    };
+      const basicCarData = {
+          name: form.carName,
+          description: form.description,
+          ...(form.vehiclePrice ? { basePrice: Number(form.vehiclePrice) } : {}), // ✅ omit if empty
+          variant: form.variant,
+          numberOfUnits: Number(form.numberOfUnits),
+          specs: {
+              engine: form.engineSpec,
+              transmission: form.transmissionSpec,
+          },
+      };
 
     // 3. Update basic details
     await carApi.updateCar(vehicle.id, basicCarData);
