@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { Mail, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { forgotPassword, resetPassword } from '../../api/auth';
+import { forgotPassword, resetPassword, verifyOtp } from '../../api/auth';
 
 /* ─── background wrapper ─── */
 const AuthShell = ({ children }) => (
@@ -47,8 +47,8 @@ const TextInput = ({ label, type = 'text', placeholder, value, onChange, icon: I
             />
             {Icon && (
                 <span className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400">
-          <Icon size={14} />
-        </span>
+                    <Icon size={14} />
+                </span>
             )}
         </div>
     </div>
@@ -81,7 +81,6 @@ const PasswordInput = ({ label, placeholder, value, onChange }) => {
 };
 
 /* ─── primary button ─── */
-// ✅ added disabled prop support
 const PrimaryBtn = ({ children, onClick, type = 'button', disabled = false, loading = false }) => (
     <button
         type={type}
@@ -273,7 +272,7 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
         }
         setLoading(true);
         try {
-            // OTP is verified as part of resetPassword — just proceed to reset step
+            await verifyOtp(otp);
             onProceed(otp);
         } catch (e) {
             setError(e.message || 'Invalid or expired code. Try again.');
@@ -331,11 +330,11 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
 /* ══════════════════════════════════════════
    STEP 4 – Reset Password
 ══════════════════════════════════════════ */
-const ResetStep = ({ email, otp, onBack, onDone }) => {
-    const [newPwd, setNewPwd]       = useState('');
-    const [confirmPwd, setConfirm]  = useState('');
-    const [error, setError]         = useState('');
-    const [loading, setLoading]     = useState(false);
+const ResetStep = ({  otp, onBack, onDone }) => {
+    const [newPwd, setNewPwd]      = useState('');
+    const [confirmPwd, setConfirm] = useState('');
+    const [error, setError]        = useState('');
+    const [loading, setLoading]    = useState(false);
 
     const handleReset = async () => {
         setError('');
@@ -413,9 +412,9 @@ const pageTitles = {
 };
 
 export default function AdminLogin() {
-    const [step, setStep]         = useState(STEPS.login);
-    const [userEmail, setUserEmail] = useState(''); // ✅ declared in root
-    const [userOtp, setUserOtp]   = useState('');   // ✅ declared in root
+    const [step, setStep]           = useState(STEPS.login);
+    const [userEmail, setUserEmail] = useState('');
+    const [userOtp, setUserOtp]     = useState('');
     const navigate = useNavigate();
     const { login, user } = useAuth();
 
@@ -437,17 +436,13 @@ export default function AdminLogin() {
         <AuthShell>
             {step === STEPS.login && (
                 <LoginStep
-                    onForgot={() => {
-                        setStep(STEPS.forgot);
-                    }}
+                    onForgot={() => setStep(STEPS.forgot)}
                     onSuccess={handleLogin}
                 />
             )}
             {step === STEPS.forgot && (
                 <ForgotStep
-                    onBack={() => {
-                        setStep(STEPS.login);
-                    }}
+                    onBack={() => setStep(STEPS.login)}
                     onProceed={(email) => {
                         setUserEmail(email);
                         setStep(STEPS.verify);
@@ -457,9 +452,7 @@ export default function AdminLogin() {
             {step === STEPS.verify && (
                 <VerifyStep
                     email={userEmail}
-                    onBack={() => {
-                        setStep(STEPS.login);
-                    }}
+                    onBack={() => setStep(STEPS.login)}
                     onProceed={(otp) => {
                         setUserOtp(otp);
                         setStep(STEPS.reset);
@@ -470,12 +463,8 @@ export default function AdminLogin() {
                 <ResetStep
                     email={userEmail}
                     otp={userOtp}
-                    onBack={() => {
-                        setStep(STEPS.login);
-                    }}
-                    onDone={() => {
-                        setStep(STEPS.login);
-                    }}
+                    onBack={() => setStep(STEPS.login)}
+                    onDone={() => setStep(STEPS.login)}
                 />
             )}
         </AuthShell>

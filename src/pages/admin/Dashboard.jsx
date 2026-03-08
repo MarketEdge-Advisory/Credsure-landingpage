@@ -10,35 +10,7 @@ import {convertToCSV, downloadCSV } from '../../utils/csvExport'
 
 const PAGE_SIZES = [10, 20, 50];
 
-const preApprovalData = [
-  { month: 'Jan',  value: 7000,  remainder: 17000 },
-  { month: 'Feb',  value: 11500, remainder: 12500 },
-  { month: 'Mar',  value: 7500,  remainder: 16500 },
-  { month: 'Apr',  value: 4000,  remainder: 20000 },
-  { month: 'May',  value: 17000, remainder: 7000  },
-  { month: 'Jun',  value: 9500,  remainder: 14500 },
-  { month: 'Jul',  value: 15000, remainder: 9000  },
-  { month: 'Aug',  value: 15500, remainder: 8500  },
-  { month: 'Sept', value: 7000,  remainder: 17000 },
-  { month: 'Oct',  value: 11000, remainder: 13000 },
-  { month: 'Nov',  value: 9000,  remainder: 15000 },
-  { month: 'Dec',  value: 10500, remainder: 13500 },
-];
 
-const visitorsData = [
-  { month: 'Jan',  visitors: 11500 },
-  { month: 'Feb',  visitors: 12200 },
-  { month: 'Mar',  visitors: 13000 },
-  { month: 'Apr',  visitors: 13800 },
-  { month: 'May',  visitors: 14600 },
-  { month: 'Jun',  visitors: 17000 },
-  { month: 'Jul',  visitors: 18200 },
-  { month: 'Aug',  visitors: 19100 },
-  { month: 'Sept', visitors: 19900 },
-  { month: 'Oct',  visitors: 20800 },
-  { month: 'Nov',  visitors: 21900 },
-  { month: 'Dec',  visitors: 23000 },
-];
 
 const formatY = (v) => `${v / 1000}k`;
 

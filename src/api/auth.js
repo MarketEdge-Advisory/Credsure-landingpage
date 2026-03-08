@@ -109,3 +109,16 @@ export async function bootstrapAdmin({ email, password }) {
   if (!res.ok) throw new Error('Bootstrap admin failed');
   return res.json();
 }
+
+export async function verifyOtp(code) {
+    const res = await fetch(`${API_BASE}/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+    });
+    if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        throw new Error(payload?.message || 'Invalid or expired code.');
+    }
+    return res.json();
+}
