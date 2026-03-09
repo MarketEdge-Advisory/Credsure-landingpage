@@ -21,7 +21,8 @@ const InterestRateManagement = () => {
   const [historyData, setHistoryData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [totalEntries, setTotalEntries] = useState(0);
+  const [totalEntries, setTotalEntries] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
 
   // Fetch history with pagination parameters
   const fetchHistory = (pageNum, size) => {
@@ -31,9 +32,10 @@ const InterestRateManagement = () => {
       .then((res) => {
         console.log('API response:', res); // Debug: see the structure
 
-        // Extract items and total from the response
-        const items = res?.data?.items || [];
-        const total = res?.data?.pagination?.total || items.length;
+        // Backends often return { status, message, data: { items, pagination } }
+        const payload = res?.data ?? res;
+        const items = payload?.items || [];
+        const totalFromApi = payload?.pagination?.total ?? payload?.total ?? null;
 
         const mapped = items.map((item, idx) => ({
           id: item.id || idx,
@@ -43,7 +45,8 @@ const InterestRateManagement = () => {
         }));
 
         setHistoryData(mapped);
-        setTotalEntries(total);
+        setTotalEntries(totalFromApi);
+        setHasMore(items.length === pageSize);
       })
       .catch((e) => setError(e.message || 'Failed to load history'))
       .finally(() => setLoading(false));
@@ -84,15 +87,22 @@ const InterestRateManagement = () => {
     }
   };
 
-  const totalPages = Math.max(1, Math.ceil(totalEntries / pageSize));
+  const totalPages = totalEntries != null
+    ? Math.max(1, Math.ceil(totalEntries / pageSize))
+    : hasMore
+    ? page + 1
+    : 1;
+
+  const canGoNext = totalEntries != null ? page < totalPages : hasMore;
+  const canGoPrev = page > 1;
   const safePage = Math.min(page, totalPages);
 
   // Ensure page stays within bounds when totalPages changes
   useEffect(() => {
-    if (page > totalPages) {
+    if (totalEntries != null && page > totalPages) {
       setPage(totalPages);
     }
-  }, [totalPages, page]);
+  }, [totalPages, page, totalEntries]);
 
   const handleDownload = () => {
     const headers = ['Date Modified', 'Previous Rate', 'Updated Rate'];
@@ -121,13 +131,13 @@ const InterestRateManagement = () => {
         >
           <div>
             <p className="font-semibold text-gray-900">Update Interest Rate</p>
-            <p className="text-sm text-gray-400 mt-0.5">Input the details below to modify interest rate</p>
+            <p className="text-sm text-gray-400 mt-0.5">Input the details to modify interest rate</p>
           </div>
           {/* Update button for desktop */}
           <div className="hidden md:flex flex-col items-end gap-2">
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-normal px-2 py-2.5 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
               disabled={updateLoading}
             >
               {updateLoading && <span className="animate-spin h-5 w-5 border-2 border-white border-t-blue-600 rounded-full inline-block"></span>}
@@ -248,9 +258,9 @@ const InterestRateManagement = () => {
         {/* Pagination */}
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
           <p className="text-sm text-gray-500">
-            {totalEntries === 0
+            {historyData.length === 0
               ? 'Showing 0 entries'
-              : `Showing ${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, totalEntries)} of ${totalEntries} entries`}
+              : `Showing ${(page - 1) * pageSize + 1}–${(page - 1) * pageSize + historyData.length} of ${totalEntries != null ? totalEntries : 'many'} entries${totalEntries == null ? ' (approx.)' : ''}`}
           </p>
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-500">Show</span>
@@ -284,7 +294,7 @@ const InterestRateManagement = () => {
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={safePage === 1}
+                disabled={!canGoPrev || loading}
                 className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <ChevronLeft size={14} />
@@ -293,8 +303,8 @@ const InterestRateManagement = () => {
                 {safePage}
               </span>
               <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={safePage === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+                disabled={!canGoNext || loading}
                 className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <ChevronRight size={14} />

@@ -3,16 +3,7 @@
 
 const API_BASE = 'https://credsure-backend-1564d84ae428.herokuapp.com/api/cars';
 
-function getAuthHeaders(extra = {}) {
-    let accessToken = '';
-    try {
-        const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
-        accessToken = user?.accessToken || user?.data?.accessToken || '';
-    } catch {}
-    return accessToken
-        ? { ...extra, Authorization: `Bearer ${accessToken}` }
-        : { ...extra };
-}
+import { authFetch } from './fetchWithAuth';
 
 // ── Generic error reader ──────────────────────────────────────────────────────
 async function readError(res, fallback) {
@@ -29,25 +20,21 @@ async function readError(res, fallback) {
 
 // ── API Functions ─────────────────────────────────────────────────────────────
 export async function getCars() {
-    const res = await fetch(`${API_BASE}`, {
-        headers: getAuthHeaders(),
-    });
+    const res = await authFetch(`${API_BASE}`);
     if (!res.ok) throw new Error(await readError(res, 'Failed to fetch cars'));
     return res.json();
 }
 
 export async function getCar(carId) {
-    const res = await fetch(`${API_BASE}/${carId}`, {
-        headers: getAuthHeaders(),
-    });
+    const res = await authFetch(`${API_BASE}/${carId}`);
     if (!res.ok) throw new Error(await readError(res, 'Failed to fetch car'));
     return res.json();
 }
 
 export async function createCar(carData) {
-    const res = await fetch(`${API_BASE}`, {
+    const res = await authFetch(`${API_BASE}`, {
         method: 'POST',
-        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(carData),
     });
     if (!res.ok) throw new Error(await readError(res, 'Failed to create car'));
@@ -55,9 +42,9 @@ export async function createCar(carData) {
 }
 
 export async function updateCar(carId, carData) {
-    const res = await fetch(`${API_BASE}/${carId}`, {
+    const res = await authFetch(`${API_BASE}/${carId}`, {
         method: 'PATCH',
-        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(carData),
     });
     if (!res.ok) throw new Error(await readError(res, 'Failed to update car'));
@@ -65,18 +52,17 @@ export async function updateCar(carId, carData) {
 }
 
 export async function deleteCar(carId) {
-    const res = await fetch(`${API_BASE}/${carId}`, {
+    const res = await authFetch(`${API_BASE}/${carId}`, {
         method: 'DELETE',
-        headers: getAuthHeaders(),
     });
     if (!res.ok) throw new Error(await readError(res, 'Failed to delete car'));
     return res.json();
 }
 
 export async function updateCarPrice(carId, price) {
-    const res = await fetch(`${API_BASE}/${carId}/price`, {
+    const res = await authFetch(`${API_BASE}/${carId}/price`, {
         method: 'PATCH',
-        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ price }),
     });
     if (!res.ok) throw new Error(await readError(res, 'Failed to update price'));
@@ -85,9 +71,9 @@ export async function updateCarPrice(carId, price) {
 
 export async function updateCarImages(carId, data) {
     // data should be { images: [{ url: '...' }] }
-    const res = await fetch(`${API_BASE}/${carId}/images`, {
+    const res = await authFetch(`${API_BASE}/${carId}/images`, {
         method: 'PATCH',
-        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error(await readError(res, 'Failed to update images'));
@@ -95,18 +81,17 @@ export async function updateCarImages(carId, data) {
 }
 
 export async function deleteCarImage(carId, imageId) {
-    const res = await fetch(`${API_BASE}/${carId}/images/${imageId}`, {
+    const res = await authFetch(`${API_BASE}/${carId}/images/${imageId}`, {
         method: 'DELETE',
-        headers: getAuthHeaders(),
     });
     if (!res.ok) throw new Error(await readError(res, 'Failed to delete image'));
     return res.json();
 }
 
 export async function reorderCarImages(carId, imageOrder) {
-    const res = await fetch(`${API_BASE}/${carId}/images/reorder`, {
+    const res = await authFetch(`${API_BASE}/${carId}/images/reorder`, {
         method: 'PATCH',
-        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order: imageOrder }),
     });
     if (!res.ok) throw new Error(await readError(res, 'Failed to reorder images'));
@@ -114,9 +99,9 @@ export async function reorderCarImages(carId, imageOrder) {
 }
 
 export async function updateCarAvailability(carId, availability) {
-    const res = await fetch(`${API_BASE}/${carId}/availability`, {
+    const res = await authFetch(`${API_BASE}/${carId}/availability`, {
         method: 'PATCH',
-        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ availability }),
     });
     if (!res.ok) throw new Error(await readError(res, 'Failed to update availability'));
@@ -124,9 +109,9 @@ export async function updateCarAvailability(carId, availability) {
 }
 
 export async function updateCarFeatured(carId, featured) {
-    const res = await fetch(`${API_BASE}/${carId}/featured`, {
+    const res = await authFetch(`${API_BASE}/${carId}/featured`, {
         method: 'PATCH',
-        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ featured }),
     });
     if (!res.ok) throw new Error(await readError(res, 'Failed to update featured status'));

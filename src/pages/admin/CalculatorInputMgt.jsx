@@ -52,6 +52,7 @@ const CalculatorInputMgt = () => {
     total: 0,
     totalPages: 0,
   });
+  const [historyHasMore, setHistoryHasMore] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState('');
 
@@ -87,24 +88,46 @@ const CalculatorInputMgt = () => {
 
   // ─── Fetch history when page/pageSize changes ────────────────────────────
   useEffect(() => {
-  const fetchHistory = async () => {
-    try {
-      setHistoryLoading(true);
-      setHistoryError('');
-      const response = await getCalculatorHistory({ page, limit: pageSize });  // ✅ correct call
-      const { items, pagination } = response?.data || {};
-      setHistoryItems(items || []);
-      setHistoryPagination(pagination || { page, limit: pageSize, total: 0, totalPages: 0 });
-    } catch (e) {
-      setHistoryError(e.message || 'Failed to load history.');
-      setHistoryItems([]);
-    } finally {
-      setHistoryLoading(false);
-    }
-  };
+    const fetchHistory = async () => {
+      try {
+        setHistoryLoading(true);
+        setHistoryError('');
 
-  fetchHistory();
-}, [page, pageSize]);
+        const response = await getCalculatorHistory({ page, limit: pageSize });
+        const responseData = response?.data ?? response;
+
+        // Support multiple potential response shapes from the backend.
+        // e.g. { data: { items: [...], pagination: { ... } } }
+        // or    { items: [...], pagination: { ... } }
+        // or    { data: [...], total: 50 }
+        const items = responseData?.items ?? responseData?.data ?? response?.items ?? [];
+        const pagination = responseData?.pagination ?? response?.pagination;
+
+        const total =
+          pagination?.total ??
+          responseData?.total ??
+          response?.total ??
+          (Array.isArray(items) ? items.length : 0);
+
+        const totalPages =
+          pagination?.totalPages ??
+          (pageSize ? Math.max(1, Math.ceil(total / pageSize)) : undefined);
+
+        setHistoryItems(Array.isArray(items) ? items : []);
+        setHistoryPagination({ page, limit: pageSize, total, totalPages });
+        setHistoryHasMore(Array.isArray(items) ? items.length === pageSize : false);
+      } catch (e) {
+        setHistoryError(e.message || 'Failed to load history.');
+        setHistoryItems([]);
+        setHistoryPagination({ page, limit: pageSize, total: 0, totalPages: 0 });
+        setHistoryHasMore(false);
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, [page, pageSize]);
 
   // ─── Submit handler ──────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
@@ -146,13 +169,21 @@ const CalculatorInputMgt = () => {
     setPage(1);
   };
 
-  const handlePrev = () => setPage((p) => Math.max(1, p - 1));
-  const handleNext = () => setPage((p) => Math.min(historyPagination.totalPages, p + 1));
-
   const totalEntries = historyPagination.total;
   const totalPages = historyPagination.totalPages;
-  const safePage = Math.min(page, totalPages || 1);
+  const safePage = totalPages ? Math.min(page, totalPages) : page;
   const startIdx = (safePage - 1) * pageSize;
+  const canGoPrev = safePage > 1;
+  const canGoNext = totalPages ? safePage < totalPages : historyHasMore;
+
+  const handlePrev = () => setPage((p) => Math.max(1, p - 1));
+  const handleNext = () => {
+    if (totalPages) {
+      setPage((p) => Math.min(totalPages, p + 1));
+    } else {
+      setPage((p) => p + 1);
+    }
+  };
 
   const Spinner = () => (
   <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
@@ -182,7 +213,7 @@ const CalculatorInputMgt = () => {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Processing Fee (%)
+          Processing Fee (₦)
         </label>
         <input
           type="text"
@@ -194,7 +225,7 @@ const CalculatorInputMgt = () => {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Insurance Cost
+          Insurance Cost (%)
         </label>
         <input
           type="text"

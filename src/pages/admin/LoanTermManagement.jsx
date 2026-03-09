@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { getLoanTenures, addLoanTenure, updateLoanTenure, deleteLoanTenure, getActivityLogs } from '../../api/adminConfig';
+import { getLoanTenures, addLoanTenure, deleteLoanTenure, getActivityLogs } from '../../api/adminConfig';
 import { Plus, Trash2, X, CalendarDays, History, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import Swal from 'sweetalert2';
 
-const PAGE_SIZES = [5, 10, 20];
+// NOTE: history pagination is fixed to 10 per page (backend requirement)
+const PAGE_SIZE = 10;
 
 const LoanTermManagement = () => {
   const [terms, setTerms] = useState([]);
@@ -13,15 +14,15 @@ const LoanTermManagement = () => {
   const [historyLogs, setHistoryLogs] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState('');
+  const [historyTotal, setHistoryTotal] = useState(null);
+  const [historyHasMore, setHistoryHasMore] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [duration, setDuration] = useState('');
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [pageSizeOpen, setPageSizeOpen] = useState(false);
+  const pageSize = PAGE_SIZE; // fixed per backend requirement
 
-  // Safe arrays
   const safeTerms = Array.isArray(terms) ? terms : [];
   const safeHistoryLogs = Array.isArray(historyLogs) ? historyLogs : [];
 
@@ -30,7 +31,16 @@ const LoanTermManagement = () => {
     setError(null);
     try {
       const data = await getLoanTenures();
-      setTerms(data.tenures || []);
+      console.log('Loan tenures response:', data); // Debug: check structure
+      let tenuresArray = [];
+      if (data && Array.isArray(data)) {
+        tenuresArray = data;
+      } else if (data && Array.isArray(data.tenures)) {
+        tenuresArray = data.tenures;
+      } else {
+        tenuresArray = [];
+      }
+      setTerms(tenuresArray);
     } catch (e) {
       setError(e.message || 'Failed to load loan tenures');
       setTerms([]);
@@ -39,17 +49,21 @@ const LoanTermManagement = () => {
     }
   };
 
-  const fetchHistory = async () => {
+  const fetchHistory = async (pageNum, pageSizeNum) => {
     setHistoryLoading(true);
     setHistoryError('');
     try {
-      const data = await getActivityLogs({ page: 1, pageSize: 100 });
+      const data = await getActivityLogs({ page: pageNum, pageSize: pageSizeNum });
       const items = Array.isArray(data?.items) ? data.items : [];
       const tenureCreations = items.filter(log => log?.action === 'ADD_LOAN_TENURE');
       setHistoryLogs(tenureCreations);
+      setHistoryTotal(data?.total ?? null);
+      setHistoryHasMore(items.length === pageSizeNum);
     } catch (e) {
       setHistoryError(e.message || 'Failed to load history');
       setHistoryLogs([]);
+      setHistoryTotal(null);
+      setHistoryHasMore(false);
     } finally {
       setHistoryLoading(false);
     }
@@ -57,31 +71,12 @@ const LoanTermManagement = () => {
 
   useEffect(() => {
     refreshTenures();
-    fetchHistory();
-  }, []);
+    fetchHistory(page, pageSize);
+  }, [page]);
 
   const handleCancel = () => {
     setShowModal(false);
     setDuration('');
-  };
-
-  const handleChange = async (id, newMonths) => {
-    if (!newMonths || newMonths < 1) {
-      Swal.fire({ icon: 'error', title: 'Invalid Input', text: 'Months must be a positive number.', confirmButtonColor:'#1e3f6e' });
-      return;
-    }
-    setLoading(true);
-    try {
-      await updateLoanTenure(id, { months: newMonths });
-      await refreshTenures();
-      await fetchHistory();
-      Swal.fire({ icon: 'success', title: 'Updated!', text: 'Loan tenure updated successfully.', confirmButtonColor:'#1e3f6e' });
-    } catch (e) {
-      setError(null);
-      Swal.fire({ icon: 'error', title: 'Update Failed', text: e.message || 'Failed to update loan tenure.', confirmButtonColor:'#1e3f6e' });
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleDelete = async (id) => {
@@ -89,11 +84,23 @@ const LoanTermManagement = () => {
     try {
       await deleteLoanTenure(id);
       await refreshTenures();
-      await fetchHistory();
-      Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Loan tenure deleted successfully.', confirmButtonColor:'#1e3f6e' });
+      await fetchHistory(page, pageSize);
+      Swal.fire({
+        icon: 'success',
+        title: 'Deleted!',
+        text: 'Loan tenure deleted successfully.',
+        confirmButtonColor: '#1e3f6e',
+        timer: 1500,
+        showConfirmButton: false
+      });
     } catch (e) {
       setError(null);
-      Swal.fire({ icon: 'error', title: 'Delete Failed', text: e.message || 'Failed to delete loan tenure.', confirmButtonColor:'#1e3f6e' });
+      Swal.fire({
+        icon: 'error',
+        title: 'Delete Failed',
+        text: e.message || 'Failed to delete loan tenure.',
+        confirmButtonColor: '#1e3f6e'
+      });
     } finally {
       setLoading(false);
     }
@@ -109,43 +116,66 @@ const LoanTermManagement = () => {
           icon: 'error',
           title: 'Invalid Input',
           text: 'Please enter a valid integer greater than or equal to 1 for months.',
-          confirmButtonColor:'#1e3f6e'
+          confirmButtonColor: '#1e3f6e'
         });
         return;
       }
-      // Prevent duplicate loan terms
-      if (safeTerms.some(term => parseInt(term.id, 10) === months)) {
+      // Duplicate check – adjust field name based on your data
+      const monthValue = term => term.months ?? term.duration ?? term.id;
+      if (safeTerms.some(term => monthValue(term) === months)) {
         setLoading(false);
         Swal.fire({
           icon: 'warning',
           title: 'Duplicate Term',
           text: `A loan term for ${months} months already exists.`,
-          confirmButtonColor:'#1e3f6e'
+          confirmButtonColor: '#1e3f6e'
         });
         return;
       }
       await addLoanTenure(months);
       await refreshTenures();
-      await fetchHistory();
-      Swal.fire({ icon: 'success', title: 'Created!', text: 'Loan tenure added successfully.', confirmButtonColor:'#1e3f6e' });
+      await fetchHistory(page, pageSize);
+      Swal.fire({
+        icon: 'success',
+        title: 'Created!',
+        text: 'Loan tenure added successfully.',
+        confirmButtonColor: '#1e3f6e',
+        timer: 1500,
+        showConfirmButton: false
+      });
     } catch (e) {
       setError(null);
-      Swal.fire({ icon: 'error', title: 'Create Failed', text: e.message || 'Failed to add loan tenure.', confirmButtonColor:'#1e3f6e' });
+      Swal.fire({
+        icon: 'error',
+        title: 'Create Failed',
+        text: e.message || 'Failed to add loan tenure.',
+        confirmButtonColor: '#1e3f6e'
+      });
     } finally {
       setLoading(false);
       setShowModal(false);
     }
   };
 
-  // Pagination
-  const totalEntries = safeHistoryLogs.length;
-  const totalPages = Math.max(1, Math.ceil(totalEntries / pageSize));
+  // Pagination (server-driven)
+  const totalEntries = historyTotal != null ? historyTotal : safeHistoryLogs.length;
+  const totalPages = totalEntries != null ? Math.max(1, Math.ceil(totalEntries / pageSize)) : (historyHasMore ? page + 1 : 1);
+  const canGoNext = totalEntries != null ? page < totalPages : historyHasMore;
+  const canGoPrev = page > 1;
   const safePage = Math.min(page, totalPages);
-  const startIdx = (safePage - 1) * pageSize;
-  const pageItems = safeHistoryLogs.slice(startIdx, startIdx + pageSize);
 
-  // Show a warning if terms are empty but history exists
+  // When the API doesn't return a `total`, we still use server-driven pagination
+  // by requesting page/limit. But guard against the UI always showing the first
+  // slice of the list when the backend returns a full array.
+  const startIndex = (safePage - 1) * pageSize;
+  const pageItems = safeHistoryLogs.slice(startIndex, startIndex + pageSize);
+
   const showTermsWarning = !loading && !error && safeTerms.length === 0 && safeHistoryLogs.length > 0;
+
+  // Helper to extract the month value from a term object (works for different shapes)
+  const getMonthValue = (term) => {
+    return term?.months ?? term?.duration ?? (typeof term === 'number' ? term : term?.id);
+  };
 
   return (
     <div className="p-8 w-full">
@@ -153,7 +183,7 @@ const LoanTermManagement = () => {
       <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Loan Term Management</h1>
-          <p className="text-sm text-gray-500 mt-1">Create, edit, and delete loan terms.</p>
+          <p className="text-sm text-gray-500 mt-1">Create and delete loan terms.</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
@@ -164,11 +194,11 @@ const LoanTermManagement = () => {
         </button>
       </div>
 
-      {/* Editable Terms Card */}
+      {/* Terms Card (read‑only) */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
         <div className="mb-6">
           <p className="font-semibold text-gray-900">Current Loan Terms</p>
-          <p className="text-sm text-gray-400 mt-0.5">Edit or delete existing terms</p>
+          <p className="text-sm text-gray-400 mt-0.5">Existing loan terms (read‑only). Use the delete button to remove a term.</p>
           {showTermsWarning && (
             <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
               ⚠️ The list of terms is empty, but history shows that terms have been created. 
@@ -187,23 +217,27 @@ const LoanTermManagement = () => {
             ) : safeTerms.length === 0 ? (
               <div className="text-center py-4 text-gray-400">No loan terms found. Add one using the button above.</div>
             ) : (
-              safeTerms.map((term) => (
-                <div key={term.id} className="flex items-center gap-3">
-                  <input
-                    type="text"
-                    min="1"
-                    value={term.id}
-                    onChange={(e) => handleChange(term.id, parseInt(e.target.value, 10))}
-                    className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
-                  />
-                  <button
-                    onClick={() => handleDelete(term.id)}
-                    className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              ))
+              safeTerms.map((term) => {
+                // Determine a unique key
+                const itemId = term?.id ?? term?._id ?? term?.months ?? term;
+                const monthValue = getMonthValue(term);
+                return (
+                  <div key={String(itemId)} className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      value={monthValue}
+                      readOnly
+                      className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 bg-gray-100 cursor-not-allowed focus:outline-none"
+                    />
+                    <button
+                      onClick={() => handleDelete(itemId)}
+                      className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
@@ -217,7 +251,6 @@ const LoanTermManagement = () => {
         </div>
         <p className="text-sm text-gray-400 mt-0.5 mb-6">Timeline of when loan terms were created</p>
 
-        {/* History Table */}
         <div className="w-full overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-gray-100">
@@ -249,41 +282,20 @@ const LoanTermManagement = () => {
           </table>
         </div>
 
-        {/* Pagination (same as before) */}
+        {/* Pagination */}
         {!historyLoading && !historyError && safeHistoryLogs.length > 0 && (
           <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
             <p className="text-sm text-gray-500">
-              Showing {startIdx + 1}–{Math.min(startIdx + pageSize, totalEntries)} of {totalEntries} entries
+              {historyTotal == null
+                ? `Showing ${(page - 1) * pageSize + 1}–${(page - 1) * pageSize + pageItems.length} of many entries (approx.)`
+                : `Showing ${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, totalEntries)} of ${totalEntries} entries`}
             </p>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-500">Show</span>
-              <div className="relative">
-                <button
-                  onClick={() => setPageSizeOpen((o) => !o)}
-                  className="flex items-center gap-1.5 border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  {pageSize}
-                  <ChevronDown size={13} />
-                </button>
-                {pageSizeOpen && (
-                  <div className="absolute bottom-full mb-1 left-0 bg-white border border-gray-200 rounded-md shadow-md z-10 min-w-full">
-                    {PAGE_SIZES.map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => { setPageSize(s); setPage(1); setPageSizeOpen(false); }}
-                        className={`block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 ${s === pageSize ? 'text-blue-500 font-medium' : 'text-gray-700'}`}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <span className="text-sm text-gray-500">entries</span>
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-gray-500">entries per page: {pageSize}</span>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={safePage === 1}
+                  disabled={!canGoPrev || historyLoading}
                   className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft size={14} />
@@ -292,8 +304,8 @@ const LoanTermManagement = () => {
                   {safePage}
                 </span>
                 <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={safePage === totalPages}
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={!canGoNext || historyLoading}
                   className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <ChevronRight size={14} />

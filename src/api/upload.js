@@ -1,6 +1,8 @@
 // src/api/upload.js
 // Utility for uploading images to /api/upload/images (Cloudinary)
 
+import { authFetch } from './fetchWithAuth';
+
 // ── Image Compressor ──────────────────────────────────────────────────────────
 const compressImage = (file, maxDim = 1200, quality = 0.8) => {
     return new Promise((resolve) => {
@@ -58,28 +60,14 @@ export async function uploadImagesToCloudinary(files) {
 
     const API_BASE = 'https://credsure-backend-1564d84ae428.herokuapp.com/api/upload/images';
 
-    // 2. Get access token
-    let accessToken = '';
-    try {
-        const user = JSON.parse(sessionStorage.getItem('admin_user'));
-        accessToken = user?.accessToken || user?.data?.accessToken || '';
-    } catch {}
-
-    if (!accessToken) {
-        throw new Error('Missing authorization header: Admin user not logged in or token missing');
-    }
-
-    // 3. Set 60s timeout to avoid 499 client-cancelled errors
+    // 2. Set 60s timeout to avoid 499 client-cancelled errors
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 60000);
 
     try {
-        const res = await fetch(API_BASE, {
+        const res = await authFetch(API_BASE, {
             method: 'POST',
             body: formData,
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-            },
             signal: controller.signal,
         });
 

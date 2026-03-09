@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { getActivityLogs } from '../../api/adminConfig';
-import { ChevronLeft, ChevronRight, ChevronDown, CalendarDays, Eye } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarDays, Eye } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 import Swal from 'sweetalert2';
 
-const PAGE_SIZES = [10, 20, 50];
+const PAGE_SIZE = 10;
 
 const AuditLog = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Pagination state (backend-driven)
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [pageSizeOpen, setPageSizeOpen] = useState(false);
+  const [totalEntries, setTotalEntries] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
 
@@ -26,20 +29,34 @@ const AuditLog = () => {
     try {
       const data = await getActivityLogs({
         page,
-        pageSize,
+        pageSize: PAGE_SIZE,
         startDate: dateRange.startDate,
         endDate: dateRange.endDate,
       });
 
-      // Client‑side sorting fallback (ensures correct order)
-      const sorted = (data.items || []).sort((a, b) => {
-        const dateA = new Date(a.createdAt);
-        const dateB = new Date(b.createdAt);
-        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
-      });
+      // Backend should return { items, total, pagination }.
+      // If `total` isn't present, fall back to the current page size heuristics.
+      const items = data.items ?? data.data ?? [];
+      const total = data.total ?? data.pagination?.total ?? null;
+      const itemsCount = Array.isArray(items) ? items.length : 0;
+
+      // Client‑side sorting fallback (ensures correct order on the current page)
+      const sorted = Array.isArray(items)
+        ? items.sort((a, b) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+            return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+          })
+        : [];
+
       setLogs(sorted);
+      setTotalEntries(total);
+      setHasMore(total == null ? itemsCount === PAGE_SIZE : page * PAGE_SIZE < total);
     } catch (err) {
       setError(err.message || 'Failed to load activity logs');
+      setLogs([]);
+      setTotalEntries(null);
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
@@ -48,14 +65,16 @@ const AuditLog = () => {
   useEffect(() => {
     fetchLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, dateRange]);
+  }, [page, dateRange]);
 
-  // Pagination calculations (client‑side)
-  const totalEntries = logs.length;
-  const totalPages = Math.max(1, Math.ceil(totalEntries / pageSize));
+  // Pagination calculations (server-driven)
+  const effectiveTotal = totalEntries != null ? totalEntries : (Array.isArray(logs) ? logs.length : 0);
+  const totalPages = Math.max(1, Math.ceil(effectiveTotal / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
-  const startIdx = (safePage - 1) * pageSize;
-  const pageItems = logs.slice(startIdx, startIdx + pageSize);
+  const startIdx = (safePage - 1) * PAGE_SIZE;
+  const canGoPrev = safePage > 1;
+  const canGoNext = safePage < totalPages;
+  const pageItems = Array.isArray(logs) ? logs.slice(startIdx, startIdx + PAGE_SIZE) : [];
 
   const formatAction = (action) => action.replace(/_/g, ' ');
 
@@ -85,7 +104,20 @@ const AuditLog = () => {
   };
 
   const showDetails = (log) => {
+
     const detailsText = formatDetails(log.metadata, log.action);
+    const formatLabel = (str) => {
+  if (!str) return '';
+  // Replace underscores/hyphens with spaces
+  let result = str.replace(/[_-]/g, ' ');
+  // Insert space before each uppercase letter (handles camelCase)
+  result = result.replace(/([A-Z])/g, ' $1').trim();
+  // Capitalize first letter of each word
+  result = result.replace(/\b\w/g, (char) => char.toUpperCase());
+  // Collapse multiple spaces
+  result = result.replace(/\s+/g, ' ');
+  return result;
+};
     Swal.fire({
       title: 'Activity Details',
       html: `
@@ -112,7 +144,9 @@ const AuditLog = () => {
           </div>
           <div class="flex pt-1">
             <span class="font-normal text-sm w-24">Details:</span>
-            <span class="flex-1 break-words font-normal text-sm">${detailsText}</span>
+           <span class="flex-1 break-words font-normal text-sm word-spaced">
+  ${formatLabel(detailsText)}
+</span>
           </div>
         </div>
       `,
@@ -207,39 +241,19 @@ const AuditLog = () => {
         {/* Pagination */}
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
           <p className="text-sm text-gray-500">
-            Showing {startIdx + 1}–{Math.min(startIdx + pageSize, totalEntries)} of {totalEntries} entries
+            {totalEntries != null ? (
+              <>Showing {startIdx + 1}–{Math.min(startIdx + PAGE_SIZE, totalEntries)} of {totalEntries} entries</>
+            ) : (
+              <>Showing {startIdx + 1}–{startIdx + pageItems.length} of many entries (approx.)</>
+            )}
           </p>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">Show</span>
-            <div className="relative">
-              <button
-                onClick={() => setPageSizeOpen((o) => !o)}
-                className="flex items-center gap-1.5 border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
-              >
-                {pageSize}
-                <ChevronDown size={13} />
-              </button>
-              {pageSizeOpen && (
-                <div className="absolute bottom-full mb-1 left-0 bg-white border border-gray-200 rounded-md shadow-md z-10 min-w-full">
-                  {PAGE_SIZES.map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => { setPageSize(s); setPage(1); setPageSizeOpen(false); }}
-                      className={`block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 ${
-                        s === pageSize ? 'text-blue-500 font-medium' : 'text-gray-700'
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <span className="text-sm text-gray-500">entries</span>
+            <span className="text-sm text-gray-500">Entries per page:</span>
+            <span className="text-sm font-medium text-gray-700">{PAGE_SIZE}</span>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={safePage === 1}
+                disabled={!canGoPrev}
                 className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <ChevronLeft size={14} />
@@ -248,8 +262,8 @@ const AuditLog = () => {
                 {safePage}
               </span>
               <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={safePage === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+                disabled={!canGoNext}
                 className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <ChevronRight size={14} />

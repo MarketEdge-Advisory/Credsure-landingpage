@@ -1,6 +1,8 @@
 // src/api/auth.js
 // API utility functions for admin authentication and user management
 
+import { authFetch } from './fetchWithAuth';
+
 const API_BASE = 'https://credsure-backend-1564d84ae428.herokuapp.com/api/auth';
 
 export async function loginAdmin({ email, password }) {
@@ -43,11 +45,8 @@ export async function resetPassword({ resetToken, newPassword }) {
 }
 
 export async function getMe() {
-  const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
-  const token = user?.accessToken || '';
-  const res = await fetch(`${API_BASE}/me`, {
+  const res = await authFetch(`${API_BASE}/me`, {
     method: 'GET',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
     credentials: 'include',
   });
   if (!res.ok) throw new Error('Get user info failed');
@@ -59,13 +58,10 @@ export async function changePassword({ oldPassword: currentPassword, newPassword
   if (!currentPassword?.trim()) throw new Error('Current password is required');
   if (!newPassword?.trim()) throw new Error('New password is required');
 
-  const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
-  const token = user?.accessToken || '';
-  const res = await fetch(`${API_BASE}/change-password`, {
+  const res = await authFetch(`${API_BASE}/change-password`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify({ 
       currentPassword,      // ✅ renamed from oldPassword

@@ -1,24 +1,21 @@
-// Get interest rate history
-export async function getInterestRateHistory() {
-   const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
-  const token = user?.accessToken || '';
-  const res = await fetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/interest-rate/history', {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
+import { authFetch } from './fetchWithAuth';
+
+// Get interest rate history (supports server-side pagination)
+export async function getInterestRateHistory(page = 1, limit = 10) {
+  const url = new URL('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/interest-rate/history');
+  url.searchParams.set('page', page);
+  url.searchParams.set('limit', limit);
+
+  const res = await authFetch(url.toString());
   if (!res.ok) throw new Error('Failed to fetch interest rate history');
   return res.json();
 }
 // Update calculator config (downPaymentPct, processingFeePct, insuranceCost)
 export async function updateCalculatorConfig({ downPaymentPct, processingFeePct, insuranceCost }) {
-  const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
-  const token = user?.accessToken || '';
-  const res = await fetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/calculator', {
+  const res = await authFetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/calculator', {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
     },
     body: JSON.stringify({ downPaymentPct, processingFeePct, insuranceCost }),
   });
@@ -29,25 +26,13 @@ export async function updateCalculatorConfig({ downPaymentPct, processingFeePct,
 // Utility for admin config endpoints
 
 export async function getAdminConfig() {
-  const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
-  const token = user?.accessToken || '';
-  const res = await fetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config', {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
+  const res = await authFetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config');
   if (!res.ok) throw new Error('Failed to fetch admin config');
   return res.json();
 }
 
 export async function getInterestRate() {
-  const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
-  const token = user?.accessToken || '';
-  const res = await fetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/interest-rate', {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
+  const res = await authFetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/interest-rate');
   if (!res.ok) throw new Error('Failed to fetch interest rate');
   return res.json();
 }
@@ -58,13 +43,10 @@ export async function getPublicInterestRate() {
 }
 
 export async function updateInterestRate(rate) {
-  const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
-  const token = user?.accessToken || '';
-  const res = await fetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/interest-rate', {
+  const res = await authFetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/interest-rate', {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
     },
     body: JSON.stringify({ annualRatePct: rate }),
   });
@@ -73,26 +55,20 @@ export async function updateInterestRate(rate) {
 }
 
 export async function getLoanTenures() {
-  const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
-  const token = user?.accessToken || '';
   const url = 'https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config';
-  
+
   console.log('📡 Fetching admin config from:', url);
-  
-  const res = await fetch(url, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
+
+  const res = await authFetch(url);
 
   console.log('📡 Response status:', res.status);
-  
+
   if (!res.ok) {
     const errorText = await res.text();
     console.error('❌ Response not OK:', res.status, errorText);
     throw new Error(`Failed to fetch admin config: ${res.status}`);
   }
-  
+
   const response = await res.json();
   console.log('🔍 Full API response:', JSON.stringify(response, null, 2));
 
@@ -127,13 +103,10 @@ export async function getLoanTenures() {
 }
 
 export async function addLoanTenure(months) {
-  const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
-  const token = user?.accessToken || '';
-  const res = await fetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/loan-tenures', {
+  const res = await authFetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/loan-tenures', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
     },
     body: JSON.stringify({ months }),
   });
@@ -141,30 +114,72 @@ export async function addLoanTenure(months) {
   return res.json();
 }
 
+// export async function updateLoanTenure(months, data) {
+//   const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
+//   const token = user?.accessToken || '';
+//   const res = await fetch(`https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/${months}`, {
+//     method: 'PATCH',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'Authorization': `Bearer ${token}`,
+//     },
+//     body: JSON.stringify(data),
+//   });
+//   if (!res.ok) throw new Error('Failed to update loan tenure');
+//   return res.json();
+// }
+
+const BASE_ADMIN_CONFIG = 'https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config';
+
+async function requestWithFallback(urls, options) {
+  let lastError;
+  for (const url of urls) {
+    const res = await authFetch(url, options);
+    if (res.ok) return res;
+    lastError = res;
+    // If the backend returns 404, try the next URL.
+    if (res.status !== 404) break;
+  }
+  throw lastError || new Error('Request failed');
+}
+
 export async function updateLoanTenure(months, data) {
-  const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
-  const token = user?.accessToken || '';
-  const res = await fetch(`https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/${months}`, {
+  const urls = [
+    `${BASE_ADMIN_CONFIG}/${months}`,
+    `${BASE_ADMIN_CONFIG}/loan-tenures/${months}`,
+  ];
+
+  const res = await requestWithFallback(urls, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
     },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to update loan tenure');
+
+  if (!res.ok) {
+    const errorText = await res.text().catch(() => '');
+    throw new Error(`Failed to update loan tenure (${res.status}: ${errorText || res.statusText})`);
+  }
+
   return res.json();
 }
+
 export async function deleteLoanTenure(months) {
-  const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
-  const token = user?.accessToken || '';
-  const res = await fetch(`https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/loan-tenures/${months}`, {
+  const urls = [
+    `${BASE_ADMIN_CONFIG}/${months}`,
+    `${BASE_ADMIN_CONFIG}/loan-tenures/${months}`,
+  ];
+
+  const res = await requestWithFallback(urls, {
     method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
   });
-  if (!res.ok) throw new Error('Failed to delete loan tenure');
+
+  if (!res.ok) {
+    const errorText = await res.text().catch(() => '');
+    throw new Error(`Failed to delete loan tenure (${res.status}: ${errorText || res.statusText})`);
+  }
+
   return res.json();
 }
 
@@ -180,24 +195,28 @@ export async function getActivityLogs({ page = 1, pageSize = 10, startDate, endD
   // Build query parameters
   const params = new URLSearchParams();
   params.append('page', page);
+  // Some backends accept `page`, others accept `pageNumber`/`pageNo`, or use offset/limit.
+  params.append('pageNumber', page);
+  params.append('pageNo', page);
   params.append('limit', pageSize);
+  params.append('pageSize', pageSize);
+  params.append('offset', (page - 1) * pageSize);
   if (startDate) params.append('startDate', startDate);
   if (endDate) params.append('endDate', endDate);
 
-  const res = await fetch(`https://credsure-backend-1564d84ae428.herokuapp.com/api/activity?${params.toString()}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-  
+  const res = await authFetch(`https://credsure-backend-1564d84ae428.herokuapp.com/api/activity?${params.toString()}`);
+
   if (!res.ok) throw new Error('Failed to fetch activity logs');
   const response = await res.json();
   
   // The API returns { status, message, data: [...] }
-  // Transform it to match our expected format { items, total }
+  // Sometimes the backend also sends pagination metadata.
+  const items = response.data || [];
+  const total = response.total ?? response.data?.total ?? response.pagination?.total ?? items.length;
+
   return {
-    items: response.data || [],
-    total: response.data?.length || 0 // If your API doesn't return total, we'll use client-side pagination
+    items,
+    total,
   };
 }
 
@@ -210,13 +229,12 @@ export async function getCalculatorHistory({ page = 1, limit = 10 }) {
   const user = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
   const token = user?.accessToken || '';
   const params = new URLSearchParams();
+
+  // Calculator history endpoint validates query params strictly, so only send what it supports.
   params.append('page', page);
   params.append('limit', limit);
-  const res = await fetch(`https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/calculator/history?${params.toString()}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
+
+  const res = await authFetch(`https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/calculator/history?${params.toString()}`);
   if (!res.ok) throw new Error('Failed to fetch calculator history');
   return res.json();
 }
