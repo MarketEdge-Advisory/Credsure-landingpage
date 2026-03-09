@@ -202,94 +202,107 @@ const LoanCalculator = () => {
     setFormErrors({ ...formErrors, [name]: valid ? undefined : formErrors[name] });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
 
-    // Validate all fields
-    const errors = {};
-    if (!formData.fullName.trim()) errors.fullName = 'Full name is required';
-    if (!formData.phone.trim()) {
-      errors.phone = 'Phone number is required';
-    } else {
-      const digits = formData.phone.replace(/\D/g, '');
-      if (!/^0[789]\d{9}$/.test(digits)) {
-        errors.phone = 'Enter a valid Nigerian phone number (e.g., 08031234567)';
-      }
+  // Validate all fields (same as before)
+  const errors = {};
+  if (!formData.fullName.trim()) errors.fullName = 'Full name is required';
+  if (!formData.phone.trim()) {
+    errors.phone = 'Phone number is required';
+  } else {
+    const digits = formData.phone.replace(/\D/g, '');
+    if (!/^0[789]\d{9}$/.test(digits)) {
+      errors.phone = 'Enter a valid Nigerian phone number (e.g., 08031234567)';
     }
-    if (!formData.email.trim()) errors.email = 'Email address is required';
-    else if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) errors.email = 'Enter a valid email address';
-    if (!formData.employmentStatus) errors.employmentStatus = 'Employment status is required';
-    if (!formData.monthlyIncome.trim()) errors.monthlyIncome = 'Monthly income is required';
-    else if (isNaN(Number(formData.monthlyIncome)) || Number(formData.monthlyIncome) <= 0)
-      errors.monthlyIncome = 'Enter a valid income';
-    if (!carId) errors.carId = 'Could not determine the selected vehicle.';
-    if (!formData.agreeToContact) errors.agreeToContact = 'You must consent to be contacted.';
+  }
+  if (!formData.email.trim()) errors.email = 'Email address is required';
+  else if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) errors.email = 'Enter a valid email address';
+  if (!formData.employmentStatus) errors.employmentStatus = 'Employment status is required';
+  if (!formData.monthlyIncome.trim()) errors.monthlyIncome = 'Monthly income is required';
+  else if (isNaN(Number(formData.monthlyIncome)) || Number(formData.monthlyIncome) <= 0)
+    errors.monthlyIncome = 'Enter a valid income';
+  if (!carId) errors.carId = 'Could not determine the selected vehicle.';
+  if (!formData.agreeToContact) errors.agreeToContact = 'You must consent to be contacted.';
 
-    setFormErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      setIsSubmitting(false);
-      Swal.fire({
-        icon: 'error',
-        title: 'Form Error',
-        text: 'Please correct the highlighted fields.',
-        confirmButtonText: 'OK',
-        confirmButtonColor:'#1e3f6e'
-      });
-      return;
-    }
-
-    const payload = {
-      fullName: formData.fullName,
-      phoneNumber: formData.phone,
-      email: formData.email,
-      employmentStatus: formData.employmentStatus,
-      estimatedNetMonthlyIncome: Number(formData.monthlyIncome),
-      selectedVehicle,
-      carId,
-      vehicleAmount: vehiclePrice,
-      downPayment,
-      monthlyPayment,
-      consentGiven: !!formData.agreeToContact,
-    };
-
-    try {
-      const res = await fetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/public/finance-applications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(await res.text());
-
-      Swal.fire({
-        icon: 'success',
-        title: 'Submission Received!',
-        text: 'Our representative will contact you shortly.',
-        confirmButtonText: 'Got it',
-        confirmButtonColor:'#1e3f6e'
-      });
-
-      setShowModal(false);
-      setFormData({
-        fullName: '',
-        phone: '',
-        email: '',
-        employmentStatus: '',
-        monthlyIncome: '',
-        agreeToContact: false,
-      });
-      setFormErrors({});
-    } catch (err) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Submission Failed',
-        text: err.message || 'An error occurred. Please try again.',
-        confirmButtonText: 'OK',
-        confirmButtonColor:'#1e3f6e'
-      });
-    }
+  setFormErrors(errors);
+  if (Object.keys(errors).length > 0) {
     setIsSubmitting(false);
+    Swal.fire({
+      icon: 'error',
+      title: 'Form Error',
+      text: 'Please correct the highlighted fields.',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#1e3f6e'
+    });
+    return;
+  }
+
+  const payload = {
+    fullName: formData.fullName,
+    phoneNumber: formData.phone,
+    email: formData.email,
+    employmentStatus: formData.employmentStatus,
+    estimatedNetMonthlyIncome: Number(formData.monthlyIncome),
+    selectedVehicle,
+    carId,
+    vehicleAmount: vehiclePrice,
+    downPayment,
+    monthlyPayment,
+    consentGiven: !!formData.agreeToContact,
   };
+
+  try {
+    const res = await fetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/public/finance-applications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      // Try to extract a user-friendly error message from the response
+      let errorMsg = 'An error occurred. Please try again.';
+      try {
+        const errorData = await res.json();
+        // Adjust the property names based on your API's error response structure
+        errorMsg = errorData.error || errorData.message || errorMsg;
+      } catch {
+        // Response wasn't JSON – fallback to status text
+        errorMsg = res.statusText || errorMsg;
+      }
+      throw new Error(errorMsg);
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Submission Received!',
+      text: 'Our representative will contact you shortly.',
+      confirmButtonText: 'Got it',
+      confirmButtonColor: '#1e3f6e'
+    });
+
+    setShowModal(false);
+    setFormData({
+      fullName: '',
+      phone: '',
+      email: '',
+      employmentStatus: '',
+      monthlyIncome: '',
+      agreeToContact: false,
+    });
+    setFormErrors({});
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Submission Failed',
+      text: err.message || 'An error occurred. Please try again.',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#1e3f6e'
+    });
+  }
+  setIsSubmitting(false);
+};
 
   return (
     <section id="calculator" className="bg-[#0B2947] py-16 md:py-24">
