@@ -24,23 +24,53 @@ export async function loginAdmin({ email, password }) {
   return res.json();
 }
 
+async function parseErrorResponse(res, defaultMessage) {
+  let message = defaultMessage;
+  try {
+    const payload = await res.json();
+    if (payload) {
+      message =
+        payload?.message ||
+        payload?.error ||
+        payload?.data?.message ||
+        payload?.data?.error ||
+        message;
+    }
+  } catch {
+    // ignore invalid json
+  }
+  return message;
+}
+
 export async function forgotPassword(email) {
   const res = await fetch(`${API_BASE}/forgot-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email })
+    body: JSON.stringify({ email }),
   });
-  if (!res.ok) throw new Error('Forgot password failed');
+
+  if (!res.ok) {
+    const message = await parseErrorResponse(res, 'Failed to send reset code. Please try again.');
+    throw new Error(message);
+  }
   return res.json();
 }
 
-export async function resetPassword({ resetToken, newPassword }) {
+export async function resetPassword({ resetToken, token, newPassword }) {
+  const payload = { newPassword };
+  if (resetToken) payload.resetToken = resetToken;
+  if (token) payload.resetToken = token;
+
   const res = await fetch(`${API_BASE}/reset-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ resetToken, newPassword })
+    body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error('Reset password failed');
+
+  if (!res.ok) {
+    const message = await parseErrorResponse(res, 'Failed to reset password. Please try again.');
+    throw new Error(message);
+  }
   return res.json();
 }
 
@@ -106,15 +136,16 @@ export async function bootstrapAdmin({ email, password }) {
   return res.json();
 }
 
-export async function verifyOtp(code) {
-    const res = await fetch(`${API_BASE}/verify-reset-password-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code })
-    });
-    if (!res.ok) {
-        const payload = await res.json().catch(() => ({}));
-        throw new Error(payload?.message || 'Invalid or expired code.');
-    }
-    return res.json();
+export async function verifyOtp({ email, code }) {
+  const res = await fetch(`${API_BASE}/verify-reset-password-otp`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, code }),
+  });
+
+  if (!res.ok) {
+    const message = await parseErrorResponse(res, 'Invalid or expired code. Please try again.');
+    throw new Error(message);
+  }
+  return res.json();
 }

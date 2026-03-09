@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Users, CheckCircle2, BadgeCheck, CreditCard, Calendar,
   TrendingUp, TrendingDown, Loader2, ChevronDown, ChevronRight,
-  Mail, Briefcase, DollarSign
+  Mail, Briefcase, DollarSign, Download
 } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 import {
@@ -65,7 +65,7 @@ const RecentApplications = () => {
   const [hasMore, setHasMore] = useState(false);
   const [sortKey, setSortKey] = useState(null);
   const [sortDir, setSortDir] = useState('asc');
-  const [status, setStatus] = useState('PENDING');
+  const [status, setStatus] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
   const [expandedRows, setExpandedRows] = useState(new Set());   // track expanded rows
@@ -73,7 +73,10 @@ const RecentApplications = () => {
   const fetchApplications = async () => {
     setLoading(true);
     try {
-      const res = await financeApplicationsApi.getAll({ page, limit: pageSize, status });
+      const params = { page, limit: pageSize };
+      if (status) params.status = status;
+
+      const res = await financeApplicationsApi.getAll(params);
       const items = Array.isArray(res?.items)
         ? res.items
         : Array.isArray(res?.data?.items)
@@ -119,7 +122,7 @@ const RecentApplications = () => {
     employment: a.employmentStatus,
     vehicle: a.selectedVehicle,
     amount: a.vehicleAmount ? `₦${Number(a.vehicleAmount).toLocaleString()}` : '',
-    down: a.downPayment ? `₦${Number(a.downPayment).toLocaleString()}` : '',
+    down: a.downPayment != null ? `₦${Number(a.downPayment).toLocaleString()}` : '',
     status: a.status === 'PENDING' ? 'Pending' : a.status === 'APPROVED' ? 'Approved' : a.status === 'UNDER_REVIEW' ? 'Under Review' : a.status,
   }));
 
@@ -137,8 +140,12 @@ const RecentApplications = () => {
     : filtered;
 
   // Backend handles pagination; we still need UI controls for page number and enabling next/prev
+  const paginated = sorted;
+  const fetchedCount = Array.isArray(paginated) ? paginated.length : 0;
+  const effectiveTotal = totalEntries != null ? totalEntries : fetchedCount;
+
   const totalPages = totalEntries != null
-    ? Math.max(1, Math.ceil(totalEntries / pageSize))
+    ? Math.max(1, Math.ceil(effectiveTotal / pageSize))
     : hasMore
     ? page + 1
     : 1;
@@ -147,8 +154,16 @@ const RecentApplications = () => {
   const canGoPrev = page > 1;
 
   const startIndex = (page - 1) * pageSize + 1;
-  const endIndex = startIndex + sorted.length - 1;
-  const paginated = sorted;
+  const endIndex = startIndex + fetchedCount - 1;
+
+  const displayStart = fetchedCount === 0 ? 0 : startIndex;
+  const displayEnd = fetchedCount === 0 ? 0 : endIndex;
+  const displayTotal = totalEntries != null
+    ? effectiveTotal
+    : hasMore
+    ? `${displayEnd}+`
+    : effectiveTotal;
+  const showApprox = totalEntries == null && hasMore;
 
   const SortIcon = ({ k }) => (
     <span className={`ml-1 text-gray-400 ${sortKey === k ? 'text-gray-700' : ''}`}>↓</span>
@@ -184,7 +199,7 @@ const RecentApplications = () => {
       <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-5 border-b border-gray-100">
         <div>
           <h2 className="text-base font-bold text-gray-900">Recent Pre-Approval Applications</h2>
-          <p className="text-gray-400 text-sm mt-0.5">Latest processed pre-approval applications</p>
+          {/* <p className="text-gray-400 text-sm mt-0.5">Latest processed pre-approval applications</p> */}
         </div>
         <div className="w-full flex items-center justify-between flex-wrap gap-4">
           {/* Search */}
@@ -201,21 +216,15 @@ const RecentApplications = () => {
             />
           </div>
 
-            {/* Status filter (sent to backend) */}
             <div className="flex items-center gap-2">
-              <label htmlFor="status" className="text-sm text-gray-500">Status</label>
-              <select
-                id="status"
-                value={status}
-                onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-                className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+              <button
+                type="button"
+                onClick={handleDownload}
+                className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 border border-gray-200 px-3 py-2 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
               >
-                <option value="">All</option>
-                <option value="PENDING">Pending</option>
-                <option value="UNDER_REVIEW">Under Review</option>
-                <option value="APPROVED">Approved</option>
-                <option value="REJECTED">Rejected</option>
-              </select>
+                <Download size={16} />
+                Download
+              </button>
             </div>
           </div>
         </div>
@@ -316,7 +325,7 @@ const RecentApplications = () => {
           {/* Pagination footer */}
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 flex-wrap gap-3 w-full">
             <p className="text-sm text-gray-500">
-              Showing {sorted.length === 0 ? 0 : startIndex}–{sorted.length === 0 ? 0 : endIndex} of {totalEntries != null ? totalEntries : 'many'} entries{totalEntries == null ? ' (approx.)' : ''}
+              Showing {displayStart}–{displayEnd} of {displayTotal} entries{showApprox ? ' (approx.)' : ''}
             </p>
             <div className="flex items-center gap-3 text-sm text-gray-600">
               <span>Show</span>

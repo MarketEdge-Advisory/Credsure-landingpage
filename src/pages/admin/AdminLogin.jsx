@@ -2,7 +2,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { Mail, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { forgotPassword, resetPassword, verifyOtp } from '../../api/auth';
+import { verifyOtp } from '../../api/auth';
+
+const getErrorMessage = (err, fallback = 'Something went wrong. Please try again.') => {
+    if (!err) return fallback;
+    if (typeof err === 'string') return err;
+    if (err?.message) return err.message;
+    try {
+        return String(err);
+    } catch {
+        return fallback;
+    }
+};
 
 /* ─── background wrapper ─── */
 const AuthShell = ({ children }) => (
@@ -180,6 +191,7 @@ const LoginStep = ({ onForgot, onSuccess }) => {
    STEP 2 – Forgot Password
 ══════════════════════════════════════════ */
 const ForgotStep = ({ onBack, onProceed }) => {
+    const { forgotPassword } = useAuth();
     const [email, setEmail]     = useState('');
     const [error, setError]     = useState('');
     const [loading, setLoading] = useState(false);
@@ -192,10 +204,14 @@ const ForgotStep = ({ onBack, onProceed }) => {
         }
         setLoading(true);
         try {
-            await forgotPassword(email);
+            const result = await forgotPassword(email);
+            if (!result.ok) {
+                setError(getErrorMessage(result.message, 'Failed to send reset code. Try again.'));
+                return;
+            }
             onProceed(email);
         } catch (e) {
-            setError(e.message || 'Failed to send reset code. Try again.');
+            setError(getErrorMessage(e, 'Failed to send reset code. Try again.'));
         } finally {
             setLoading(false);
         }
@@ -235,9 +251,13 @@ const ForgotStep = ({ onBack, onProceed }) => {
    STEP 3 – Verify OTP
 ══════════════════════════════════════════ */
 const VerifyStep = ({ email, onBack, onProceed }) => {
+    const { forgotPassword } = useAuth();
     const [digits, setDigits]   = useState(Array(6).fill(''));
     const [error, setError]     = useState('');
     const [loading, setLoading] = useState(false);
+    const [resendError, setResendError] = useState('');
+    const [resendMessage, setResendMessage] = useState('');
+    const [resendCooldown, setResendCooldown] = useState(0);
     const refs = useRef([]);
 
     const handleChange = (idx, val) => {
@@ -272,15 +292,53 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
         }
         setLoading(true);
         try {
-            const payload = await verifyOtp(otp);
-            const resetToken = payload?.resetToken ?? payload;
+            const payload = await verifyOtp({ email, code: otp });
+            const resetToken =
+                payload?.resetToken ||
+                payload?.token ||
+                payload?.data?.resetToken ||
+                payload;
             onProceed(resetToken);
         } catch (e) {
-            setError(e.message || 'Invalid or expired code. Try again.');
+            setError(getErrorMessage(e, 'Invalid or expired code. Please try again.'));
         } finally {
             setLoading(false);
         }
     };
+
+    const handleResend = async () => {
+        setResendError('');
+        setResendMessage('');
+
+        if (!email) {
+            setResendError('Unable to resend code: missing email address.');
+            return;
+        }
+
+        setResendCooldown(60);
+        setResendMessage('Sending new code...');
+
+        try {
+            const result = await forgotPassword(email);
+            if (!result.ok) {
+                setResendError(getErrorMessage(result.message, 'Failed to resend code.')); 
+                setResendCooldown(0);
+                return;
+            }
+            setResendMessage('A new code was sent to your email.');
+        } catch (e) {
+            setResendError(getErrorMessage(e, 'Failed to resend code.'));
+            setResendCooldown(0);
+        }
+    };
+
+    useEffect(() => {
+        if (!resendCooldown) return;
+        const timer = window.setInterval(() => {
+            setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+        }, 1000);
+        return () => window.clearInterval(timer);
+    }, [resendCooldown]);
 
     const otp = digits.join('');
 
@@ -292,6 +350,7 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
             </p>
 
             <ErrorBox message={error} />
+            <ErrorBox message={resendError} />
 
             <div className="mb-4">
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Enter Code</label>
@@ -314,6 +373,23 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
                 </div>
             </div>
 
+            {resendMessage && (
+                <div className="mb-3 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-xs sm:text-sm text-green-600">
+                    {resendMessage}
+                </div>
+            )}
+
+            <div className="text-center mb-4">
+                <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resendCooldown > 0 || loading}
+                    className="text-xs sm:text-sm text-[#2d9de5] hover:underline font-medium disabled:text-gray-400 disabled:hover:no-underline"
+                >
+                    {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend code'}
+                </button>
+            </div>
+
             <PrimaryBtn onClick={handleProceed} disabled={otp.length < 6} loading={loading}>
                 Proceed
             </PrimaryBtn>
@@ -332,6 +408,7 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
    STEP 4 – Reset Password
 ══════════════════════════════════════════ */
 const ResetStep = ({ resetToken, onBack, onDone }) => {
+    const { resetPassword } = useAuth();
     const [newPwd, setNewPwd]      = useState('');
     const [confirmPwd, setConfirm] = useState('');
     const [error, setError]        = useState('');
@@ -357,10 +434,14 @@ const ResetStep = ({ resetToken, onBack, onDone }) => {
         }
         setLoading(true);
         try {
-            await resetPassword({ resetToken, newPassword: newPwd });
+            const result = await resetPassword({ resetToken, newPassword: newPwd });
+            if (!result.ok) {
+                setError(getErrorMessage(result.message, 'Failed to reset password. Please try again.'));
+                return;
+            }
             onDone();
         } catch (e) {
-            setError(e.message || 'Failed to reset password. Try again.');
+            setError(getErrorMessage(e, 'Failed to reset password. Please try again.'));
         } finally {
             setLoading(false);
         }

@@ -38,11 +38,61 @@ const CalculatorInputMgt = () => {
   const [processingFee, setProcessingFee] = useState('');
   const [insuranceCost, setInsuranceCost] = useState('');
 
+  const [processingFeeError, setProcessingFeeError] = useState('');
+  const [insuranceCostError, setInsuranceCostError] = useState('');
+
   // UI state
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Helpers
+  const formatNumberWithCommas = (value) => {
+    const str = String(value || '');
+    return str.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  const handleProcessingFeeChange = (e) => {
+    const raw = e.target.value;
+    const digits = raw.replace(/\D/g, '');
+
+    if (!digits) {
+      setProcessingFee('');
+      setProcessingFeeError('');
+      return;
+    }
+
+    const num = Number(digits);
+    if (Number.isNaN(num)) {
+      setProcessingFee('');
+      setProcessingFeeError('Invalid number');
+      return;
+    }
+
+    setProcessingFee(formatNumberWithCommas(num));
+    setProcessingFeeError('');
+  };
+
+  const handleInsuranceCostChange = (e) => {
+    const raw = e.target.value;
+    const digits = raw.replace(/\D/g, '');
+
+    if (!digits) {
+      setInsuranceCost('');
+      setInsuranceCostError('');
+      return;
+    }
+
+    const num = Number(digits);
+    setInsuranceCost(digits);
+
+    if (num < 1 || num > 100) {
+      setInsuranceCostError('Insurance cost must be between 1 and 100.');
+    } else {
+      setInsuranceCostError('');
+    }
+  };
 
   // History state
   const [historyItems, setHistoryItems] = useState([]);
@@ -69,7 +119,11 @@ const CalculatorInputMgt = () => {
         const config = response?.data?.calculator;
 
         setDownPayment(String(config?.downPaymentPct ?? ''));
-        setProcessingFee(String(config?.processingFeePct ?? ''));
+        setProcessingFee(
+          config?.processingFeePct != null
+            ? formatNumberWithCommas(config.processingFeePct)
+            : ''
+        );
         setInsuranceCost(String(config?.insuranceCost ?? ''));
       } catch (e) {
         Swal.fire({
@@ -135,11 +189,40 @@ const CalculatorInputMgt = () => {
     setLoading(true);
     setError('');
     setSuccess('');
+    setProcessingFeeError('');
+    setInsuranceCostError('');
+
+    const downPaymentValue = Number(downPayment);
+    const processingFeeValue = Number(processingFee.replace(/,/g, ''));
+    const insuranceCostValue = Number(insuranceCost);
+
+    let hasError = false;
+
+    if (Number.isNaN(downPaymentValue)) {
+      setError('Down payment must be a number.');
+      hasError = true;
+    }
+
+    if (Number.isNaN(processingFeeValue) || processingFeeValue < 0) {
+      setProcessingFeeError('Processing fee must be a valid number.');
+      hasError = true;
+    }
+
+    if (Number.isNaN(insuranceCostValue) || insuranceCostValue < 1 || insuranceCostValue > 100) {
+      setInsuranceCostError('Insurance cost must be between 1 and 100.');
+      hasError = true;
+    }
+
+    if (hasError) {
+      setLoading(false);
+      return;
+    }
+
     try {
       await updateCalculatorConfig({
-        downPaymentPct: Number(downPayment),
-        processingFeePct: Number(processingFee),
-        insuranceCost: Number(insuranceCost),
+        downPaymentPct: downPaymentValue,
+        processingFeePct: processingFeeValue,
+        insuranceCost: insuranceCostValue,
       });
       Swal.fire({
         icon: 'success',
@@ -193,6 +276,7 @@ const CalculatorInputMgt = () => {
     <div className="p-8 w-full">
       <h1 className="text-2xl font-bold text-gray-900">Calculator Input Management</h1>
       <p className="text-sm text-gray-500 mt-1 mb-6">Set, modify, and track calculator input management.</p>
+      {error && <div className="text-sm text-red-600 mb-4">{error}</div>}
 
       {/* ── Update Card ── (unchanged) */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
@@ -218,10 +302,13 @@ const CalculatorInputMgt = () => {
         <input
           type="text"
           value={processingFee}
-          onChange={(e) => setProcessingFee(e.target.value)}
+          onChange={handleProcessingFeeChange}
           className="w-full max-w-md border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           required
         />
+        {processingFeeError && (
+          <p className="mt-1 text-sm text-red-600">{processingFeeError}</p>
+        )}
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -230,10 +317,13 @@ const CalculatorInputMgt = () => {
         <input
           type="text"
           value={insuranceCost}
-          onChange={(e) => setInsuranceCost(e.target.value)}
+          onChange={handleInsuranceCostChange}
           className="w-full max-w-md border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           required
         />
+        {insuranceCostError && (
+          <p className="mt-1 text-sm text-red-600">{insuranceCostError}</p>
+        )}
       </div>
     </div>
     <div className="flex justify-start"> {/* Align button to the left as well */}
