@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { Mail, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { verifyOtp } from '../../api/auth';
+import Swal from 'sweetalert2';
 
 const getErrorMessage = (err, fallback = 'Something went wrong. Please try again.') => {
     if (!err) return fallback;
@@ -13,6 +14,26 @@ const getErrorMessage = (err, fallback = 'Something went wrong. Please try again
     } catch {
         return fallback;
     }
+};
+
+const getFriendlyForgotPasswordError = (rawMessage) => {
+    const msg = String(rawMessage || '').trim().toLowerCase();
+
+    if (!msg) return 'Unable to send reset code. Please try again.';
+    if (/invalid|must.*email|email.*invalid|invalid email/.test(msg)) {
+        return 'Please enter a valid email address.';
+    }
+    if (/not\s*found|no\s*account|no\s*user|doesn\W*exist|not\s*registered|user\s*does\s*not\s*exist/.test(msg)) {
+        return 'No account found with that email.';
+    }
+    if (/rate.*limit|too many|try again later|temporarily unavailable|service unavailable/.test(msg)) {
+        return 'Too many attempts. Please try again later.';
+    }
+    if (/failed to fetch|network/i.test(msg)) {
+        return 'Network error. Please check your connection and try again.';
+    }
+
+    return 'Unable to send reset code. Please try again.';
 };
 
 /* ─── background wrapper ─── */
@@ -198,20 +219,42 @@ const ForgotStep = ({ onBack, onProceed }) => {
 
     const handleProceed = async () => {
         setError('');
-        if (!email.trim()) {
+        const trimmedEmail = String(email || '').trim();
+        if (!trimmedEmail) {
             setError('Please enter your email address.');
             return;
         }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+            setError('Please enter a valid email address.');
+            return;
+        }
+
         setLoading(true);
         try {
-            const result = await forgotPassword(email);
+            const result = await forgotPassword(trimmedEmail);
             if (!result.ok) {
-                setError(getErrorMessage(result.message, 'Failed to send reset code. Try again.'));
+                const userMessage = getFriendlyForgotPasswordError(result.message);
+                setError(userMessage);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Unable to send reset code',
+                    text: userMessage,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#1e3f6e',
+                });
                 return;
             }
-            onProceed(email);
+            onProceed(trimmedEmail);
         } catch (e) {
-            setError(getErrorMessage(e, 'Failed to send reset code. Try again.'));
+            const userMessage = getFriendlyForgotPasswordError(e?.message || e);
+            setError(userMessage);
+            Swal.fire({
+                icon: 'error',
+                title: 'Unable to send reset code',
+                text: userMessage,
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#1e3f6e',
+            });
         } finally {
             setLoading(false);
         }
@@ -300,7 +343,21 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
                 payload;
             onProceed(resetToken);
         } catch (e) {
-            setError(getErrorMessage(e, 'Invalid or expired code. Please try again.'));
+            const msg = getErrorMessage(e, 'Invalid or expired code. Please try again.');
+            const userMessage = /expired|expired\s*otp|token\s*expired/i.test(msg)
+                ? 'Expired or wrong OTP. Please resend and try again.'
+                : /invalid|wrong|incorrect|not\s*valid|validation\s*failed/i.test(msg)
+                ? 'Expired or wrong OTP. Please resend and try again.'
+                : msg;
+
+            setError(userMessage);
+            Swal.fire({
+                icon: 'error',
+                title: 'OTP Verification Failed',
+                text: userMessage,
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#1e3f6e',
+            });
         } finally {
             setLoading(false);
         }
@@ -321,13 +378,13 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
         try {
             const result = await forgotPassword(email);
             if (!result.ok) {
-                setResendError(getErrorMessage(result.message, 'Failed to resend code.')); 
+                setResendError(getFriendlyForgotPasswordError(result.message));
                 setResendCooldown(0);
                 return;
             }
             setResendMessage('A new code was sent to your email.');
         } catch (e) {
-            setResendError(getErrorMessage(e, 'Failed to resend code.'));
+            setResendError(getFriendlyForgotPasswordError(e?.message || e));
             setResendCooldown(0);
         }
     };

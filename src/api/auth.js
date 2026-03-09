@@ -29,12 +29,20 @@ async function parseErrorResponse(res, defaultMessage) {
   try {
     const payload = await res.json();
     if (payload) {
-      message =
-        payload?.message ||
-        payload?.error ||
-        payload?.data?.message ||
-        payload?.data?.error ||
-        message;
+      // Prefer explicit errors array when available (e.g., validation failures)
+      if (Array.isArray(payload.errors) && payload.errors.length > 0) {
+        // Avoid displaying raw backend validation details in the UI.
+        message = 'Validation failed. Please check your input and try again.';
+      } else if (typeof payload.errors === 'string' && payload.errors.trim()) {
+        message = payload.errors;
+      } else {
+        message =
+          payload?.message ||
+          payload?.error ||
+          payload?.data?.message ||
+          payload?.data?.error ||
+          message;
+      }
     }
   } catch {
     // ignore invalid json
@@ -49,11 +57,36 @@ export async function forgotPassword(email) {
     body: JSON.stringify({ email }),
   });
 
-  if (!res.ok) {
-    const message = await parseErrorResponse(res, 'Failed to send reset code. Please try again.');
+  const payload = await res.json().catch(() => null);
+
+  // Backend may return 200 even when the email is not registered.
+  // Detect failure explicitly and throw so callers can handle it.
+  const messageCandidate =
+    payload?.message ||
+    payload?.error ||
+    payload?.data?.message ||
+    payload?.data?.error ||
+    '';
+
+  const negativity = /not\s*found|no\s*user|invalid\s*email|doesn\'t\s*exist|not\s*registered|user\s*does\s*not\s*exist|does\s*not\s*exist/i;
+
+  const isFail =
+    !res.ok ||
+    payload == null ||
+    payload.status === false ||
+    payload.ok === false ||
+    payload.success === false ||
+    (typeof messageCandidate === 'string' && negativity.test(messageCandidate));
+
+  if (isFail) {
+    const message =
+      (typeof messageCandidate === 'string' && messageCandidate.trim())
+        ? messageCandidate
+        : 'Email not registered. Please check and try again.';
     throw new Error(message);
   }
-  return res.json();
+
+  return payload;
 }
 
 export async function resetPassword({ resetToken, token, newPassword }) {
@@ -136,11 +169,11 @@ export async function bootstrapAdmin({ email, password }) {
   return res.json();
 }
 
-export async function verifyOtp({ email, code }) {
+export async function verifyOtp({ code }) {
   const res = await fetch(`${API_BASE}/verify-reset-password-otp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, code }),
+    body: JSON.stringify({ code }),
   });
 
   if (!res.ok) {

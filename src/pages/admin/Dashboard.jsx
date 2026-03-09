@@ -170,15 +170,30 @@ const RecentApplications = () => {
   );
 
   const handleDownload = () => {
-    const headers = ['Full Name', 'Phone Number', 'Vehicle Selected', 'Vehicle Amount', 'Down Payment', 'Status'];
+    const headers = [
+      'Full Name',
+      'Email',
+      'Employment Status',
+      'Monthly Income',
+      'Phone Number',
+      'Vehicle Selected',
+      'Vehicle Amount',
+      'Down Payment',
+      'Status',
+    ];
+
     const dataForExport = paginated.map(row => ({
       'Full Name': row.name,
+      'Email': row.email,
+      'Employment Status': row.employment,
+      'Monthly Income': row.income,
       'Phone Number': row.phone,
       'Vehicle Selected': row.vehicle,
       'Vehicle Amount': row.amount,
       'Down Payment': row.down,
-      'Status': row.status
+      'Status': row.status,
     }));
+
     const csv = convertToCSV(dataForExport, headers);
     downloadCSV(csv, 'dashboard-applications.csv');
   };

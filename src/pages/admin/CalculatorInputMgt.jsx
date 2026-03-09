@@ -381,8 +381,8 @@ const CalculatorInputMgt = () => {
                   <th className="py-3 px-4 font-medium">S/N</th>
                   <th className="py-3 px-4 font-medium">Date & Time</th>
                   <th className="py-3 px-4 font-medium">Down Payment (%)</th>
-                  <th className="py-3 px-4 font-medium">Processing Fee (%)</th>
-                  <th className="py-3 px-4 font-medium">Insurance Cost</th>
+                  <th className="py-3 px-4 font-medium">Processing Fee (₦)</th>
+                  <th className="py-3 px-4 font-medium">Insurance Cost (%)</th>
                   <th className="py-3 px-4 font-medium">Changed By</th>
                 </tr>
               </thead>
@@ -392,13 +392,17 @@ const CalculatorInputMgt = () => {
                   const date = formatDate(item.createdAt);
                   // Format values
                   const downPct = item.downPaymentPct != null ? `${item.downPaymentPct}%` : '-';
-                  const feePct =
+                  const feeAmount =
                     item.processingFee != null
-                      ? `₦${Number(item.processingFee).toLocaleString()}`
+                      ? Number(item.processingFee)
                       : item.processingFeePct != null
-                      ? `${item.processingFeePct}%`
+                      ? Number(item.processingFeePct)
+                      : null;
+                  const feeDisplay = feeAmount != null ? `₦${feeAmount.toLocaleString()}` : '-';
+                  const insurance =
+                    item.insuranceCost != null
+                      ? `${item.insuranceCost.toLocaleString()}%`
                       : '-';
-                  const insurance = item.insuranceCost != null ? item.insuranceCost.toLocaleString() : '-';
                   const changedBy = item.changedByEmail || item.changedByRole || 'System';
 
                   return (
@@ -406,7 +410,7 @@ const CalculatorInputMgt = () => {
                       <td className="py-3 px-4 text-gray-500">{serial}</td>
                       <td className="py-3 px-4 text-gray-700">{date}</td>
                       <td className="py-3 px-4 text-gray-700">{downPct}</td>
-                      <td className="py-3 px-4 text-gray-700">{feePct}</td>
+                      <td className="py-3 px-4 text-gray-700">{feeDisplay}</td>
                       <td className="py-3 px-4 text-gray-700">{insurance}</td>
                       <td className="py-3 px-4 text-gray-600">{changedBy}</td>
                     </tr>

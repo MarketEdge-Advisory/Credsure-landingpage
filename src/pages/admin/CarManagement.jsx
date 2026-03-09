@@ -387,7 +387,7 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
     numberOfUnits: '',
     engineSpec: '',
     transmissionSpec: 'Manual',
-    availability: '',
+    availability: 'AVAILABLE',
     fuelTypeSpec: '',
   });
   const [formError, setFormError] = useState('');
@@ -753,7 +753,7 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
     numberOfUnits: vehicle.numberOfUnits || '',
     engineSpec: vehicle.specs?.engine || '',
     transmissionSpec: vehicle.specs?.transmission || '',
-    availability: vehicle.availability || '',
+    availability: vehicle.availability || 'AVAILABLE',
   });
 
   // Filter out any fake image URLs that contain "example.com"

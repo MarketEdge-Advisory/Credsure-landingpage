@@ -21,6 +21,16 @@ const normalizeRole = (role) => {
   return normalized;
 };
 
+// Registered admin emails. Keep in sync with the role-mapping in the login handler below.
+const ADMIN_EMAILS = [
+  'support@credsureloans.com',
+  'suzukisalesng@cfao.com',
+  'agency@marketedgeadvisory.com',
+];
+
+const isRegisteredAdmin = (email) =>
+  ADMIN_EMAILS.includes(String(email || '').trim().toLowerCase());
+
 /**
  * Hard-coded admin accounts.
  * role: 'credsure' | 'suzuki'
@@ -35,6 +45,8 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   });
+
+
 
   // LOGIN
   const login = async (email, password) => {
@@ -79,6 +91,10 @@ export const AuthProvider = ({ children }) => {
 
   // FORGOT PASSWORD
   const forgotPassword = async (email) => {
+    // Guard: backend returns 200 for any email, so validate against known admins first.
+    if (!isRegisteredAdmin(email)) {
+      return { ok: false, message: 'No account found with that email.' };
+    }
     try {
       await authApi.forgotPassword(email);
       return { ok: true };

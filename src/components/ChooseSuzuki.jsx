@@ -377,6 +377,21 @@ const ChooseSuzuki = () => {
           };
         });
 
+        // Sort by availability: available first, then coming soon, then not available
+        const availabilityRank = (status) => {
+          const s = String(status || '').toUpperCase();
+          if (s === 'COMING_SOON') return 1;
+          if (s === 'NOT_AVAILABLE' || s === 'UNAVAILABLE') return 2;
+          return 0; // treat anything else as available
+        };
+
+        formatted.sort((a, b) => {
+          const rankA = availabilityRank(a.availability);
+          const rankB = availabilityRank(b.availability);
+          if (rankA !== rankB) return rankA - rankB;
+          return String(a.name || '').localeCompare(String(b.name || ''));
+        });
+
         setCars(formatted);
       } catch (err) {
         console.error(err);
