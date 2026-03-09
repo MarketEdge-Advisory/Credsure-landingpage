@@ -12,14 +12,27 @@ export async function getInterestRateHistory(page = 1, limit = 10) {
 }
 // Update calculator config (downPaymentPct, processingFeePct, insuranceCost)
 export async function updateCalculatorConfig({ downPaymentPct, processingFeePct, insuranceCost }) {
+  const payload = { downPaymentPct, processingFeePct, insuranceCost };
   const res = await authFetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/calculator', {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ downPaymentPct, processingFeePct, insuranceCost }),
+    body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error('Failed to update calculator config');
+
+  if (!res.ok) {
+    const text = await res.text();
+    let errorMessage = text;
+    try {
+      const json = JSON.parse(text);
+      errorMessage = json.message || json.error || JSON.stringify(json);
+    } catch (e) {
+      // not JSON
+    }
+    throw new Error(`Failed to update calculator config: ${errorMessage}`);
+  }
+
   return res.json();
 }
 

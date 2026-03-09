@@ -119,11 +119,13 @@ const CalculatorInputMgt = () => {
         const config = response?.data?.calculator;
 
         setDownPayment(String(config?.downPaymentPct ?? ''));
-        setProcessingFee(
-          config?.processingFeePct != null
-            ? formatNumberWithCommas(config.processingFeePct)
-            : ''
-        );
+        const feeAmount =
+          config?.processingFee != null
+            ? config.processingFee
+            : config?.processingFeePct != null
+            ? config.processingFeePct
+            : '';
+        setProcessingFee(feeAmount !== '' ? formatNumberWithCommas(feeAmount) : '');
         setInsuranceCost(String(config?.insuranceCost ?? ''));
       } catch (e) {
         Swal.fire({
@@ -208,6 +210,7 @@ const CalculatorInputMgt = () => {
       hasError = true;
     }
 
+
     if (Number.isNaN(insuranceCostValue) || insuranceCostValue < 1 || insuranceCostValue > 100) {
       setInsuranceCostError('Insurance cost must be between 1 and 100.');
       hasError = true;
@@ -219,11 +222,18 @@ const CalculatorInputMgt = () => {
     }
 
     try {
-      await updateCalculatorConfig({
+      const payload = {
         downPaymentPct: downPaymentValue,
-        processingFeePct: processingFeeValue,
+        processingFee: processingFeeValue,
         insuranceCost: insuranceCostValue,
-      });
+      };
+
+      // Keep legacy `processingFeePct` for backward compatibility
+      // (some backends still validate this field as a percentage).
+      // If the value is > 100, clamp it to 100 so validation passes.
+      payload.processingFeePct = Math.min(processingFeeValue, 100);
+
+      await updateCalculatorConfig(payload);
       Swal.fire({
         icon: 'success',
         title: 'Calculator Updated!',
@@ -241,6 +251,8 @@ const CalculatorInputMgt = () => {
         confirmButtonText: 'OK',
         confirmButtonColor:'#1e3f6e'
       });
+
+      console.error('Calculator update error:', e);
     } finally {
       setLoading(false);
     }
@@ -380,7 +392,12 @@ const CalculatorInputMgt = () => {
                   const date = formatDate(item.createdAt);
                   // Format values
                   const downPct = item.downPaymentPct != null ? `${item.downPaymentPct}%` : '-';
-                  const feePct = item.processingFeePct != null ? `${item.processingFeePct}%` : '-';
+                  const feePct =
+                    item.processingFee != null
+                      ? `₦${Number(item.processingFee).toLocaleString()}`
+                      : item.processingFeePct != null
+                      ? `${item.processingFeePct}%`
+                      : '-';
                   const insurance = item.insuranceCost != null ? item.insuranceCost.toLocaleString() : '-';
                   const changedBy = item.changedByEmail || item.changedByRole || 'System';
 
