@@ -111,7 +111,7 @@ export async function bootstrapAdmin({ email, password }) {
 }
 
 export async function verifyOtp(code) {
-    const res = await fetch(`${API_BASE}/verify-otp`, {
+    const res = await fetch(`${API_BASE}/verify-reset-password-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code })
