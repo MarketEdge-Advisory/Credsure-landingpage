@@ -88,9 +88,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   // RESET PASSWORD
-  const resetPassword = async ({ token, newPassword }) => {
+  const resetPassword = async ({ token, resetToken, newPassword }) => {
     try {
-      await authApi.resetPassword({ token, newPassword });
+      await authApi.resetPassword({ resetToken: resetToken || token, newPassword });
       return { ok: true };
     } catch (e) {
       return { ok: false, message: e.message || 'Failed to reset password' };

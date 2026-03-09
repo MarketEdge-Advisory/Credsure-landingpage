@@ -32,11 +32,11 @@ export async function forgotPassword(email) {
   return res.json();
 }
 
-export async function resetPassword({ code, newPassword }) {
+export async function resetPassword({ resetToken, newPassword }) {
   const res = await fetch(`${API_BASE}/reset-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code, newPassword })
+    body: JSON.stringify({ resetToken, newPassword })
   });
   if (!res.ok) throw new Error('Reset password failed');
   return res.json();

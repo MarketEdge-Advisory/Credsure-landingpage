@@ -272,8 +272,9 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
         }
         setLoading(true);
         try {
-            await verifyOtp(otp);
-            onProceed(otp);
+            const payload = await verifyOtp(otp);
+            const resetToken = payload?.resetToken ?? payload;
+            onProceed(resetToken);
         } catch (e) {
             setError(e.message || 'Invalid or expired code. Try again.');
         } finally {
@@ -330,7 +331,7 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
 /* ══════════════════════════════════════════
    STEP 4 – Reset Password
 ══════════════════════════════════════════ */
-const ResetStep = ({  otp, onBack, onDone }) => {
+const ResetStep = ({ resetToken, onBack, onDone }) => {
     const [newPwd, setNewPwd]      = useState('');
     const [confirmPwd, setConfirm] = useState('');
     const [error, setError]        = useState('');
@@ -338,6 +339,10 @@ const ResetStep = ({  otp, onBack, onDone }) => {
 
     const handleReset = async () => {
         setError('');
+        if (!resetToken) {
+            setError('Reset token missing. Please verify your code again.');
+            return;
+        }
         if (!newPwd.trim() || !confirmPwd.trim()) {
             setError('Please fill in both password fields.');
             return;
@@ -352,7 +357,7 @@ const ResetStep = ({  otp, onBack, onDone }) => {
         }
         setLoading(true);
         try {
-            await resetPassword({ code: otp, newPassword: newPwd });
+            await resetPassword({ resetToken, newPassword: newPwd });
             onDone();
         } catch (e) {
             setError(e.message || 'Failed to reset password. Try again.');
@@ -414,7 +419,7 @@ const pageTitles = {
 export default function AdminLogin() {
     const [step, setStep]           = useState(STEPS.login);
     const [userEmail, setUserEmail] = useState('');
-    const [userOtp, setUserOtp]     = useState('');
+    const [resetToken, setResetToken] = useState('');
     const navigate = useNavigate();
     const { login, user } = useAuth();
 
@@ -453,8 +458,8 @@ export default function AdminLogin() {
                 <VerifyStep
                     email={userEmail}
                     onBack={() => setStep(STEPS.login)}
-                    onProceed={(otp) => {
-                        setUserOtp(otp);
+                    onProceed={(resetToken) => {
+                        setResetToken(resetToken);
                         setStep(STEPS.reset);
                     }}
                 />
@@ -462,7 +467,7 @@ export default function AdminLogin() {
             {step === STEPS.reset && (
                 <ResetStep
                     email={userEmail}
-                    otp={userOtp}
+                    resetToken={resetToken}
                     onBack={() => setStep(STEPS.login)}
                     onDone={() => setStep(STEPS.login)}
                 />
