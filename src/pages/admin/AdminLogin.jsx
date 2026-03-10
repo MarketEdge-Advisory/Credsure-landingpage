@@ -596,9 +596,14 @@ const ResetStep = ({ resetToken, onBack, onDone }) => {
                 if (/requirement|uppercase|special|short|validation/i.test(friendly)) setShowHints(true);
                 return;
             }
+            await Swal.fire({
+                icon: 'success',
+                title: 'Password Reset Successful',
+                text: 'Your password has been updated. You can now log in with your new password.',
+                confirmButtonText: 'Go to Login',
+                confirmButtonColor: '#1e3f6e',
+            });
             onDone();
-        } catch (e) {
-            const friendly = getFriendlyResetError(e?.message || e);
             setError(friendly);
         } finally {
             setLoading(false);
