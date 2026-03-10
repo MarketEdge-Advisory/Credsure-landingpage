@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import * as authApi from '../api/auth';
+
+const INACTIVITY_TIMEOUT_MS = 60 * 60 * 1000; // 1 hour
 
 const AuthContext = createContext();
 
@@ -46,7 +48,40 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
+  const inactivityTimerRef = useRef(null);
 
+  const doLogout = useCallback(() => {
+    setUser(null);
+    sessionStorage.removeItem('admin_user');
+    sessionStorage.removeItem('access_token');
+  }, []);
+
+  // Reset the inactivity timer on any user activity
+  const resetInactivityTimer = useCallback(() => {
+    if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+    inactivityTimerRef.current = setTimeout(() => {
+      doLogout();
+      // Show a non-blocking alert (works without SweetAlert dependency)
+      window.alert('You have been logged out due to 1 hour of inactivity.');
+    }, INACTIVITY_TIMEOUT_MS);
+  }, [doLogout]);
+
+  // Attach/detach activity listeners whenever a user is logged in
+  useEffect(() => {
+    if (!user) {
+      if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+      return;
+    }
+
+    const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+    events.forEach((e) => window.addEventListener(e, resetInactivityTimer, { passive: true }));
+    resetInactivityTimer(); // start the timer immediately on login
+
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, resetInactivityTimer));
+      if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+    };
+  }, [user, resetInactivityTimer]);
 
   // LOGIN
   const login = async (email, password) => {
@@ -134,9 +169,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    setUser(null);
-    sessionStorage.removeItem('admin_user');
-    sessionStorage.removeItem('access_token');
+    doLogout();
   };
 
   return (
