@@ -147,6 +147,13 @@ const LoginStep = ({ onForgot, onSuccess }) => {
     const [remember, setRemember] = useState(false);
     const [error, setError]       = useState('');
     const [loading, setLoading]   = useState(false);
+    const [showPwdHints, setShowPwdHints] = useState(false);
+
+    const pwdRules = [
+        { label: 'At least 8 characters',       pass: password.length >= 8 },
+        { label: 'At least one uppercase letter', pass: /[A-Z]/.test(password) },
+        { label: 'At least one special character', pass: /[^A-Za-z0-9]/.test(password) },
+    ];
 
     const handleLogin = async () => {
         setError('');
@@ -162,6 +169,7 @@ const LoginStep = ({ onForgot, onSuccess }) => {
             let friendly = result.message;
             if (/validation failed|invalid.*credential|credential.*invalid|wrong.*password|incorrect.*password|password.*wrong|password.*incorrect|unauthorized/i.test(raw)) {
                 friendly = 'Incorrect email or password. Please try again.';
+                setShowPwdHints(true);
             } else if (/not\s*found|no\s*account|no\s*user|doesn\W*exist|not\s*registered|user\s*does\s*not\s*exist/i.test(raw)) {
                 friendly = 'No account found with that email address.';
             } else if (/invalid.*email|email.*invalid|must.*email/i.test(raw)) {
@@ -192,8 +200,18 @@ const LoginStep = ({ onForgot, onSuccess }) => {
                 label="Personal / Auto-generated Password"
                 placeholder="Enter Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); if (showPwdHints) setShowPwdHints(true); }}
             />
+            {showPwdHints && (
+                <ul className="mb-3 space-y-1">
+                    {pwdRules.map((rule) => (
+                        <li key={rule.label} className={`flex items-center gap-1.5 text-xs ${rule.pass ? 'text-green-600' : 'text-red-500'}`}>
+                            <span>{rule.pass ? '✓' : '✗'}</span>
+                            {rule.label}
+                        </li>
+                    ))}
+                </ul>
+            )}
 
             <div className="flex items-center justify-between mb-4 mt-1">
                 <label className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-600 cursor-pointer select-none">
