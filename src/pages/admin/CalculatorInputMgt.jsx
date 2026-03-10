@@ -119,12 +119,7 @@ const CalculatorInputMgt = () => {
         const config = response?.data?.calculator;
 
         setDownPayment(String(config?.downPaymentPct ?? ''));
-        const feeAmount =
-          config?.processingFee != null
-            ? config.processingFee
-            : config?.processingFeePct != null
-            ? config.processingFeePct
-            : '';
+        const feeAmount = config?.processingFee ?? config?.processingFeePct ?? '';
         setProcessingFee(feeAmount !== '' ? formatNumberWithCommas(feeAmount) : '');
         setInsuranceCost(String(config?.insuranceCost ?? ''));
       } catch (e) {
@@ -206,7 +201,7 @@ const CalculatorInputMgt = () => {
     }
 
     if (Number.isNaN(processingFeeValue) || processingFeeValue < 0) {
-      setProcessingFeeError('Processing fee must be a valid number.');
+      setProcessingFeeError('Processing fee must be a valid positive number.');
       hasError = true;
     }
 
@@ -224,7 +219,7 @@ const CalculatorInputMgt = () => {
     try {
       const payload = {
         downPaymentPct: downPaymentValue,
-        processingFee: processingFeeValue,
+        processingFeePct: processingFeeValue,
         insuranceCost: insuranceCostValue,
       };
 
@@ -387,13 +382,8 @@ const CalculatorInputMgt = () => {
                   const date = formatDate(item.createdAt);
                   // Format values
                   const downPct = item.downPaymentPct != null ? `${item.downPaymentPct}%` : '-';
-                  const feeAmount =
-                    item.processingFee != null
-                      ? Number(item.processingFee)
-                      : item.processingFeePct != null
-                      ? Number(item.processingFeePct)
-                      : null;
-                  const feeDisplay = feeAmount != null ? `₦${feeAmount.toLocaleString()}` : '-';
+                  const feeAmount = item.processingFee ?? item.processingFeePct ?? null;
+                  const feeDisplay = feeAmount != null ? `₦${Number(feeAmount).toLocaleString()}` : '-';
                   const insurance =
                     item.insuranceCost != null
                       ? `${item.insuranceCost.toLocaleString()}%`
