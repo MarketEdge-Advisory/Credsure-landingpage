@@ -332,7 +332,21 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
     const [resendError, setResendError] = useState('');
     const [resendMessage, setResendMessage] = useState('');
     const [resendCooldown, setResendCooldown] = useState(0);
+    const [otpExpiry, setOtpExpiry] = useState(10 * 60); // 10 minutes in seconds
     const refs = useRef([]);
+
+    // OTP expiry countdown
+    useEffect(() => {
+        if (otpExpiry <= 0) return;
+        const timer = window.setInterval(() => {
+            setOtpExpiry((prev) => (prev > 0 ? prev - 1 : 0));
+        }, 1000);
+        return () => window.clearInterval(timer);
+    }, [otpExpiry]);
+
+    const otpMinutes = Math.floor(otpExpiry / 60);
+    const otpSeconds = otpExpiry % 60;
+    const otpExpired = otpExpiry === 0;
 
     const handleChange = (idx, val) => {
         const cleaned = val.replace(/\D/g, '').slice(-1);
@@ -359,6 +373,10 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
 
     const handleProceed = async () => {
         setError('');
+        if (otpExpired) {
+            setError('Your code has expired. Please request a new one.');
+            return;
+        }
         const otp = digits.join('');
         if (otp.length < 6) {
             setError('Please enter the complete 6-digit code.');
@@ -413,6 +431,9 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
                 setResendCooldown(0);
                 return;
             }
+            setOtpExpiry(10 * 60); // reset 10-minute timer
+            setDigits(Array(6).fill(''));
+            setError('');
             setResendMessage('A new code was sent to your email.');
         } catch (e) {
             setResendError(getFriendlyForgotPasswordError(e?.message || e));
@@ -436,6 +457,17 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
             <p className="text-xs sm:text-sm text-gray-500 text-center mb-5">
                 We've sent a 6-digit code to <span className="font-semibold text-gray-700">{email}</span>
             </p>
+
+            {/* OTP expiry timer */}
+            <div className={`flex items-center justify-center gap-1.5 mb-3 text-xs sm:text-sm font-medium ${
+                otpExpired ? 'text-red-500' : otpExpiry <= 60 ? 'text-orange-500' : 'text-gray-500'
+            }`}>
+                {otpExpired ? (
+                    <span>Code expired. Please resend.</span>
+                ) : (
+                    <span>Code expires in {otpMinutes}:{String(otpSeconds).padStart(2, '0')}</span>
+                )}
+            </div>
 
             <ErrorBox message={error} />
             <ErrorBox message={resendError} />
@@ -478,7 +510,7 @@ const VerifyStep = ({ email, onBack, onProceed }) => {
                 </button>
             </div>
 
-            <PrimaryBtn onClick={handleProceed} disabled={otp.length < 6} loading={loading}>
+            <PrimaryBtn onClick={handleProceed} disabled={otp.length < 6 || otpExpired} loading={loading}>
                 Proceed
             </PrimaryBtn>
 
@@ -501,6 +533,36 @@ const ResetStep = ({ resetToken, onBack, onDone }) => {
     const [confirmPwd, setConfirm] = useState('');
     const [error, setError]        = useState('');
     const [loading, setLoading]    = useState(false);
+    const [showHints, setShowHints] = useState(false);
+
+    const pwdRules = [
+        { label: 'At least 8 characters',        pass: newPwd.length >= 8 },
+        { label: 'At least one uppercase letter', pass: /[A-Z]/.test(newPwd) },
+        { label: 'At least one special character', pass: /[^A-Za-z0-9]/.test(newPwd) },
+    ];
+    const pwdValid = pwdRules.every((r) => r.pass);
+
+    const getFriendlyResetError = (raw) => {
+        const msg = String(raw || '').toLowerCase();
+        if (!msg) return 'Failed to reset password. Please try again.';
+        if (/token.*expired|expired.*token|link.*expired|reset.*expired/i.test(msg))
+            return 'Your reset link has expired. Please request a new one.';
+        if (/token.*invalid|invalid.*token|token.*not.*found|bad.*token/i.test(msg))
+            return 'Invalid reset token. Please go back and verify your code again.';
+        if (/password.*too.*short|too.*short|minimum.*character/i.test(msg))
+            return 'Password is too short. It must be at least 8 characters.';
+        if (/uppercase/i.test(msg))
+            return 'Password must contain at least one uppercase letter.';
+        if (/special|symbol/i.test(msg))
+            return 'Password must contain at least one special character.';
+        if (/password.*match|match.*password/i.test(msg))
+            return 'Passwords do not match.';
+        if (/network|failed to fetch/i.test(msg))
+            return 'Network error. Please check your connection and try again.';
+        if (/validation failed/i.test(msg))
+            return 'Password does not meet requirements. Please check the rules below.';
+        return 'Failed to reset password. Please try again.';
+    };
 
     const handleReset = async () => {
         setError('');
@@ -512,24 +574,28 @@ const ResetStep = ({ resetToken, onBack, onDone }) => {
             setError('Please fill in both password fields.');
             return;
         }
-        if (newPwd !== confirmPwd) {
-            setError('Passwords do not match.');
+        if (!pwdValid) {
+            setShowHints(true);
+            setError('Password does not meet all requirements.');
             return;
         }
-        if (newPwd.length < 8) {
-            setError('Password must be at least 8 characters.');
+        if (newPwd !== confirmPwd) {
+            setError('Passwords do not match.');
             return;
         }
         setLoading(true);
         try {
             const result = await resetPassword({ resetToken, newPassword: newPwd });
             if (!result.ok) {
-                setError(getErrorMessage(result.message, 'Failed to reset password. Please try again.'));
+                const friendly = getFriendlyResetError(result.message);
+                setError(friendly);
+                if (/requirement|uppercase|special|short|validation/i.test(friendly)) setShowHints(true);
                 return;
             }
             onDone();
         } catch (e) {
-            setError(getErrorMessage(e, 'Failed to reset password. Please try again.'));
+            const friendly = getFriendlyResetError(e?.message || e);
+            setError(friendly);
         } finally {
             setLoading(false);
         }
@@ -546,8 +612,18 @@ const ResetStep = ({ resetToken, onBack, onDone }) => {
                 label="New Password"
                 placeholder="Enter New Password"
                 value={newPwd}
-                onChange={(e) => setNewPwd(e.target.value)}
+                onChange={(e) => { setNewPwd(e.target.value); if (showHints) setShowHints(true); }}
             />
+            {showHints && (
+                <ul className="mb-3 space-y-1">
+                    {pwdRules.map((rule) => (
+                        <li key={rule.label} className={`flex items-center gap-1.5 text-xs ${rule.pass ? 'text-green-600' : 'text-red-500'}`}>
+                            <span>{rule.pass ? '✓' : '✗'}</span>
+                            {rule.label}
+                        </li>
+                    ))}
+                </ul>
+            )}
             <PasswordInput
                 label="Confirm Password"
                 placeholder="Confirm Password"
