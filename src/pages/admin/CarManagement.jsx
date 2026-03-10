@@ -535,7 +535,6 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
             <p className="text-sm text-gray-400 mt-0.5">Input the details below to add new vehicles</p>
           </div>
         </div>
-
         <div className="divide-y divide-gray-100">
           {/* Upload Images Row */}
           <div className="grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] gap-4 md:gap-8 py-6 w-full">
