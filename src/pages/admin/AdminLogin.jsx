@@ -150,8 +150,9 @@ const LoginStep = ({ onForgot, onSuccess }) => {
     const [showPwdHints, setShowPwdHints] = useState(false);
 
     const pwdRules = [
-        { label: 'At least 8 characters',       pass: password.length >= 8 },
+        { label: 'At least 8 characters',        pass: password.length >= 8 },
         { label: 'At least one uppercase letter', pass: /[A-Z]/.test(password) },
+        { label: 'At least one number',           pass: /[0-9]/.test(password) },
         { label: 'At least one special character', pass: /[^A-Za-z0-9]/.test(password) },
     ];
 
@@ -538,6 +539,7 @@ const ResetStep = ({ resetToken, onBack, onDone }) => {
     const pwdRules = [
         { label: 'At least 8 characters',        pass: newPwd.length >= 8 },
         { label: 'At least one uppercase letter', pass: /[A-Z]/.test(newPwd) },
+        { label: 'At least one number',           pass: /[0-9]/.test(newPwd) },
         { label: 'At least one special character', pass: /[^A-Za-z0-9]/.test(newPwd) },
     ];
     const pwdValid = pwdRules.every((r) => r.pass);
@@ -553,6 +555,8 @@ const ResetStep = ({ resetToken, onBack, onDone }) => {
             return 'Password is too short. It must be at least 8 characters.';
         if (/uppercase/i.test(msg))
             return 'Password must contain at least one uppercase letter.';
+        if (/number|digit/i.test(msg))
+            return 'Password must contain at least one number.';
         if (/special|symbol/i.test(msg))
             return 'Password must contain at least one special character.';
         if (/password.*match|match.*password/i.test(msg))
