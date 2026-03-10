@@ -218,7 +218,7 @@ const RecentApplications = () => {
         </div>
         <div className="w-full flex items-center justify-between flex-wrap gap-4">
           {/* Search */}
-          <div className="relative">
+          <div className="relative w-full sm:w-64">
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
             </svg>
@@ -227,7 +227,7 @@ const RecentApplications = () => {
               placeholder="Search name, vehicle..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl w-64 focus:outline-none focus:border-blue-400 bg-gray-50"
+              className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl w-full focus:outline-none focus:border-blue-400 bg-gray-50"
             />
           </div>
 
