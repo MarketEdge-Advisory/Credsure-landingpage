@@ -3,8 +3,7 @@ import { getLoanTenures, addLoanTenure, deleteLoanTenure, getActivityLogs } from
 import { Plus, Trash2, X, CalendarDays, History, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import Swal from 'sweetalert2';
 
-// NOTE: history pagination is fixed to 10 per page (backend requirement)
-const PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 const LoanTermManagement = () => {
   const [terms, setTerms] = useState([]);
@@ -21,7 +20,7 @@ const LoanTermManagement = () => {
   const [duration, setDuration] = useState('');
 
   const [page, setPage] = useState(1);
-  const pageSize = PAGE_SIZE; // fixed per backend requirement
+  const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
 
   const safeTerms = Array.isArray(terms) ? terms : [];
   const safeHistoryLogs = Array.isArray(historyLogs) ? historyLogs : [];
@@ -284,14 +283,25 @@ const LoanTermManagement = () => {
 
         {/* Pagination */}
         {!historyLoading && !historyError && safeHistoryLogs.length > 0 && (
-          <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-6 pt-4 border-t border-gray-100 gap-3">
             <p className="text-sm text-gray-500">
               {historyTotal == null
                 ? `Showing ${(page - 1) * pageSize + 1}–${(page - 1) * pageSize + pageItems.length} of many entries (approx.)`
                 : `Showing ${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, totalEntries)} of ${totalEntries} entries`}
             </p>
-            <div className="flex items-center gap-1">
-              <span className="text-sm text-gray-500">entries per page: {pageSize}</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <span>Rows per page:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+                  className="border border-gray-200 rounded-md px-2 py-1 text-sm text-gray-700 focus:outline-none focus:border-blue-400"
+                >
+                  {PAGE_SIZE_OPTIONS.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}

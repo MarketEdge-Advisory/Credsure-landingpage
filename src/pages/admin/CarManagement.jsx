@@ -826,7 +826,6 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
       const basicCarData = {
           name: form.carName,
           description: form.description,
-          ...(form.vehiclePrice ? { basePrice: Number(form.vehiclePrice) } : {}), // ✅ omit if empty
           variant: form.variant,
           numberOfUnits: Number(form.numberOfUnits),
           specs: {
@@ -838,7 +837,13 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
     // 3. Update basic details
     await carApi.updateCar(vehicle.id, basicCarData);
 
-    // 4. Update availability if changed
+    // 4. Update price via dedicated endpoint if changed
+    const newPrice = form.vehiclePrice ? Number(form.vehiclePrice) : null;
+    if (newPrice !== null && newPrice !== Number(vehicle.basePrice)) {
+      await carApi.updateCarPrice(vehicle.id, newPrice);
+    }
+
+    // 5. Update availability if changed
     if (form.availability !== vehicle.availability) {
       await carApi.updateCarAvailability(vehicle.id, form.availability);
     }

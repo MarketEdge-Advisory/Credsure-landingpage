@@ -10,9 +10,9 @@ export async function getInterestRateHistory(page = 1, limit = 10) {
   if (!res.ok) throw new Error('Failed to fetch interest rate history');
   return res.json();
 }
-// Update calculator config (downPaymentPct, processingFeePct, insuranceCost)
-export async function updateCalculatorConfig({ downPaymentPct, processingFeePct, insuranceCost }) {
-  const payload = { downPaymentPct, processingFeePct, insuranceCost };
+// Update calculator config (downPaymentPct, processingFee, insuranceCost)
+export async function updateCalculatorConfig({ downPaymentPct, processingFee, insuranceCost }) {
+  const payload = { downPaymentPct, processingFee, insuranceCost };
   const res = await authFetch('https://credsure-backend-1564d84ae428.herokuapp.com/api/admin-config/calculator', {
     method: 'PATCH',
     headers: {

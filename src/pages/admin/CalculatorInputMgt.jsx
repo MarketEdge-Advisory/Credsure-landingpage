@@ -228,11 +228,6 @@ const CalculatorInputMgt = () => {
         insuranceCost: insuranceCostValue,
       };
 
-      // Keep legacy `processingFeePct` for backward compatibility
-      // (some backends still validate this field as a percentage).
-      // If the value is > 100, clamp it to 100 so validation passes.
-      payload.processingFeePct = Math.min(processingFeeValue, 100);
-
       await updateCalculatorConfig(payload);
       Swal.fire({
         icon: 'success',
