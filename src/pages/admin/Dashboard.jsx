@@ -305,31 +305,23 @@ const RecentApplications = () => {
                       <td className="px-6 py-4 text-gray-700">{row.amount}</td>
                       <td className="px-6 py-4 text-gray-700">{row.down}</td>
                     </tr>
-                    {/* Expanded row - beautifully styled */}
+                    {/* Expanded row - aligned under columns */}
                     {expandedRows.has(row.id) && (
                       <tr className="bg-gray-50/80 border-b border-gray-100">
-                        <td colSpan={7} className="px-6 py-4">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ml-8">
-                            <div className="flex items-start space-x-3">
-                              <div>
-                                <p className="text-sm font-normal text-gray-500 tracking-wider">Email</p>
-                                <p className="text-sm text-gray-800 font-normal">{row.email || '—'}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-start space-x-3">
-                              <div>
-                                <p className="text-xs font-normal text-gray-500 tracking-wider">Employment</p>
-                                <p className="text-sm text-gray-800 font-normal">{row.employment || '—'}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-start space-x-3">
-                              <div>
-                                <p className="text-xs font-normal text-gray-500 tracking-wider">Monthly Income</p>
-                                <p className="text-sm text-gray-800 font-normal">{row.income || '—'}</p>
-                              </div>
-                            </div>
-                          </div>
+                        <td className="px-2 py-3" />
+                        <td className="px-6 py-3">
+                          <p className="text-xs font-normal text-gray-500 tracking-wider">Email</p>
+                          <p className="text-sm text-gray-800 font-normal">{row.email || '—'}</p>
                         </td>
+                        <td className="px-6 py-3">
+                          <p className="text-xs font-normal text-gray-500 tracking-wider">Employment</p>
+                          <p className="text-sm text-gray-800 font-normal">{row.employment || '—'}</p>
+                        </td>
+                        <td className="px-6 py-3">
+                          <p className="text-xs font-normal text-gray-500 tracking-wider">Monthly Income</p>
+                          <p className="text-sm text-gray-800 font-normal">{row.income || '—'}</p>
+                        </td>
+                        <td colSpan={2} />
                       </tr>
                     )}
                   </React.Fragment>
