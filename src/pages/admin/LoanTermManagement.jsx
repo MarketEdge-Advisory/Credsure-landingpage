@@ -13,8 +13,6 @@ const LoanTermManagement = () => {
   const [historyLogs, setHistoryLogs] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState('');
-  const [historyTotal, setHistoryTotal] = useState(null);
-  const [historyHasMore, setHistoryHasMore] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [duration, setDuration] = useState('');
@@ -48,21 +46,17 @@ const LoanTermManagement = () => {
     }
   };
 
-  const fetchHistory = async (pageNum, pageSizeNum) => {
+  const fetchHistory = async () => {
     setHistoryLoading(true);
     setHistoryError('');
     try {
-      const data = await getActivityLogs({ page: pageNum, pageSize: pageSizeNum });
+      const data = await getActivityLogs({ page: 1, pageSize: 500 });
       const items = Array.isArray(data?.items) ? data.items : [];
       const tenureCreations = items.filter(log => log?.action === 'ADD_LOAN_TENURE');
       setHistoryLogs(tenureCreations);
-      setHistoryTotal(data?.total ?? null);
-      setHistoryHasMore(items.length === pageSizeNum);
     } catch (e) {
       setHistoryError(e.message || 'Failed to load history');
       setHistoryLogs([]);
-      setHistoryTotal(null);
-      setHistoryHasMore(false);
     } finally {
       setHistoryLoading(false);
     }
@@ -70,8 +64,8 @@ const LoanTermManagement = () => {
 
   useEffect(() => {
     refreshTenures();
-    fetchHistory(page, pageSize);
-  }, [page]);
+    fetchHistory();
+  }, []);
 
   const handleCancel = () => {
     setShowModal(false);
@@ -83,7 +77,7 @@ const LoanTermManagement = () => {
     try {
       await deleteLoanTenure(id);
       await refreshTenures();
-      await fetchHistory(page, pageSize);
+      await fetchHistory();
       Swal.fire({
         icon: 'success',
         title: 'Deleted!',
@@ -133,7 +127,7 @@ const LoanTermManagement = () => {
       }
       await addLoanTenure(months);
       await refreshTenures();
-      await fetchHistory(page, pageSize);
+      await fetchHistory();
       Swal.fire({
         icon: 'success',
         title: 'Created!',
@@ -156,18 +150,13 @@ const LoanTermManagement = () => {
     }
   };
 
-  // Pagination (server-driven)
-  const totalEntries = historyTotal != null ? historyTotal : safeHistoryLogs.length;
-  const totalPages = totalEntries != null ? Math.max(1, Math.ceil(totalEntries / pageSize)) : (historyHasMore ? page + 1 : 1);
-  const canGoNext = totalEntries != null ? page < totalPages : historyHasMore;
-  const canGoPrev = page > 1;
+  // Pagination (client-side on the full filtered dataset)
+  const totalEntries = safeHistoryLogs.length;
+  const totalPages = Math.max(1, Math.ceil(totalEntries / pageSize));
   const safePage = Math.min(page, totalPages);
-
-  // When the API doesn't return a `total`, we still use server-driven pagination
-  // by requesting page/limit. But guard against the UI always showing the first
-  // slice of the list when the backend returns a full array.
-  const startIndex = (safePage - 1) * pageSize;
-  const pageItems = safeHistoryLogs.slice(startIndex, startIndex + pageSize);
+  const canGoPrev = safePage > 1;
+  const canGoNext = safePage < totalPages;
+  const pageItems = safeHistoryLogs.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   const showTermsWarning = !loading && !error && safeTerms.length === 0 && safeHistoryLogs.length > 0;
 
@@ -285,9 +274,7 @@ const LoanTermManagement = () => {
         {!historyLoading && !historyError && safeHistoryLogs.length > 0 && (
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-6 pt-4 border-t border-gray-100 gap-3">
             <p className="text-sm text-gray-500">
-              {historyTotal == null
-                ? `Showing ${(page - 1) * pageSize + 1}–${(page - 1) * pageSize + pageItems.length} of many entries (approx.)`
-                : `Showing ${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, totalEntries)} of ${totalEntries} entries`}
+              {`Showing ${(safePage - 1) * pageSize + 1}–${Math.min(safePage * pageSize, totalEntries)} of ${totalEntries} entries`}
             </p>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 text-sm text-gray-500">

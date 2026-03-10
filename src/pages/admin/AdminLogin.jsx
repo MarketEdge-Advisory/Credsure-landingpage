@@ -157,7 +157,20 @@ const LoginStep = ({ onForgot, onSuccess }) => {
         setLoading(true);
         const result = await onSuccess(email, password);
         setLoading(false);
-        if (!result.ok) setError(result.message);
+        if (!result.ok) {
+            const raw = String(result.message || '').toLowerCase();
+            let friendly = result.message;
+            if (/validation failed|invalid.*credential|credential.*invalid|wrong.*password|incorrect.*password|password.*wrong|password.*incorrect|unauthorized/i.test(raw)) {
+                friendly = 'Incorrect email or password. Please try again.';
+            } else if (/not\s*found|no\s*account|no\s*user|doesn\W*exist|not\s*registered|user\s*does\s*not\s*exist/i.test(raw)) {
+                friendly = 'No account found with that email address.';
+            } else if (/invalid.*email|email.*invalid|must.*email/i.test(raw)) {
+                friendly = 'The email address entered is invalid.';
+            } else if (/network|failed to fetch/i.test(raw)) {
+                friendly = 'Network error. Please check your connection and try again.';
+            }
+            setError(friendly);
+        }
     };
 
     return (
