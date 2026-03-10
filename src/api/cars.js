@@ -63,7 +63,7 @@ export async function updateCarPrice(carId, price) {
     const res = await authFetch(`${API_BASE}/${carId}/price`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ price }),
+        body: JSON.stringify({ basePrice: price }),
     });
     if (!res.ok) throw new Error(await readError(res, 'Failed to update price'));
     return res.json();

@@ -1284,7 +1284,6 @@ const CarManagement = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
           <div>
             <p className="font-semibold text-gray-900">All Cars</p>
-            <p className="text-sm text-gray-400 mt-0.5">Latest Inventories across all dealerships</p>
           </div>
           <div className="flex flex-col gap-3 w-full sm:w-auto sm:flex-row sm:items-center">
             {/* Select All Checkbox */}

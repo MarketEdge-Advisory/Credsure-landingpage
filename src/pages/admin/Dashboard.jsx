@@ -179,7 +179,7 @@ const RecentApplications = () => {
       'Vehicle Selected',
       'Vehicle Amount',
       'Down Payment',
-      'Status',
+      // 'Status',
     ];
 
     const dataForExport = paginated.map(row => ({
@@ -191,7 +191,7 @@ const RecentApplications = () => {
       'Vehicle Selected': row.vehicle,
       'Vehicle Amount': row.amount,
       'Down Payment': row.down,
-      'Status': row.status,
+      // 'Status': row.status,
     }));
 
     const csv = convertToCSV(dataForExport, headers);

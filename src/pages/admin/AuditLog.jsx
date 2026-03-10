@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, CalendarDays, Eye } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 import Swal from 'sweetalert2';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 const AuditLog = () => {
   const [logs, setLogs] = useState([]);
@@ -13,6 +13,7 @@ const AuditLog = () => {
 
   // Pagination state (backend-driven)
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
   const [totalEntries, setTotalEntries] = useState(null);
   const [hasMore, setHasMore] = useState(false);
 
@@ -29,18 +30,15 @@ const AuditLog = () => {
     try {
       const data = await getActivityLogs({
         page,
-        pageSize: PAGE_SIZE,
+        pageSize,
         startDate: dateRange.startDate,
         endDate: dateRange.endDate,
       });
 
-      // Backend should return { items, total, pagination }.
-      // If `total` isn't present, fall back to the current page size heuristics.
       const items = data.items ?? data.data ?? [];
       const total = data.total ?? data.pagination?.total ?? null;
       const itemsCount = Array.isArray(items) ? items.length : 0;
 
-      // Client‑side sorting fallback (ensures correct order on the current page)
       const sorted = Array.isArray(items)
         ? items.sort((a, b) => {
             const dateA = new Date(a.createdAt);
@@ -51,7 +49,7 @@ const AuditLog = () => {
 
       setLogs(sorted);
       setTotalEntries(total);
-      setHasMore(total == null ? itemsCount === PAGE_SIZE : page * PAGE_SIZE < total);
+      setHasMore(total == null ? itemsCount === pageSize : page * pageSize < total);
     } catch (err) {
       setError(err.message || 'Failed to load activity logs');
       setLogs([]);
@@ -65,16 +63,16 @@ const AuditLog = () => {
   useEffect(() => {
     fetchLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, dateRange]);
+  }, [page, pageSize, dateRange]);
 
   // Pagination calculations (server-driven)
   const effectiveTotal = totalEntries != null ? totalEntries : (Array.isArray(logs) ? logs.length : 0);
-  const totalPages = Math.max(1, Math.ceil(effectiveTotal / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(effectiveTotal / pageSize));
   const safePage = Math.min(page, totalPages);
-  const startIdx = (safePage - 1) * PAGE_SIZE;
+  const startIdx = (safePage - 1) * pageSize;
   const canGoPrev = safePage > 1;
   const canGoNext = safePage < totalPages;
-  const pageItems = Array.isArray(logs) ? logs.slice(startIdx, startIdx + PAGE_SIZE) : [];
+  const pageItems = Array.isArray(logs) ? logs.slice(startIdx, startIdx + pageSize) : [];
 
   const formatAction = (action) => action.replace(/_/g, ' ');
 
@@ -239,38 +237,50 @@ const AuditLog = () => {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
-          <p className="text-sm text-gray-500">
-            {totalEntries != null ? (
-              <>Showing {startIdx + 1}–{Math.min(startIdx + PAGE_SIZE, totalEntries)} of {totalEntries} entries</>
-            ) : (
-              <>Showing {startIdx + 1}–{startIdx + pageItems.length} of many entries (approx.)</>
-            )}
-          </p>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">Entries per page:</span>
-            <span className="text-sm font-medium text-gray-700">{PAGE_SIZE}</span>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={!canGoPrev}
-                className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft size={14} />
-              </button>
-              <span className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-sm text-gray-700 font-medium bg-white">
-                {safePage}
-              </span>
-              <button
-                onClick={() => setPage((p) => p + 1)}
-                disabled={!canGoNext}
-                className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <ChevronRight size={14} />
-              </button>
+        {!loading && !error && pageItems.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-6 pt-4 border-t border-gray-100 gap-3">
+            <p className="text-sm text-gray-500">
+              {totalEntries != null ? (
+                <>Showing {startIdx + 1}–{Math.min(startIdx + pageSize, totalEntries)} of {totalEntries} entries</>
+              ) : (
+                <>Showing {startIdx + 1}–{startIdx + pageItems.length} of many entries (approx.)</>
+              )}
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <span>Rows per page:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+                  className="border border-gray-200 rounded-md px-2 py-1 text-sm text-gray-700 focus:outline-none focus:border-blue-400"
+                >
+                  {PAGE_SIZE_OPTIONS.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={!canGoPrev}
+                  className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                <span className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-sm text-gray-700 font-medium bg-white">
+                  {safePage}
+                </span>
+                <button
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={!canGoNext}
+                  className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
