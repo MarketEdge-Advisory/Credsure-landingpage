@@ -123,17 +123,19 @@ if (newPassword && newPassword.length < 8) {
       });
 
       setSuccess();
-      Swal.fire({
+      await Swal.fire({
         icon: 'success',
         title: 'Password Changed!',
-        text: 'Your password has been updated successfully.',
+        text: 'Your password has been updated successfully. Please log in again.',
         confirmButtonColor:'#1e3f6e'
       });
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
       setFieldErrors({});
-       navigate('/admin/dashboard');
+      localStorage.removeItem('adminToken');
+      sessionStorage.removeItem('admin_user');
+      navigate('/admin/login');
     } catch (e) {
       setError();
       Swal.fire({
