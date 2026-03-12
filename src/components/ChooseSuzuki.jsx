@@ -79,11 +79,17 @@ const ChooseSuzuki = () => {
           const mainImage = car.images?.[0]?.url || car.images?.[0] || "/empty-cars.svg";
           const optimizedMainImage = optimizeImageUrl(mainImage, 400);
 
+          // Preserve full image list before it gets overwritten
+          const allImages = (car.images || []).map(img =>
+            optimizeImageUrl(img?.url || img, 300)
+          ).filter(Boolean);
+
           return {
             ...car,
             id: car._id || car.id,
             image: optimizedMainImage,
             images: variantImages.map(img => optimizeImageUrl(img, 200)),
+            allImages,
             showFrom,
             priceFormatted: formatPrice(Math.min(...variantPrices)),
             monthlyFormatted: monthlyPayment,
@@ -200,12 +206,12 @@ const formatStatus = (status) => {
                 <div className="absolute bottom-0 z-10 p-4 text-white w-full">
                   <div className="flex items-baseline justify-between mb-1">
                     <h3 className="text-xl font-bold">{`${car.name} ${car.variant}`}</h3>
-                    <button
+                    {/* <button
                       onClick={() => navigate(`/car/${car.id}`)}
                       className="text-xs text-cyan-300 hover:text-white underline underline-offset-2 transition ml-2 shrink-0"
                     >
                       view detail
-                    </button>
+                    </button> */}
                   </div>
                   <button
                     onClick={() => {
@@ -242,9 +248,31 @@ const formatStatus = (status) => {
                       className="bg-white rounded-lg p-3 w-full flex flex-col max-h-[280px] overflow-y-auto scrollbar-hide"
                       style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                     >
+                      {/* All car images gallery */}
+                      {car.allImages && car.allImages.length > 0 && (
+                        <div className="mb-3 border-b border-gray-100 pb-3">
+                          <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">All Photos ({car.allImages.length})</p>
+                          <div className="grid grid-cols-3 gap-1">
+                            {car.allImages.map((img, idx) => (
+                              <img
+                                key={idx}
+                                src={img}
+                                alt={`${car.name} photo ${idx + 1}`}
+                                className="rounded object-cover w-full h-16"
+                                onError={(e) => (e.target.src = '/empty-cars.svg')}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Variant details */}
                       {cars
                         .filter(c => c.name === car.name)
-                        .map((variant) => (
+                        .map((variant) => {
+                          const variantPrice = variant.basePrice || variant.price || 0;
+                          const isUnavailable = variant.availability === 'COMING_SOON' || variant.availability === 'NOT_AVAILABLE';
+                          return (
                           <div key={variant.id} className="mb-4 last:mb-0 border-b border-gray-200 pb-3 last:border-0">
                             {/* Variant images */}
                             <div className="mb-2">
@@ -262,24 +290,74 @@ const formatStatus = (status) => {
                                 </div>
                               ) : (
                                 <img
-                                  src={variant.images?.[0] || '/empty-cars.svg'}
+                                  src={variant.images?.[0] || variant.image || '/empty-cars.svg'}
                                   alt={variant.name}
                                   className="rounded-lg object-cover w-full h-28"
                                   onError={(e) => (e.target.src = '/empty-cars.svg')}
                                 />
                               )}
                             </div>
-                            {/* Variant name and description */}
-                            <div>
+
+                            {/* Variant name + availability badge */}
+                            <div className="flex items-center justify-between mb-1">
                               <p className="font-semibold text-gray-900 text-sm">
-                                {variant.variant || 'Standard'}
+                                {variant.name}{variant.variant ? ` — ${variant.variant}` : ''}
                               </p>
-                              <p className="text-xs text-gray-600 line-clamp-3">
-                                {variant.description || 'No description available'}
-                              </p>
+                              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                                variant.availability === 'AVAILABLE' ? 'bg-green-100 text-green-700' :
+                                variant.availability === 'COMING_SOON' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-red-100 text-red-600'
+                              }`}>
+                                {formatStatus(variant.availability) || 'Available'}
+                              </span>
                             </div>
+
+                            {/* Description */}
+                            {variant.description && (
+                              <p className="text-xs text-gray-500 mb-2">{variant.description}</p>
+                            )}
+
+                            {/* Price & Monthly */}
+                            <div className="flex items-center justify-between mb-2">
+                              <div>
+                                <p className="text-xs text-gray-400">Base Price</p>
+                                <p className="text-sm font-bold text-gray-800">
+                                  {isUnavailable && !variantPrice ? 'TBA' : formatPrice(variantPrice)}
+                                </p>
+                              </div>
+                              {!isUnavailable && variantPrice > 0 && (
+                                <div className="text-right">
+                                  <p className="text-xs text-gray-400">Est. Monthly</p>
+                                  <p className="text-sm font-bold text-cyan-600">{calculateMonthly(variantPrice)}</p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Specs */}
+                            {(variant.specs?.engine || variant.specs?.transmission) && (
+                              <div className="grid grid-cols-2 gap-1 mt-1">
+                                {variant.specs?.engine && (
+                                  <div className="bg-gray-50 rounded p-1.5">
+                                    <p className="text-[10px] text-gray-400 uppercase tracking-wide">Engine</p>
+                                    <p className="text-xs text-gray-700 line-clamp-1">{variant.specs.engine}</p>
+                                  </div>
+                                )}
+                                {variant.specs?.transmission && (
+                                  <div className="bg-gray-50 rounded p-1.5">
+                                    <p className="text-[10px] text-gray-400 uppercase tracking-wide">Transmission</p>
+                                    <p className="text-xs text-gray-700 line-clamp-1">{variant.specs.transmission}</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Units */}
+                            {variant.numberOfUnits > 0 && (
+                              <p className="text-[10px] text-gray-400 mt-1">{variant.numberOfUnits} unit{variant.numberOfUnits !== 1 ? 's' : ''} available</p>
+                            )}
                           </div>
-                        ))}
+                          );
+                        })}
                     </div>
                   </div>
                 )}
