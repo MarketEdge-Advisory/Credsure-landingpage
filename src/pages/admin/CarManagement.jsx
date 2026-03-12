@@ -823,12 +823,12 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
       finalImageUrls = [...finalImageUrls, ...newUrls];
     }
 
-      const newPrice = form.vehiclePrice !== '' ? Number(form.vehiclePrice) : null;
+      const newPrice = form.vehiclePrice !== '' ? Number(form.vehiclePrice) : 0;
+      const oldPrice = Number(vehicle.basePrice) || 0;
 
       const basicCarData = {
           name: form.carName,
           description: form.description,
-          ...(newPrice !== null && newPrice >= 0.01 ? { basePrice: newPrice } : {}),
           variant: form.variant,
           numberOfUnits: Number(form.numberOfUnits),
           specs: {
@@ -840,9 +840,15 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
     // 3. Update basic details
     await carApi.updateCar(vehicle.id, basicCarData);
 
-    // 4. Update price via dedicated endpoint if valid and changed
-    if (newPrice !== null && newPrice >= 0.01 && newPrice !== Number(vehicle.basePrice)) {
-      await carApi.updateCarPrice(vehicle.id, newPrice);
+    // 4. Update price if changed
+    if (newPrice !== oldPrice) {
+      if (newPrice >= 0.01) {
+        // Use dedicated price endpoint for valid prices
+        await carApi.updateCarPrice(vehicle.id, newPrice);
+      } else {
+        // Reset price to null via general PATCH (bypasses >= 0.01 validation)
+        await carApi.resetCarPrice(vehicle.id);
+      }
     }
 
     // 5. Update availability if changed

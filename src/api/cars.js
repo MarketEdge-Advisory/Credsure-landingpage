@@ -69,6 +69,18 @@ export async function updateCarPrice(carId, price) {
     return res.json();
 }
 
+// Clears/resets price to null (zero) via the general PATCH endpoint.
+// Used when the /price endpoint rejects values < 0.01.
+export async function resetCarPrice(carId) {
+    const res = await authFetch(`${API_BASE}/${carId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ basePrice: null }),
+    });
+    if (!res.ok) throw new Error(await readError(res, 'Failed to reset price'));
+    return res.json();
+}
+
 export async function updateCarImages(carId, data) {
     // data should be { images: [{ url: '...' }] }
     const res = await authFetch(`${API_BASE}/${carId}/images`, {
