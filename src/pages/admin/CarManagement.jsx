@@ -748,7 +748,7 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
   setForm({
     carName: vehicle.name || '',
     description: vehicle.description || '',
-    vehiclePrice: vehicle.basePrice || '',
+    vehiclePrice: vehicle.basePrice ? String(vehicle.basePrice) : '',
     variant: vehicle.variant || '',
     numberOfUnits: vehicle.numberOfUnits || '',
     engineSpec: vehicle.specs?.engine || '',
@@ -823,9 +823,12 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
       finalImageUrls = [...finalImageUrls, ...newUrls];
     }
 
+      const newPrice = form.vehiclePrice !== '' ? Number(form.vehiclePrice) : null;
+
       const basicCarData = {
           name: form.carName,
           description: form.description,
+          ...(newPrice !== null && newPrice >= 0.01 ? { basePrice: newPrice } : {}),
           variant: form.variant,
           numberOfUnits: Number(form.numberOfUnits),
           specs: {
@@ -837,9 +840,8 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
     // 3. Update basic details
     await carApi.updateCar(vehicle.id, basicCarData);
 
-    // 4. Update price via dedicated endpoint if changed
-    const newPrice = form.vehiclePrice ? Number(form.vehiclePrice) : null;
-    if (newPrice !== null && newPrice !== Number(vehicle.basePrice)) {
+    // 4. Update price via dedicated endpoint if valid and changed
+    if (newPrice !== null && newPrice >= 0.01 && newPrice !== Number(vehicle.basePrice)) {
       await carApi.updateCarPrice(vehicle.id, newPrice);
     }
 
