@@ -117,7 +117,7 @@ const AuditLog = () => {
   return result;
 };
     Swal.fire({
-      title: 'Activity Details',
+      title: '<span style="font-size:1.5rem;font-weight:600;">Activity Details</span>',
       html: `
         <div class="text-left space-y-2">
           <div class="flex pb-1 font-normal text-sm">
@@ -130,11 +130,11 @@ const AuditLog = () => {
           </div>
           <div class="flex pb-1 font-normal text-sm">
             <span class="font-normal text-sm w-24">Action:</span>
-            <span>${formatAction(log.action)}</span>
+            <span class="font-normal text-sm">${formatAction(log.action)}</span>
           </div>
           <div class="flex pb-1 font-normal text-sm">
             <span class="font-normal text-sm w-24">Entity:</span>
-            <span>${log.entityType || '—'}</span>
+            <span class="font-normal text-sm">${log.entityType || '—'}</span>
           </div>
           <div class="flex pb-1 font-normal text-sm">
             <span class="font-normal text-sm w-24">Timestamp:</span>
