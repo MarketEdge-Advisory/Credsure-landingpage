@@ -204,7 +204,7 @@ const FAQ = () => {
           </p>
           <button 
             onClick={() => setShowModal(true)}
-            className="bg-[#3FA9F5] hover:bg-slate-100 hover:text-black text-white font-semibold px-6 sm:px-8 py-2.5 sm:py-3 rounded-full transition-all duration-300 hover:shadow-lg text-sm sm:text-base"
+            className="bg-[#3FA9F5] hover:bg-slate-100 hover:text-black text-white font-semibold px-6 sm:px-8 py-2 sm:py-2 rounded-full transition-all duration-300 hover:shadow-lg text-sm sm:text-base"
           >
             Get in touch
           </button>
@@ -217,23 +217,23 @@ const FAQ = () => {
             onClick={() => setShowModal(false)}
           >
             <div 
-              className="bg-white rounded-lg max-w-2xl w-full relative max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+              className="bg-white rounded-lg max-w-md w-full relative max-h-[80vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Close Button */}
-              <button
-                onClick={() => setShowModal(false)}
-                className="absolute top-3 right-3 w-8 h-8 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full flex items-center justify-center transition-colors z-10"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              {/* Close Button — outside the header background, top-right */}
+              <div className="flex justify-end px-3 pt-3 pb-1">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="w-8 h-8 hover:bg-gray-200 text-gray-700 rounded-full flex items-center justify-center transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-              {/* Header Section */}
-              <div className="bg-[#1a3a52] text-white px-6 py-4 flex justify-center items-center rounded-t-lg">
-                <div className="text-center">
-                  <h3 className="text-2xl font-bold">Get in Touch</h3>
-                  <p className="text-gray-300 text-sm mt-1">We're here to help you</p>
-                </div>
+              {/* Header Section — title + subtitle inside background */}
+              <div className="mx-6 rounded-lg bg-[#1a3a52] text-white px-6 py-1">
+                <h3 className="text-md font-bold">Get in Touch</h3>
+                <p className="text-gray-300 text-xs mt-0.5">We're here to help you</p>
               </div>
 
               {/* Form Section */}
@@ -250,7 +250,7 @@ const FAQ = () => {
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleFormChange}
-                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${formErrors.fullName ? 'border-red-500' : 'border-gray-300'}`}
+                      className={`w-full px-4 py-2 text-sm border rounded-lg focus:outline-none bg-gray-50 ${formErrors.fullName ? 'border-red-500' : 'border-gray-300'}`}
                       placeholder="Enter your full name"
                       autoComplete="off"
                     />
@@ -268,7 +268,7 @@ const FAQ = () => {
                       value={formData.phone}
                       maxLength="11" 
                       onChange={handleFormChange}
-                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${formErrors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                      className={`w-full px-4 py-2 text-sm border rounded-lg focus:outline-none bg-gray-50 ${formErrors.phone ? 'border-red-500' : 'border-gray-300'}`}
                       placeholder="Enter your phone number"
                       autoComplete="off"
                     />
@@ -285,7 +285,7 @@ const FAQ = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleFormChange}
-                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${formErrors.email ? 'border-red-500' : 'border-gray-300'}`}
+                      className={`w-full px-4 py-2 text-sm border rounded-lg focus:outline-none bg-gray-50 ${formErrors.email ? 'border-red-500' : 'border-gray-300'}`}
                       placeholder="Enter your email"
                       autoComplete="off"
                     />
@@ -302,7 +302,7 @@ const FAQ = () => {
                         value={formData.message}
                         onChange={handleFormChange}
                         rows="4"
-                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 resize-none"
+                        className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none bg-gray-50 resize-none"
                         placeholder="How can we help you?"
                       />
                     {/* Word count and error */}
@@ -315,7 +315,7 @@ const FAQ = () => {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3.5 rounded-lg transition-all duration-300 hover:shadow-lg text-base mt-6"
+                    className="w-full bg-cyan-500 hover:bg-slate-200 text-white hover:text-black font-semibold py-2.5 rounded-lg transition-all duration-300 hover:shadow-lg text-sm mt-6"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? 'Sending...' : 'Send Inquiry'}

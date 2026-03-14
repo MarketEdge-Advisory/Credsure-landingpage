@@ -6,31 +6,31 @@ import { IoFlashSharp } from "react-icons/io5";
 const CFAO = () => {
   const features = [
     {
-      icon: <img src='/cert.svg' alt='certificate'  className="w-12 h-12 text-blue-600"/>,
+      icon: <img src='/cert.svg' alt='certificate'  className="w-12 h-12 text-[#3FA9F5]"/>,
       title: 'Authorized Suzuki Dealer',
       description: 'Official Suzuki partner in Nigeria. Every vehicle comes with manufacturer warranty and certification.',
       bgColor: '#EDF5FC',
     },
     {
-      icon: <img src='/Group-1.svg' alt='group' className="w-12 h-12 text-blue-600" strokeWidth={2} />,
+      icon: <img src='/Group-1.svg' alt='group' className="w-12 h-12 text-[#3FA9F5]" strokeWidth={2} />,
       title: '100% Genuine Vehicles',
       description: 'Brand-new Suzuki cars imported directly from the manufacturer. No refurbished or used vehicles.',
       bgColor: '#FFEDEB',
     },
     {
-      icon: <img src='/maintenance.svg' className="w-12 h-12 text-blue-600" strokeWidth={2} />,
+      icon: <img src='/maintenance.svg' className="w-12 h-12 text-[#3FA9F5]" strokeWidth={2} />,
       title: 'Flexible Payment Terms',
       description: 'Choose payment plans from 6 to 36 months that fit your budget and lifestyle.',
       bgColor: '#EBFFFC',
     },
     {
-      icon: <img src='/award.svg' alt='award' className="w-12 h-12 text-blue-600" strokeWidth={2} />,
+      icon: <img src='/award.svg' alt='award' className="w-12 h-12 text-[#3FA9F5]" strokeWidth={2} />,
       title: 'Decades of Automotive Excellence',
       description: 'CFAO has served Nigeria\'s automotive market for generations. Experience you can trust.',
       bgColor: '#FFFCF2',
     },
     {
-      icon: <img src='/car-wash.svg' alt='car wash' className="w-12 h-12 text-blue-600" strokeWidth={2} />,
+      icon: <img src='/car-wash.svg' alt='car wash' className="w-12 h-12 text-[#3FA9F5]" strokeWidth={2} />,
       title: 'Wide Vehicle Selection',
       description: 'From compact city cars to adventure SUVs and commercial vehicles — find your perfect Suzuki.',
       bgColor: '#EBFFF9',
@@ -42,7 +42,7 @@ const CFAO = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <p className="text-cyan-500 text-xs sm:text-sm md:text-lg font-semibold mb-2 sm:mb-3">
+          <p className="text-[#3FA9F5] text-xs sm:text-sm md:text-lg font-semibold mb-2 sm:mb-3">
             The CFAO Suzuki Advantage
           </p>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4 px-4">

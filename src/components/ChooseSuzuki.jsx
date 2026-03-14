@@ -20,6 +20,13 @@ const ChooseSuzuki = () => {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCarId, setSelectedCarId] = useState(null); // controls popup
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
+
+  const handlePopupScroll = (e) => {
+    const el = e.currentTarget;
+    const atBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 4;
+    setIsScrolledToBottom(atBottom);
+  };
 
   // Format price
   const formatPrice = (price) => {
@@ -127,6 +134,11 @@ const ChooseSuzuki = () => {
     setVisibleCars(cars.length);
   };
 
+  const handleShowLess = () => {
+    setVisibleCars(6);
+    document.getElementById('vehicles')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
 const formatStatus = (status) => {
   if (!status) return '';
   return status
@@ -183,6 +195,7 @@ const formatStatus = (status) => {
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedCarId(isOpen ? null : car.id);
+                      setIsScrolledToBottom(false);
                     }}
                     className="absolute top-4 left-4 z-10 bg-white p-2 rounded-full hover:scale-110 transition"
                     title="View variants"
@@ -192,7 +205,7 @@ const formatStatus = (status) => {
                 )}
 
                 {/* Price */}
-                <div className="absolute top-4 right-4 z-10 bg-[#1a2942] text-white p-3 rounded">
+                <div className="absolute top-4 right-4 z-10 bg-[#1a2942]/10 backdrop-blur-sm text-white p-3 rounded">
   {car.availability === 'COMING_SOON' || car.availability === 'NOT_AVAILABLE' ? (
     <p>{formatStatus(car.availability)}</p>
   ) : (
@@ -221,7 +234,7 @@ const formatStatus = (status) => {
                         calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }
                     }}
-                    className="group gap-4 mt-2 w-full bg-cyan-500 py-2 rounded-full hover:bg-slate-200 hover:text-black transition flex items-center justify-center"
+                    className="group gap-4 mt-2 w-full bg-[#3FA9F5] py-2 rounded-full hover:bg-slate-200 hover:text-black transition flex items-center justify-center"
                   >
                     Calculate Monthly Payment
                     <ChevronDown className="w-5 h-5 text-white transition-transform duration-300 group-hover:translate-y-1 group-hover:text-slate-800" />
@@ -244,9 +257,11 @@ const formatStatus = (status) => {
                     <h3 className="text-white text-xl font-bold mb-4">{car.name}</h3>
 
                     {/* Scrollable variants container with hidden scrollbar */}
+                    <div className="relative w-full">
                     <div
                       className="bg-white rounded-lg p-3 w-full flex flex-col max-h-[280px] overflow-y-auto scrollbar-hide"
                       style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                      onScroll={handlePopupScroll}
                     >
                       {/* All car images gallery */}
                       {car.allImages && car.allImages.length > 0 && (
@@ -359,6 +374,13 @@ const formatStatus = (status) => {
                           );
                         })}
                     </div>
+                    {/* Scroll indicator — hidden once user reaches bottom */}
+                    {!isScrolledToBottom && (
+                      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-12 rounded-b-lg bg-gradient-to-t from-white to-transparent flex items-end justify-center pb-1">
+                        <ChevronDown className="w-4 h-4 text-[#3FA9F5] animate-bounce" />
+                      </div>
+                    )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -366,18 +388,27 @@ const formatStatus = (status) => {
           })}
         </div>
 
-        {/* Load more */}
-        {visibleCars < cars.length && (
-          <div className="text-center mt-8 flex w-full items-center justify-center">
+        {/* Load more / Show less */}
+        <div className="text-center mt-8 flex w-full items-center justify-center gap-4">
+          {visibleCars < cars.length && (
             <button
               onClick={handleLoadMore}
-              className="group gap-2 flex bg-cyan-500 text-white px-6 py-3 rounded-full hover:bg-slate-200 hover:text-black transition items-center"
+              className="group gap-2 flex bg-[#3FA9F5] text-white px-6 py-2 rounded-full hover:bg-slate-200 hover:text-black transition items-center"
             >
-              Load More
+              Load More Vehicles
               <ChevronDown className="w-5 h-5 text-white transition-transform duration-300 group-hover:translate-y-1 group-hover:text-slate-800" />
             </button>
-          </div>
-        )}
+          )}
+          {visibleCars > 6 && (
+            <button
+              onClick={handleShowLess}
+              className="group gap-2 flex bg-[#3FA9F5] text-white px-6 py-2 rounded-full hover:bg-slate-200 hover:text-black transition items-center"
+            >
+              Load Less Vehicles
+              <ChevronDown className="w-5 h-5 text-white transition-transform duration-300 rotate-180 group-hover:text-slate-800" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Style to hide scrollbar (placed once at the end) */}

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowDown, ChevronDown, X } from 'lucide-react';
+import { ArrowDown, ChevronDown, X, SquarePen } from 'lucide-react';
 import { useCarContext } from '../context/CarContext';
 import Swal from 'sweetalert2';
+import { MdWarning } from 'react-icons/md';
 
 const LoanCalculator = () => {
   const { selectedCar } = useCarContext();
@@ -339,7 +340,7 @@ const LoanCalculator = () => {
                 <label className="text-gray-300 text-xs sm:text-sm font-medium">
                   Select Vehicle Model
                 </label>
-                <span className="text-cyan-400 text-xs sm:text-sm font-semibold">
+                <span className="text-[#3FA9F5] text-xs sm:text-sm font-semibold">
                   Vehicle Price : ₦{formatCurrency(vehiclePrice)}
                 </span>
               </div>
@@ -408,25 +409,65 @@ const LoanCalculator = () => {
                 type="text"
                 value={formatCurrency(downPayment)}
                 onChange={handleDownPaymentChange}
-                className="w-full bg-gradient-to-br from-gray-200 to-gray-300 text-cyan-500 text-base sm:text-lg md:text-xl font-bold px-3 py-2 sm:py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 border-2 border-gray-700"
+                className="w-full bg-gradient-to-br from-gray-200 to-gray-300 text-[#3FA9F5] text-base sm:text-lg md:text-xl font-bold px-3 py-2 sm:py-3 rounded-xl focus:outline-none border-2 border-gray-700"
               />
-              {/* Slider */}
-              <div className="mb-6 relative pt-0">
+              {/* Slider + ticks */}
+              <div className="relative mt-[-15px] mb-5">
                 <input
                   type="range"
                   min="0"
                   max="100"
                   value={downPaymentPercentage}
                   onChange={handleSliderChange}
-                  className="absolute top-0 w-full h-1 bg-[#374151] rounded-none appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rotate-45 [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-2 [&::-moz-range-thumb]:h-2 [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-0"
+                  className="custom-slider w-full h-[2px] appearance-none cursor-pointer relative z-10
+                    [&::-webkit-slider-thumb]:appearance-none
+                    [&::-webkit-slider-thumb]:w-3
+                    [&::-webkit-slider-thumb]:h-3
+                    [&::-webkit-slider-thumb]:rotate-45
+                    [&::-webkit-slider-thumb]:cursor-pointer
+                    [&::-webkit-slider-thumb]:shadow-md
+                    [&::-moz-range-thumb]:appearance-none
+                    [&::-moz-range-thumb]:w-4
+                    [&::-moz-range-thumb]:h-4
+                    [&::-moz-range-thumb]:rotate-45
+                    [&::-moz-range-thumb]:cursor-pointer
+                    [&::-moz-range-thumb]:border-0"
                   style={{
-                    background: `linear-gradient(to right, #22d3ee 0%, #22d3ee ${downPaymentPercentage}%, #374151 ${downPaymentPercentage}%, #374151 100%)`,
+                    background: `linear-gradient(to right, #3FA9F5 0%, #3FA9F5 ${downPaymentPercentage}%, #374151 ${downPaymentPercentage}%, #374151 100%)`,
+                    '--webkit-slider-thumb-bg': 'radial-gradient(circle, white 30%, #3FA9F5 30%)',
                   }}
                 />
+                {/* Inline style for thumb with white dot via radial-gradient */}
+                <style>{`
+                  input[type=range].custom-slider::-webkit-slider-thumb {
+                    background: radial-gradient(circle, white 30%, #3FA9F5 30%);
+                  }
+                  input[type=range].custom-slider::-moz-range-thumb {
+                    background: radial-gradient(circle, white 30%, #3FA9F5 30%);
+                  }
+                `}</style>
+                {/* Tick marks */}
+                <div className="w-full flex justify-between mt-0">
+                  {Array.from({ length: 51 }).map((_, i) => (
+                    <div
+                      key={i}
+                      style={{ width: '1px' }}
+                      className={`${i % 5 === 0 ? 'h-3' : 'h-1.5'} ${
+                        (i / 50) * 100 <= Number(downPaymentPercentage) ? 'bg-[#3FA9F5]' : 'bg-[#2d4a66]'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
               <p className="text-gray-400 text-xs m-0 bg-[#0D2A46] rounded-full px-3 py-2">
                 Slider Range: 10% - 100% of vehicle price
               </p>
+              {monthlyPayment <= 0 && vehiclePrice > 0 && (
+                <p className="text-amber-400 text-xs mt-2 flex items-center gap-1.5">
+                  <MdWarning size={32}/>
+                  Your advance payment covers the full vehicle price, reduce it to generate a monthly payment and enable pre-approval.
+                </p>
+              )}
             </div>
           </div>
 
@@ -436,10 +477,16 @@ const LoanCalculator = () => {
               <p className="text-gray-300 text-sm sm:text-base mb-3 sm:mb-4">
                 Estimated Monthly Payment
               </p>
-              <h3 className="text-cyan-400 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2">
-                ₦{monthlyPayment.toLocaleString('en-NG')}
+              <h3 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 ${
+                monthlyPayment <= 0 && vehiclePrice > 0 ? 'text-amber-400' : 'text-[#3FA9F5]'
+              }`}>
+                {monthlyPayment <= 0 && vehiclePrice > 0 ? '—' : `₦${monthlyPayment.toLocaleString('en-NG')}`}
               </h3>
-              <p className="text-gray-400 text-xs sm:text-sm">for {loanTenure} months</p>
+              {monthlyPayment <= 0 && vehiclePrice > 0 ? (
+                <p className="text-amber-400 text-xs sm:text-sm">Reduce your advance payment to see a monthly estimate</p>
+              ) : (
+                <p className="text-gray-400 text-xs sm:text-sm">for {loanTenure} months</p>
+              )}
             </div>
 
             {/* Vehicle Price Disclaimers */}
@@ -467,16 +514,25 @@ const LoanCalculator = () => {
 
             {/* Get Approved Button */}
             <div className="mt-2 sm:mt-4">
+              <div className="flex items-center justify-center gap-1 bg-[#ECF2F9] rounded-full px-3 py-2 mb-4 overflow-hidden">
+                <span className="text-gray-900 font-semibold text-xs bg-white rounded-full px-3 py-0.5 shrink-0">
+                  Step 3
+                </span>
+                <span className="text-[#3FA9F5] font-medium text-xs flex items-center gap-1 whitespace-nowrap truncate">
+                  Click below to get approved <ArrowDown className="w-3 h-3 shrink-0" />
+                </span>
+              </div>
               <button
                 onClick={() => setShowModal(true)}
-                className="w-full bg-cyan-500 hover:bg-slate-100 hover:text-black text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 hover:shadow-lg text-xs sm:text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#3FA9F5] hover:bg-slate-100 hover:text-black text-white font-semibold py-2.5 rounded-full transition-all duration-300 hover:shadow-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={
                   !selectedVehicle ||
                   !vehiclePrice ||
                   Number(downPayment) < vehiclePrice * 0.1 ||
                   !loanTenure ||
                   tenures.length === 0 || // wait for tenures to load
-                  (tenures.length > 0 && !tenures.some(t => String(t.value) === String(loanTenure)))
+                  (tenures.length > 0 && !tenures.some(t => String(t.value) === String(loanTenure))) ||
+                  monthlyPayment <= 0
                 }
               >
                 Get pre-approved now
@@ -492,26 +548,34 @@ const LoanCalculator = () => {
             onClick={() => setShowModal(false)}
           >
             <div
-              className="bg-white rounded-lg max-w-2xl w-full relative max-h-[90vh] overflow-y-auto scrollbar-hide"
+              className="bg-white rounded-2xl max-w-lg w-full relative"
               onClick={(e) => e.stopPropagation()}
             >
-              <button
-                onClick={() => setShowModal(false)}
-                className="absolute top-3 right-3 w-8 h-8 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full flex items-center justify-center transition-colors z-10"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="max-h-[90vh] overflow-y-auto scrollbar-hide">
+              {/* Top bar: edit icon (left) + close (right) */}
+              <div className="flex items-center justify-between px-5 pt-5 pb-2">
+                <div className="w-10 h-10 border border-gray-200 rounded-xl flex items-center justify-center">
+                  <SquarePen className="w-5 h-5 text-gray-600" />
+                </div>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-              {/* Header with Vehicle & Payment */}
-              <div className="bg-[#1a3a52] text-white px-6 py-4 flex justify-between items-center rounded-none mt-12">
-                <div className="flex items-center gap-3">
-                  <p className="text-gray-300 text-sm mb-1">Selected Vehicle:</p>
-                  <h3 className="text-lg font-bold">{selectedVehicle || 'N/A'}</h3>
-                </div>
-                <div className="text-right flex items-center gap-3">
-                  <p className="text-gray-300 text-sm mb-1">Monthly Payment:</p>
-                  <h3 className="text-lg font-bold">₦{monthlyPayment.toLocaleString('en-NG')}</h3>
-                </div>
+              {/* Title */}
+              <h2 className="text-xl font-bold text-gray-900 px-6 pb-4">Get Pre-Approved</h2>
+
+              {/* Banner with Vehicle & Payment */}
+              <div className="bg-[#0d1f30] text-white mx-6 rounded-lg px-6 py-2 flex justify-between items-center">
+                <p className="text-sm text-gray-300">
+                  Selected Vehicle: <span className="font-bold text-white">{selectedVehicle || 'N/A'}</span>
+                </p>
+                <p className="text-sm text-gray-300 text-right">
+                  Monthly Payment: <span className="font-bold text-white">₦{monthlyPayment.toLocaleString('en-NG')}</span>
+                </p>
               </div>
 
               {/* Form */}
@@ -519,7 +583,7 @@ const LoanCalculator = () => {
                 <form onSubmit={handleSubmit} className="space-y-5 mt-2">
                   {/* Full Name */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-500 mb-2">
                       Full name*
                     </label>
                     <input
@@ -527,7 +591,7 @@ const LoanCalculator = () => {
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleFormChange}
-                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${
+                      className={`w-full px-4 py-2 text-sm border rounded-lg focus:outline-none bg-gray-50 ${
                         formErrors.fullName ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="Enter your full name"
@@ -540,7 +604,7 @@ const LoanCalculator = () => {
 
                   {/* Phone */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-500 mb-2">
                       Phone number*
                     </label>
                     <input
@@ -548,7 +612,7 @@ const LoanCalculator = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleFormChange}
-                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${
+                      className={`w-full px-4 py-2 text-sm border rounded-lg focus:outline-none bg-gray-50 ${
                         formErrors.phone ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="Enter your phone number"
@@ -562,7 +626,7 @@ const LoanCalculator = () => {
 
                   {/* Email */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-500 mb-2">
                       Email address*
                     </label>
                     <input
@@ -570,7 +634,7 @@ const LoanCalculator = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleFormChange}
-                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${
+                      className={`w-full px-4 py-2 text-sm border rounded-lg focus:outline-none bg-gray-50 ${
                         formErrors.email ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="Enter your email"
@@ -583,13 +647,13 @@ const LoanCalculator = () => {
 
                   {/* Employment Status */}
                   <div ref={employmentDropdownRef} className="relative">
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-500 mb-2">
                       Employment status*
                     </label>
                     <button
                       type="button"
                       onClick={() => setShowEmploymentDropdown(!showEmploymentDropdown)}
-                      className={`w-full px-4 py-3 text-base text-gray-900 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white flex justify-between items-center ${
+                      className={`w-full px-4 py-2 text-sm text-gray-900 border rounded-lg focus:outline-none bg-white flex justify-between items-center ${
                         formErrors.employmentStatus ? 'border-red-500' : 'border-gray-300'
                       }`}
                     >
@@ -617,7 +681,7 @@ const LoanCalculator = () => {
                                 setFormData({ ...formData, employmentStatus: option });
                                 setShowEmploymentDropdown(false);
                               }}
-                              className="px-4 py-4 text-base text-gray-900 hover:bg-gray-50 cursor-pointer transition-colors"
+                              className="px-4 py-2 text-sm text-gray-900 hover:bg-gray-50 cursor-pointer transition-colors"
                             >
                               {option}
                             </div>
@@ -629,7 +693,7 @@ const LoanCalculator = () => {
 
                   {/* Monthly Income */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-500 mb-2">
                       Estimated net monthly income*
                     </label>
                     <input
@@ -646,7 +710,7 @@ const LoanCalculator = () => {
                         };
                         handleFormChange(syntheticEvent);
                       }}
-                      className={`w-full px-4 py-3 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-50 ${
+                      className={`w-full px-4 py-2 text-sm border rounded-lg focus:outline-none bg-gray-50 ${
                         formErrors.monthlyIncome ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="Enter your monthly income"
@@ -658,7 +722,7 @@ const LoanCalculator = () => {
                   </div>
 
                   {/* Consent Checkbox */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-3">
                     <input
                       type="checkbox"
                       name="agreeToContact"
@@ -669,12 +733,14 @@ const LoanCalculator = () => {
                           setFormErrors({ ...formErrors, agreeToContact: undefined });
                         }
                       }}
-                      className={`h-4 w-4 text-cyan-500 border-gray-300 rounded focus:ring-cyan-500 ${
+                      className={`mt-0.5 h-4 w-4 shrink-0 text-cyan-500 border-gray-300 rounded focus:ring-cyan-500 ${
                         formErrors.agreeToContact ? 'ring-2 ring-red-500' : ''
                       }`}
                     />
-                    <label className="text-gray-600 text-sm">
-                      I consent to be contacted regarding this loan application.
+                    <label className="text-gray-500 text-sm leading-snug">
+                      I agree to be contacted by CFAO (Suzuki) and Credsure regarding my finance
+                      application. I understand that my information will be processed according to
+                      the privacy policy
                     </label>
                   </div>
                   {formErrors.agreeToContact && (
@@ -684,16 +750,17 @@ const LoanCalculator = () => {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-cyan-500 hover:bg-slate-100 hover:text-black text-white font-semibold py-3 sm:py-4 rounded-full transition-all duration-300 hover:shadow-lg text-base sm:text-lg"
+                    className="w-full bg-cyan-500 hover:bg-slate-100 hover:text-black text-white font-semibold py-2.5 rounded-full transition-all duration-300 hover:shadow-lg text-sm"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                    {isSubmitting ? 'Submitting...' : 'Submit Details'}
                   </button>
                   {formErrors.carId && (
                     <span className="text-xs text-red-500 mt-2 block text-center">{formErrors.carId}</span>
                   )}
                 </form>
               </div>
+            </div>{/* end inner scroll wrapper */}
             </div>
           </div>
         )}

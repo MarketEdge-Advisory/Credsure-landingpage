@@ -11,22 +11,22 @@ const WhyCredsure = () => {
       description: 'Get approved in as little as 24 hours. No endless paperwork or long waiting periods.',
     },
     {
-      icon: <img src='/document.svg' alt='document' className="w-8 h-8 text-blue-600" strokeWidth={2} />,
+      icon: <img src='/document.svg' alt='document' className="w-8 h-8 text-[#3FA9F5]" strokeWidth={2} />,
       title: 'Transparent Pricing',
       description: 'Clear monthly payments with no hidden fees. What you see is what you pay.',
     },
     {
-      icon: <img src='/calendar.svg' alt='calendar' className="w-8 h-8 text-blue-600" strokeWidth={2} />,
+      icon: <img src='/calendar.svg' alt='calendar' className="w-8 h-8 text-[#3FA9F5]" strokeWidth={2} />,
       title: 'Flexible Payment Terms',
       description: 'Choose payment plans from 6 to 36 months that fit your budget and lifestyle.',
     },
     {
-      icon: <img src='/truck.svg' alt='truck' className="w-8 h-8 text-blue-600" strokeWidth={2} />,
+      icon: <img src='/truck.svg' alt='truck' className="w-8 h-8 text-[#3FA9F5]" strokeWidth={2} />,
       title: 'Quick Vehicle Delivery',
       description: 'Drive your Suzuki within 2 weeks of completing your documentation. We move fast so you can too.',
     },
     {
-      icon: <img src='/shield-check.svg' alt='shield check' className="w-8 h-8 text-blue-600" strokeWidth={2} />,
+      icon: <img src='/shield-check.svg' alt='shield check' className="w-8 h-8 text-[#3FA9F5]" strokeWidth={2} />,
       title: 'Trusted Financing Partner',
       description: 'Nigeria\'s leading Buy Now, Pay Later platform for automotive financing. Thousands of satisfied customers.',
     },
@@ -37,7 +37,7 @@ const WhyCredsure = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <p className="text-cyan-500 text-xs sm:text-sm md:text-lg font-semibold mb-2 sm:mb-3">
+          <p className="text-[#3FA9F5] text-xs sm:text-sm md:text-lg font-semibold mb-2 sm:mb-3">
             Financing You Can Trust
           </p>
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 px-4">

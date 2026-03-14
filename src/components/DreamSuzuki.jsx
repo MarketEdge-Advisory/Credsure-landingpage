@@ -337,251 +337,257 @@ useEffect(() => {
 
   return (
     <div id="home" className="relative w-full overflow-hidden">
-      {/* Hero Container */}
-      <div className={`relative min-h-screen w-full mt-16${isGallerySlide ? '' : ' bg-[#0f1e3d]'}`}> 
+      {/* Hero Container — always dark background so no bare background flashes during transitions */}
+      <div className="relative min-h-screen w-full mt-16 bg-[#0f1e3d]">
 
-        {/* ── PROMO SLIDE: full background image as <img> ── */}
-        {!isGallerySlide && currentSlideData && (
-          <img
-            src={currentSlideData.image}
-            alt={currentSlideData.title}
-            className="absolute inset-0 w-full h-full object-cover object-center"
-            loading={currentSlide === 0 ? 'eager' : 'lazy'}
-            decoding="async"
-            fetchpriority={currentSlide === 0 ? 'high' : 'auto'}
-          />
+        {/* All slides rendered stacked; opacity crossfade eliminates the flash between slides */}
+        {interleavedSlides.map((slide, index) => {
+          const isActive = index === currentSlide;
+          const slideIsGallery = slide.type === 'gallery';
+          return (
+            <div
+              key={`slide-${slide.id || index}`}
+              className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+              style={{ opacity: isActive ? 1 : 0, zIndex: isActive ? 1 : 0 }}
+              aria-hidden={!isActive}
+            >
+              {/* Promo background image */}
+              {!slideIsGallery && (
+                <img
+                  src={slide.image}
+                  alt={slide.title}
+                  className="absolute inset-0 w-full h-full object-cover object-center"
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  fetchpriority={index === 0 ? 'high' : 'auto'}
+                />
+              )}
+
+              {/* Slide content */}
+              <div className="relative z-10 flex min-h-screen items-center justify-center">
+                {!slideIsGallery ? (
+                  /* ─── PROMO CONTENT ─── */
+                  <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:pl-20 md:pr-6 lg:pl-20 lg:pr-8 xl:px-8">
+                    <div className="max-w-2xl">
+                      <h1 className="mb-4 sm:mb-6 text-2xl sm:text-3xl md:text-4xl lg:text-[55px] font-bold text-white leading-tight">
+                        {slide.title}{' '}
+                        <span className="block mt-1 sm:mt-2 text-[#3FA9F5]">{slide.price}</span>
+                      </h1>
+                      <p className="mb-6 sm:mb-10 text-sm sm:text-base md:text-lg lg:text-[18px] max-w-[620px] text-gray-200 leading-relaxed">
+                        {slide.description}
+                      </p>
+                      <div>
+                        <button
+                          className="group flex items-center justify-between gap-2 sm:gap-4 bg-[#3FA9F5] hover:bg-slate-100 hover:text-gray-800 text-slate-100 font-medium px-6 sm:px-8 md:px-10 py-3 sm:py-3 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl w-full sm:w-auto sm:min-w-[280px] md:min-w-[320px]"
+                          onClick={() => {
+                            const calculator = document.querySelector('#calculator');
+                            if (calculator) calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
+                        >
+                          <span className="text-sm sm:text-base md:text-lg">
+                            {slide.buttonText || 'Check Your Monthly Payment'}
+                          </span>
+                          <ChevronDown className="hidden md:flexw-5 h-5 text-white transition-transform duration-300 group-hover:translate-y-1 group-hover:text-slate-800" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* ─── GALLERY CONTENT ─── */
+                  <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center py-12">
+                    <div className="text-center mb-8">
+                      <p className="text-[#3FA9F5] text-sm font-semibold uppercase tracking-widest mb-2">Explore Our Fleet</p>
+                      <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+                        Find Your Perfect Suzuki
+                      </h2>
+                      <p className="text-gray-400 mt-3 text-base md:text-lg max-w-xl mx-auto">
+                        Every model available through CredSure flexible financing.
+                      </p>
+                    </div>
+                    {slide.cars.map((car) => {
+                      const optimizedImage = getOptimizedImageUrl(car.image, 900);
+                      return (
+                        <div
+                          key={car.id}
+                          className="absolute inset-0 w-full h-full flex flex-col items-center justify-center overflow-hidden group"
+                        >
+                          <img
+                            src={optimizedImage}
+                            alt={car.name}
+                            className="absolute inset-0 w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                          {/* Caption */}
+                          <div className="absolute bottom-0 left-0 right-0 p-5 text-left">
+                            <h4 className="text-white font-bold text-xl mb-1">{`${car.name} ${car.variant}`}</h4>
+                            <p className="text-gray-300 text-sm mb-3 md:max-w-[600px]">{car.description}</p>
+                            <span className="text-blue-300 font-semibold text-base block mb-2">
+                              ₦{(car.price / 1000000).toFixed(1)}M
+                            </span>
+                            <button
+                              className="text-xs md:text-sm bg-white/20 hover:bg-[#3FA9F5] text-white px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm"
+                              onClick={() => {
+                                const calc = document.querySelector('#calculator');
+                                if (calc) calc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              }}
+                            >
+                              Calculate →
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <p className="text-center text-gray-500 text-sm mt-6">
+                      Showing model {index + 1} of {carGallery.length}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* ─── Navigation Arrows (z-20, always above slides) ─── */}
+        {interleavedSlides.length > 1 && (
+          <>
+            <button
+              onClick={prevSlide}
+              className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:scale-110 z-20"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:scale-110 z-20"
+              aria-label="Next slide"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </>
         )}
-        {/* Overlay removed for both promo and gallery cards */}
 
-        {/* Content */}
-        <div className="relative z-10 flex min-h-screen items-center justify-center">
+        {/* ─── Pagination Dots ─── */}
+        {interleavedSlides.length > 1 && (
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 flex-wrap justify-center max-w-xs">
+            {interleavedSlides.map((slide, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`transition-all duration-300 rounded-full ${
+                  index === currentSlide
+                    ? slide.type === 'gallery'
+                      ? 'w-8 h-2 bg-blue-400'
+                      : 'w-8 h-2 bg-white'
+                    : slide.type === 'gallery'
+                      ? 'w-2 h-2 bg-blue-500/50 hover:bg-blue-400/75'
+                      : 'w-2 h-2 bg-white/40 hover:bg-white/70'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
 
-          {/* ─── PROMO CONTENT ─── */}
-          {!isGallerySlide && (
-            <div className="w-full container px-4 md:px-8 lg:px-16">
-              <div className="max-w-2xl">
-                <h1 className="mb-4 sm:mb-6 text-2xl sm:text-3xl md:text-4xl lg:text-[55px] font-bold text-white leading-tight">
-                  {currentSlideData?.title}{' '}
-                  <span className="block mt-1 sm:mt-2 text-blue-300">{currentSlideData?.price}</span>
-                </h1>
-                <p className="mb-6 sm:mb-10 text-sm sm:text-base md:text-lg lg:text-[18px] max-w-[620px] text-gray-200 leading-relaxed">
-                  {currentSlideData?.description}
-                </p>
-                <div>
+        {/* ─── Slide type badge ─── */}
+        <div className="absolute top-24 right-4 bg-black/40 backdrop-blur-sm text-white px-6 py-2 rounded-full text-sm z-20 text-center">
+          <p className="font-semibold">{currentSlide + 1} / {interleavedSlides.length}</p>
+          <p className="text-xs text-gray-300">{isGallerySlide ? 'Fleet' : 'Promo'}</p>
+        </div>
+
+        {/* Chatbot */}
+        <div className="fixed bottom-6 right-6 z-[99999]">
+          {/* Chat Window */}
+          {isChatOpen && (
+            <div className="mb-4 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl overflow-hidden animate-[fade-in_0.3s_ease-out] flex flex-col max-h-[calc(100vh-120px)] mt-16 z-[9999]">
+              {/* Chat Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 flex items-center justify-between flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center">
+                    <MessageCircle className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm">CredSure Assistant</h3>
+                    <p className="text-xs text-blue-100">Always here to help</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsChatOpen(false)}
+                  className="hover:bg-white/20 p-1 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Chat Messages – with scroll anchor */}
+              <div className="flex-1 overflow-y-auto p-3 bg-gray-50 space-y-3 min-h-0">
+                {chatMessages.map((msg) => (
+                  <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div
+                      className={`max-w-[80%] rounded-2xl px-3 py-2 ${
+                        msg.type === 'user'
+                          ? 'bg-blue-600 text-white rounded-br-sm'
+                          : 'bg-white text-gray-800 rounded-bl-sm shadow-sm'
+                      }`}
+                    >
+                      <p className="text-sm">{msg.message}</p>
+                      <p className={`text-xs mt-1 ${msg.type === 'user' ? 'text-blue-100' : 'text-gray-400'}`}>
+                        {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                {/* Invisible anchor for auto‑scroll */}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Quick Questions */}
+              <div className="p-2 bg-white border-t border-gray-200 flex-shrink-0">
+                <p className="text-xs text-gray-600 mb-1.5">Quick questions:</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {faqs.slice(0, 3).map((faq, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleQuickQuestion(faq.question)}
+                      className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full transition-colors"
+                    >
+                      {faq.question.split(' ').slice(0, 3).join(' ')}...
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Chat Input */}
+              <div className="p-3 bg-white border-t border-gray-200 flex-shrink-0">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    placeholder="Type your message..."
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  />
                   <button
-                    className="group flex items-center justify-between gap-2 sm:gap-4 bg-cyan-400 hover:bg-slate-100 hover:text-gray-800 text-slate-100 font-medium px-6 sm:px-8 md:px-10 py-3 sm:py-4 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl w-full sm:w-auto sm:min-w-[280px] md:min-w-[320px]"
-                    onClick={() => {
-                      const calculator = document.querySelector('#calculator');
-                      if (calculator) calculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }}
+                    onClick={handleSendMessage}
+                    className="bg-blue-600 hover:bg-slate-200 hover:text-black text-white p-2 rounded-full transition-colors flex-shrink-0"
                   >
-                    <span className="text-sm sm:text-base md:text-lg">
-                      {currentSlideData?.buttonText || 'Check Your Monthly Payment'}
-                    </span>
-                    <ChevronDown className="hidden md:flexw-5 h-5 text-white transition-transform duration-300 group-hover:translate-y-1 group-hover:text-slate-800" />
+                    <Send className="w-4 h-4" />
                   </button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* ─── GALLERY CONTENT ─── */}
-          {isGallerySlide && (
-            <div className="w-full flex flex-col items-center justify-center px-4 py-12">
-              {/* Header */}
-              <div className="text-center mb-8">
-                <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-2">Explore Our Fleet</p>
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white">
-                  Find Your Perfect Suzuki
-                </h2>
-                <p className="text-gray-400 mt-3 text-base md:text-lg max-w-xl mx-auto">
-                  Every model available through CredSure flexible financing.
-                </p>
-              </div>
-              {/* Single portrait image, centered */}
-              {currentSlideData.cars.map((car) => {
-                // Generate optimized Cloudinary URL (width 900px)
-                const optimizedImage = getOptimizedImageUrl(car.image, 900);
-                return (
-                  <div
-                    key={car.id}
-                    className="absolute inset-0 w-full h-full flex flex-col items-center justify-center overflow-hidden group"
-                  >
-                    <img
-                      src={optimizedImage}
-                      alt={car.name}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                    {/* Caption */}
-                    <div className="absolute bottom-0 left-0 right-0 p-5 text-left">
-                      <h4 className="text-white font-bold text-xl mb-1">{`${car.name} ${car.variant}`}</h4>
-                      <p className="text-gray-300 text-sm mb-3 md:max-w-[600px]">{car.description}</p>
-                      <span className="text-blue-300 font-semibold text-base block mb-2">
-                        ₦{(car.price / 1000000).toFixed(1)}M
-                      </span>
-                      <button
-                        className="text-xs md:text-sm bg-white/20 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm"
-                        onClick={() => {
-                          const calc = document.querySelector('#calculator');
-                          if (calc) calc.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }}
-                      >
-                        Calculate →
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-              {/* Slide indicator */}
-              <p className="text-center text-gray-500 text-sm mt-6">
-                Showing model {currentSlide + 1} of {carGallery.length}
-              </p>
-            </div>
-          )}
-
-          {/* ─── Navigation Arrows (always visible) ─── */}
-          {interleavedSlides.length > 1 && (
-            <>
-              <button
-                onClick={prevSlide}
-                className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:scale-110 z-20"
-                aria-label="Previous slide"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-              <button
-                onClick={nextSlide}
-                className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:scale-110 z-20"
-                aria-label="Next slide"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            </>
-          )}
-
-          {/* ─── Pagination Dots ─── */}
-          {interleavedSlides.length > 1 && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 flex-wrap justify-center max-w-xs">
-              {interleavedSlides.map((slide, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  className={`transition-all duration-300 rounded-full ${
-                    index === currentSlide
-                      ? slide.type === 'gallery'
-                        ? 'w-8 h-2 bg-blue-400'
-                        : 'w-8 h-2 bg-white'
-                      : slide.type === 'gallery'
-                        ? 'w-2 h-2 bg-blue-500/50 hover:bg-blue-400/75'
-                        : 'w-2 h-2 bg-white/40 hover:bg-white/70'
-                  }`}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* ─── Slide type badge ─── */}
-          <div className="absolute top-24 right-4 bg-black/40 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm z-20 text-center">
-            <p className="font-semibold">{currentSlide + 1} / {interleavedSlides.length}</p>
-            <p className="text-xs text-gray-300">{isGallerySlide ? 'Fleet' : 'Promo'}</p>
-          </div>
-
-          {/* Chatbot (unchanged) */}
-          <div className="fixed bottom-6 right-6 z-[99999]">
-  {/* Chat Window */}
-  {isChatOpen && (
-    <div className="mb-4 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl overflow-hidden animate-[fade-in_0.3s_ease-out] flex flex-col max-h-[calc(100vh-120px)] mt-16 z-[9999]">
-      {/* Chat Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center">
-            <MessageCircle className="w-5 h-5 text-blue-600" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm">CredSure Assistant</h3>
-            <p className="text-xs text-blue-100">Always here to help</p>
-          </div>
-        </div>
-        <button
-          onClick={() => setIsChatOpen(false)}
-          className="hover:bg-white/20 p-1 rounded-full transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* Chat Messages – with scroll anchor */}
-      <div className="flex-1 overflow-y-auto p-3 bg-gray-50 space-y-3 min-h-0">
-        {chatMessages.map((msg) => (
-          <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div
-              className={`max-w-[80%] rounded-2xl px-3 py-2 ${
-                msg.type === 'user'
-                  ? 'bg-blue-600 text-white rounded-br-sm'
-                  : 'bg-white text-gray-800 rounded-bl-sm shadow-sm'
-              }`}
-            >
-              <p className="text-sm">{msg.message}</p>
-              <p className={`text-xs mt-1 ${msg.type === 'user' ? 'text-blue-100' : 'text-gray-400'}`}>
-                {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
-            </div>
-          </div>
-        ))}
-        {/* Invisible anchor for auto‑scroll */}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Quick Questions */}
-      <div className="p-2 bg-white border-t border-gray-200 flex-shrink-0">
-        <p className="text-xs text-gray-600 mb-1.5">Quick questions:</p>
-        <div className="flex flex-wrap gap-1.5">
-          {faqs.slice(0, 3).map((faq, index) => (
-            <button
-              key={index}
-              onClick={() => handleQuickQuestion(faq.question)}
-              className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full transition-colors"
-            >
-              {faq.question.split(' ').slice(0, 3).join(' ')}...
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Chat Input */}
-      <div className="p-3 bg-white border-t border-gray-200 flex-shrink-0">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            placeholder="Type your message..."
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-          />
+          {/* Chat Toggle Button */}
           <button
-            onClick={handleSendMessage}
-            className="bg-blue-600 hover:bg-slate-200 hover:text-black text-white p-2 rounded-full transition-colors flex-shrink-0"
+            onClick={() => setIsChatOpen(!isChatOpen)}
+            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
+            aria-label="Toggle chat"
           >
-            <Send className="w-4 h-4" />
+            {isChatOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
           </button>
-        </div>
-      </div>
-    </div>
-  )}
-
-  {/* Chat Toggle Button */}
-  <button
-    onClick={() => setIsChatOpen(!isChatOpen)}
-    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
-    aria-label="Toggle chat"
-  >
-    {isChatOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
-  </button>
-</div>
         </div>
       </div>
     </div>
