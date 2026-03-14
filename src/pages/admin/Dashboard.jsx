@@ -12,6 +12,7 @@ import {
 import financeApplicationsApi from '../../api/financeApplications';
 import { getInterestRateHistory } from '../../api/adminConfig';
 import { convertToCSV, downloadCSV } from '../../utils/csvExport';
+import DashboardOverview from '../../components/admin/DashboardOverview';
 
 const PAGE_SIZES = [10, 20, 50];
 
@@ -40,11 +41,12 @@ const Dashboard = () => {
 
   return (
     <div className="p-8 min-w-0 w-full">
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex items-start justify-between mb-4">
         <div>
           <h1 className="text-sm md:text-lg font-bold text-gray-900">Dashboard Overview</h1>
         </div>
       </div>
+      <DashboardOverview />
       <RecentApplications />
     </div>
   );
