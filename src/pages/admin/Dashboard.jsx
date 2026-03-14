@@ -13,6 +13,7 @@ import financeApplicationsApi from '../../api/financeApplications';
 import { getInterestRateHistory } from '../../api/adminConfig';
 import { convertToCSV, downloadCSV } from '../../utils/csvExport';
 import DashboardOverview from '../../components/admin/DashboardOverview';
+import { useAuth } from '../../context/AuthContext';
 
 const PAGE_SIZES = [10, 20, 50];
 
@@ -59,6 +60,7 @@ const statusStyle = {
 };
 
 const RecentApplications = () => {
+  const { user } = useAuth();
   const [applications, setApplications] = useState([]);
   const [rateHistory, setRateHistory] = useState([]); // sorted ascending by createdAt
   const [loading, setLoading] = useState(true);

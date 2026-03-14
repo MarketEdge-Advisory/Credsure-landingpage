@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import financeApplicationsApi from '../../api/financeApplications';
 import { getCars } from '../../api/cars';
+import { useAuth } from '../../context/AuthContext';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
 
@@ -95,6 +96,7 @@ const HatchedBar = (props) => {
 };
 
 const DashboardOverview = () => {
+  const { user } = useAuth();
   const [activeCars, setActiveCars] = useState(null);
   const [totalApprovals, setTotalApprovals] = useState(null);
   const [avgDownPayment, setAvgDownPayment] = useState(null);

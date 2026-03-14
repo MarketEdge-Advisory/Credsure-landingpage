@@ -27,10 +27,9 @@ export async function authFetch(input, init = {}) {
     headers,
   });
 
-  if (response.status === 401 || response.status === 403) {
-    // Token expired / unauthorized
+  if (response.status === 401) {
+    // Token expired / invalid → force logout
     clearAuthAndRedirect();
-    // Throw to stop further processing.
     throw new Error('Session expired. Redirecting to login...');
   }
 

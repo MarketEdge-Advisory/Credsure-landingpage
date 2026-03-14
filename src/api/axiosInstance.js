@@ -19,7 +19,9 @@ instance.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error?.response?.status;
-    if (status === 401 || status === 403) {
+    // 401 = token expired/invalid → force logout
+    // 403 = authenticated but not authorized for this resource → do NOT log out
+    if (status === 401) {
       clearAuthAndRedirect();
     }
     return Promise.reject(error);
