@@ -275,79 +275,96 @@ const CalculatorInputMgt = () => {
 );
 
   return (
-    <div className="p-8 w-full">
-      <h1 className="text-2xl font-bold text-gray-900">Calculator Input Management</h1>
-      <p className="text-sm text-gray-500 mt-1 mb-6">Set, modify, and track calculator input management.</p>
+    <div className="p-4 sm:p-8 w-full">
+      <h1 className="text-sm md:text-lg font-bold text-gray-900">Calculator Input Management</h1>
+      <p className="text-xs sm:text-sm text-gray-500 mt-1 mb-6">Set, modify, and track calculator input management.</p>
       {error && <div className="text-sm text-red-600 mb-4">{error}</div>}
 
-      {/* ── Update Card ── (unchanged) */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-  <div className="bg-white rounded-xl  p-6 mb-6">
-  <form onSubmit={handleSubmit} className="space-y-4 justify-center items-center flex flex-col"> 
-    <div className="flex flex-col space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Down Payment (%)
-        </label>
-        <input
-          type="text"
-          value={downPayment}
-          onChange={(e) => setDownPayment(e.target.value)}
-          className="w-full max-w-md border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          required
-        />
+      {/* ── Update Card ── */}
+      <div className="bg-white rounded-xl border border-gray-200 mb-6 overflow-hidden">
+        <form onSubmit={handleSubmit}>
+          {/* Top row: title + button */}
+          <div className="flex items-start justify-between px-4 sm:px-6 py-4 sm:py-5">
+            <div>
+              <p className="font-semibold text-gray-900 text-sm sm:text-base">Update Calculator Input</p>
+              <p className="text-xs sm:text-sm text-gray-400 mt-0.5">Input the details below to modify calculator input</p>
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="hidden md:flex bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 items-center gap-2 shrink-0"
+            >
+              {loading && <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full inline-block"></span>}
+              {loading ? 'Updating...' : 'Update Details'}
+            </button>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-100" />
+
+          {/* Two-column form body */}
+          <div className="flex flex-col md:flex-row px-4 sm:px-6 py-6 gap-6">
+            {/* Left label */}
+            <div className="md:w-48 shrink-0">
+              <p className="text-sm font-medium text-gray-700">Input calculator details</p>
+            </div>
+            {/* Right inputs */}
+            <div className="flex-1 space-y-4 max-w-xl">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Update down payment (%)</label>
+                <input
+                  type="text"
+                  value={downPayment}
+                  onChange={(e) => setDownPayment(e.target.value)}
+                  placeholder="Enter down payment"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Update processing fee (%)</label>
+                <input
+                  type="text"
+                  value={processingFee}
+                  onChange={handleProcessingFeeChange}
+                  placeholder="Enter processing fee"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                  required
+                />
+                {processingFeeError && <p className="mt-1 text-xs text-red-600">{processingFeeError}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Update insurance cost</label>
+                <input
+                  type="text"
+                  value={insuranceCost}
+                  onChange={handleInsuranceCostChange}
+                  placeholder="Enter insurance cost"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                  required
+                />
+                {insuranceCostError && <p className="mt-1 text-xs text-red-600">{insuranceCostError}</p>}
+              </div>
+              {/* Mobile submit button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="md:hidden w-full flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-blue-500 hover:bg-blue-600 text-white transition-colors disabled:opacity-50"
+              >
+                {loading && <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full inline-block"></span>}
+                {loading ? 'Updating...' : 'Update Details'}
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Processing Fee (₦)
-        </label>
-        <input
-          type="text"
-          value={processingFee}
-          onChange={handleProcessingFeeChange}
-          className="w-full max-w-md border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          required
-        />
-        {processingFeeError && (
-          <p className="mt-1 text-sm text-red-600">{processingFeeError}</p>
-        )}
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Insurance Cost (%)
-        </label>
-        <input
-          type="text"
-          value={insuranceCost}
-          onChange={handleInsuranceCostChange}
-          className="w-full max-w-md border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          required
-        />
-        {insuranceCostError && (
-          <p className="mt-1 text-sm text-red-600">{insuranceCostError}</p>
-        )}
-      </div>
-    </div>
-    <div className="flex justify-start"> {/* Align button to the left as well */}
-      <button
-        type="submit"
-        disabled={loading}
-        className="relative bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-      >
-        {loading && <Spinner />}
-        Update Calculator
-      </button>
-    </div>
-  </form>
-</div>
-</div>
 
       {/* ── History Table Card ── (updated columns) */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <div>
             <p className="font-semibold text-gray-900">Update History</p>
-            <p className="text-sm text-gray-400 mt-0.5">All previous calculator input updates</p>
+            <p className="text-sm text-gray-400 mt-0.5">View and track all previous calculator input details</p>
           </div>
           {/* <button className="flex items-center gap-2 border border-gray-200 text-gray-600 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
             <Download size={15} />

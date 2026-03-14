@@ -9,6 +9,9 @@ import {
   Settings,
   LogOut,
   Monitor,
+  ClipboardList,
+  Home,
+  CirclePercentIcon,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -17,7 +20,7 @@ const ALL_SECTIONS = [
     label: 'Overview',
     roles: ['credsure', 'suzuki', 'super'],
     items: [
-      { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
+      { name: 'Dashboard', icon: Home, path: '/admin/dashboard' },
     ],
   },
   {
@@ -27,22 +30,23 @@ const ALL_SECTIONS = [
       { name: 'Car Management', icon: Truck, path: '/admin/car-management' },
     ],
   },
-  // {
-  //   label: 'Credsure Admin',
-  //   roles: ['credsure'],
-  //   items: [
-  //     { name: 'Interest Rate Management', icon: Percent, path: '/admin/interest-rate' },
-  //     { name: 'Calculator Input Mgt', icon: Calculator, path: '/admin/calculator-input' },
-  //     { name: 'Loan Term Management', icon: FileText, path: '/admin/loan-term' },
-  //   ],
-  // },
   {
-    label: 'Settings',
-   roles: ['credsure', 'super'],
+    label: 'Credsure Admin',
+    roles: ['credsure', 'super'],
     items: [
-      { name: 'Platform Settings', icon: Settings, path: '/admin/settings' },
+      { name: 'Interest Rate Management', icon: CirclePercentIcon, path: '/admin/interest-rate' },
+      { name: 'Calculator Input Management', icon: Calculator, path: '/admin/calculator-input' },
+      { name: 'Loan Term Management', icon: FileText, path: '/admin/loan-term' },
+      { name: 'Audit Log', icon: ClipboardList, path: '/admin/audit-log' },
     ],
   },
+  // {
+  //   label: 'Settings',
+  //  roles: ['credsure', 'super'],
+  //   items: [
+  //     { name: 'Platform Settings', icon: Settings, path: '/admin/settings' },
+  //   ],
+  // },
 ];
 
 
@@ -75,12 +79,12 @@ const AdminSidebar = ({ open, setOpen }) => {
   // Responsive sidebar: hidden on mobile, drawer on mobile
   return (
     <aside
-      className={`flex flex-col bg-[#0d1e3a] self-stretch w-64 flex-shrink-0 z-50
-        fixed md:static top-0 left-0 h-full transition-transform duration-300
+      className={`flex flex-col bg-[#0d1e3a] w-64 flex-shrink-0 z-50 overflow-y-auto
+        fixed md:sticky md:top-0 md:self-stretch top-0 left-0 h-full transition-transform duration-300
         ${open ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0
       `}
-      style={{ boxShadow: open ? '0 0 0 9999px rgba(0,0,0,0.2)' : undefined }}
+      style={{ boxShadow: open ? '0 0 0 9999px rgba(0,0,0,0.2)' : undefined, minHeight: '100%' }}
     >
       {/* Hamburger close button (mobile only) */}
       <div className="md:hidden flex justify-end p-4">
@@ -112,7 +116,7 @@ const AdminSidebar = ({ open, setOpen }) => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-3 space-y-5">
+      <nav className="px-3 py-3 space-y-5">
         {navSections.map((section) => (
           <div key={section.label}>
             <p className="text-gray-400 text-xs font-semibold tracking-wider mb-1.5 px-2">
@@ -124,7 +128,7 @@ const AdminSidebar = ({ open, setOpen }) => {
                   <NavLink
                     to={path}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      `flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${
                         isActive
                           ? 'bg-[#1e3f6e] text-white'
                           : 'text-gray-400 hover:bg-white/5 hover:text-white'
@@ -142,7 +146,7 @@ const AdminSidebar = ({ open, setOpen }) => {
       </nav>
 
       {/* Welcome Card */}
-      <div className="mx-3 mb-3 rounded-xl bg-[#132f52] p-4 relative overflow-hidden">
+      <div className="mx-3 mb-8 rounded-xl bg-[#132f52] p-4 relative overflow-hidden mt-16">
   <div className="relative z-10">
     <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center mb-3">
       <Monitor size={18} className="text-white" />
@@ -151,19 +155,22 @@ const AdminSidebar = ({ open, setOpen }) => {
     {getNormalizedRole(user?.role) === 'credsure' ? (
       <>
         <p className="text-white font-bold text-sm mb-1">
-          {user?.name ?? 'Credsure Admin'}
+          {/* {user?.name ?? 'Credsure Admin'} */}
+          Need help?
         </p>
         <p className="text-gray-400 text-xs leading-relaxed">
-          Manage loan rates, calculator inputs, and loan terms.
+          {/* Manage loan rates, calculator inputs, and loan terms. */}
+          Visit our help center or contact support if you need assistance.
         </p>
       </>
     ) : getNormalizedRole(user?.role) === 'suzuki' ? (
       <>
         <p className="text-white font-bold text-sm mb-1">
-          {user?.name ?? 'Suzuki Admin'}
+          {/* {user?.name ?? 'Suzuki Admin'} */}
         </p>
         <p className="text-gray-400 text-xs leading-relaxed">
-          Manage car listings, inventory, and vehicle details.
+          {/* Manage car listings, inventory, and vehicle details. */}
+          Visit our help center or contact support if you need assistance.
         </p>
       </>
     ) : null}
@@ -174,13 +181,13 @@ const AdminSidebar = ({ open, setOpen }) => {
 </div>
       {/* Log Out */}
       <div className="border-t border-white/10 mx-4" />
-      <div className="flex items-center justify-between px-4 py-4">
+      <div className="flex items-center justify-between px-4 py-4 pb-8">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#1e3f6e] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-[#d0e8f7] flex items-center justify-center text-[#0d1e3a] text-xs font-bold flex-shrink-0">
             {user?.initials ?? '??'}
           </div>
           <div className="leading-tight">
-            <p className="text-white text-sm font-medium">{user?.name ?? 'Admin'}</p>
+            <p className="text-white text-sm font-bold">Log Out</p>
             <p className="text-gray-400 text-xs truncate max-w-[110px]">{user?.email ?? ''}</p>
           </div>
         </div>

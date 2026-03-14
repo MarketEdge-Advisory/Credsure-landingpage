@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getActivityLogs } from '../../api/adminConfig';
+import { getCars } from '../../api/cars';
 import { ChevronLeft, ChevronRight, CalendarDays, Eye } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 import Swal from 'sweetalert2';
@@ -19,6 +20,20 @@ const AuditLog = () => {
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
+
+  // carMap: { [carId]: carName } — used to resolve car names in activity logs
+  const [carMap, setCarMap] = useState({});
+
+  useEffect(() => {
+    getCars()
+      .then(data => {
+        const cars = Array.isArray(data) ? data : (data?.data ?? data?.cars ?? []);
+        const map = {};
+        cars.forEach(c => { if (c?.id) map[c.id] = c.name || c.model || c.title || c.id; });
+        setCarMap(map);
+      })
+      .catch(() => {});
+  }, []);
 
   // Sorting is fixed: newest first (descending by createdAt)
   const sortBy = 'createdAt';
@@ -84,74 +99,153 @@ const AuditLog = () => {
       if (action.includes('DELETE')) return 'bg-red-100 text-red-800';
     }
     if (action.includes('CALCULATOR')) return 'bg-yellow-100 text-yellow-800';
+    if (action.includes('DELETE') || action.includes('REMOVE')) return 'bg-red-100 text-red-800';
+    if (action.includes('CREATE') || action.includes('ADD')) return 'bg-green-100 text-green-800';
+    if (action.includes('UPDATE') || action.includes('TOGGLE') || action.includes('UPSERT')) return 'bg-orange-100 text-orange-800';
     return 'bg-gray-100 text-gray-800';
   };
 
-  const formatDetails = (metadata, action) => {
-    if (!metadata) return '—';
-    if (typeof metadata === 'string') return metadata;
-    if (typeof metadata === 'object') {
-      const keys = Object.keys(metadata);
-      if (keys.length === 1) {
-        const val = metadata[keys[0]];
-        return val !== null && val !== undefined ? String(val) : '—';
-      }
-      return keys.map(key => `${key}: ${metadata[key]}`).join(', ');
+  // Returns a short human-readable summary shown inline in the table
+  const getActionSummary = (log) => {
+    const action = log.action || '';
+    const meta = log.metadata || {};
+    const carName = meta.carName || meta.model || meta.name || meta.title
+      || (log.entityId ? carMap[log.entityId] : null) || null;
+    const carLabel = carName || (log.entityId ? `ID: ${log.entityId}` : null);
+
+    if (action === 'CREATE_CAR') return `Added car${carLabel ? ': ' + carLabel : ''}`;
+    if (action === 'DELETE_CAR') return `Deleted car${carLabel ? ': ' + carLabel : ''}`;
+    if (action === 'UPDATE_CAR') return `Updated car${carLabel ? ': ' + carLabel : ''}`;
+    if (action === 'UPSERT_CAR_IMAGES') return `Updated images${carLabel ? ' for ' + carLabel : ''}`;
+    if (action === 'UPDATE_CAR_PRICE') {
+      const oldP = meta.oldPrice != null ? `₦${Number(meta.oldPrice).toLocaleString()}` : null;
+      const newP = meta.newPrice != null ? `₦${Number(meta.newPrice).toLocaleString()}` : (meta.price != null ? `₦${Number(meta.price).toLocaleString()}` : null);
+      const car = carLabel ? carLabel + ': ' : '';
+      if (oldP && newP) return `${car}${oldP} → ${newP}`;
+      if (newP) return `${car}price set to ${newP}`;
+      return `Updated price${carLabel ? ' for ' + carLabel : ''}`;
     }
-    return String(metadata);
+    if (action === 'TOGGLE_CAR_AVAILABILITY') {
+      const avail = meta.available ?? meta.isAvailable;
+      const status = avail != null ? (avail ? 'Available' : 'Unavailable') : null;
+      return `${carLabel ? carLabel + ': ' : ''}${status ? 'marked ' + status : 'availability toggled'}`;
+    }
+    if (action === 'UPDATE_INTEREST_RATE') {
+      const oldR = meta.oldRate ?? meta.previousRate;
+      const newR = meta.newRate ?? meta.rate ?? meta.annualRatePct;
+      if (oldR != null && newR != null) return `${oldR}% → ${newR}%`;
+      if (newR != null) return `Rate set to ${newR}%`;
+      return 'Updated interest rate';
+    }
+    if (action.includes('LOAN_TENURE')) {
+      const months = meta.months || log.entityId;
+      const verb = action.includes('ADD') || action.includes('CREATE') ? 'Added' : action.includes('DELETE') ? 'Deleted' : 'Updated';
+      return `${verb} tenure${months ? ': ' + months + ' months' : ''}`;
+    }
+    if (action === 'UPDATE_CALCULATOR_CONFIG') {
+      const parts = [];
+      if (meta.downPaymentPct != null) parts.push(`Down: ${meta.downPaymentPct}%`);
+      if (meta.processingFeePct != null) parts.push(`Fee: ₦${Number(meta.processingFeePct).toLocaleString()}`);
+      if (meta.insuranceCost != null) parts.push(`Insurance: ${meta.insuranceCost}%`);
+      return parts.length ? parts.join(' · ') : 'Updated calculator config';
+    }
+    if (action === 'CREATE_FINANCE_APPLICATION') return 'Finance application submitted';
+    return '—';
+  };
+
+  // Builds the rich HTML for the details modal
+  const buildDetailsHtml = (log) => {
+    const meta = log.metadata || {};
+    const action = log.action || '';
+    const carName = meta.carName || meta.model || meta.name || meta.title
+      || (log.entityId ? carMap[log.entityId] : null) || null;
+
+    const row = (label, value) =>
+      value != null && value !== ''
+        ? `<tr>
+            <td style="padding:6px 16px 6px 0;color:#6b7280;font-size:0.8125rem;white-space:nowrap;vertical-align:top">${label}</td>
+            <td style="padding:6px 0;color:#111827;font-size:0.8125rem;font-weight:500;word-break:break-word">${value}</td>
+           </tr>`
+        : '';
+
+    const divider = `<tr><td colspan="2" style="padding:6px 0"><hr style="border:none;border-top:1px solid #f3f4f6"/></td></tr>`;
+
+    const rows = [];
+    rows.push(row('Action', `<span style="font-weight:600">${formatAction(action)}</span>`));
+    rows.push(divider);
+    rows.push(row('Performed By', log.actorEmail || 'System'));
+    rows.push(row('Role', log.actorRole || null));
+    rows.push(row('Time', new Date(log.createdAt).toLocaleString()));
+    rows.push(divider);
+
+    // Car-specific fields
+    if (carName) rows.push(row('Car', `<strong>${carName}</strong>`));
+    if (log.entityId && !carName && log.entityType === 'CAR') rows.push(row('🚗 Car ID', log.entityId));
+    if (log.entityType && log.entityType !== 'CAR') rows.push(row('Entity Type', log.entityType));
+    if (log.entityId && log.entityType !== 'CAR') rows.push(row('Entity ID', log.entityId));
+
+    // Action-specific details
+    if (action === 'UPDATE_CAR_PRICE') {
+      const oldP = meta.oldPrice ?? meta.previousPrice;
+      const newP = meta.newPrice ?? meta.price;
+      if (oldP != null) rows.push(row('Previous Price', `₦${Number(oldP).toLocaleString()}`));
+      if (newP != null) rows.push(row('New Price', `<strong style="color:#16a34a">₦${Number(newP).toLocaleString()}</strong>`));
+    } else if (action === 'TOGGLE_CAR_AVAILABILITY') {
+      const avail = meta.available ?? meta.isAvailable;
+      if (avail != null) rows.push(row('Status', avail
+        ? '<span style="color:#16a34a;font-weight:600">✅ Available</span>'
+        : '<span style="color:#dc2626;font-weight:600">❌ Unavailable</span>'));
+    } else if (action === 'UPDATE_CAR') {
+      Object.entries(meta).forEach(([k, v]) => {
+        if (['carName','model','name','title','id','carId'].includes(k)) return;
+        const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+        rows.push(row(label, String(v)));
+      });
+    } else if (action === 'UPDATE_INTEREST_RATE') {
+      const oldR = meta.oldRate ?? meta.previousRate;
+      const newR = meta.newRate ?? meta.rate ?? meta.annualRatePct;
+      if (oldR != null) rows.push(row('Previous Rate', `${oldR}%`));
+      if (newR != null) rows.push(row('New Rate', `<strong style="color:#16a34a">${newR}%</strong>`));
+    } else if (action.includes('LOAN_TENURE')) {
+      const months = meta.months || log.entityId;
+      if (months) rows.push(row('Duration', `<strong>${months} months</strong>`));
+    } else if (action === 'UPDATE_CALCULATOR_CONFIG') {
+      if (meta.downPaymentPct != null) rows.push(row('Down Payment', `${meta.downPaymentPct}%`));
+      if (meta.processingFeePct != null) rows.push(row('Processing Fee', `₦${Number(meta.processingFeePct).toLocaleString()}`));
+      if (meta.insuranceCost != null) rows.push(row('Insurance Cost', `${meta.insuranceCost}%`));
+    } else if (action === 'CREATE_FINANCE_APPLICATION') {
+      Object.entries(meta).forEach(([k, v]) => {
+        if (v == null) return;
+        const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+        rows.push(row(label, String(v)));
+      });
+    } else if (action === 'UPSERT_CAR_IMAGES' || action === 'CREATE_CAR' || action === 'DELETE_CAR') {
+      // show any additional metadata keys
+      Object.entries(meta).forEach(([k, v]) => {
+        if (['carName','model','name','title'].includes(k)) return;
+        if (v == null) return;
+        const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+        rows.push(row(label, String(v)));
+      });
+    } else {
+      // Generic fallback
+      Object.entries(meta).forEach(([k, v]) => {
+        if (v == null) return;
+        const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+        rows.push(row(label, String(v)));
+      });
+    }
+
+    return `<table style="width:100%;text-align:left;border-collapse:collapse">${rows.join('')}</table>`;
   };
 
   const showDetails = (log) => {
-
-    const detailsText = formatDetails(log.metadata, log.action);
-    const formatLabel = (str) => {
-  if (!str) return '';
-  // Replace underscores/hyphens with spaces
-  let result = str.replace(/[_-]/g, ' ');
-  // Insert space before each uppercase letter (handles camelCase)
-  result = result.replace(/([A-Z])/g, ' $1').trim();
-  // Capitalize first letter of each word
-  result = result.replace(/\b\w/g, (char) => char.toUpperCase());
-  // Collapse multiple spaces
-  result = result.replace(/\s+/g, ' ');
-  return result;
-};
     Swal.fire({
-      title: '<span style="font-size:1.5rem;font-weight:600;">Activity Details</span>',
-      html: `
-        <div class="text-left space-y-2">
-          <div class="flex pb-1 font-normal text-sm">
-            <span class="font-normal text-sm w-24">User:</span>
-            <span>${log.actorEmail || 'System'}</span>
-          </div>
-          <div class="flex pb-1 font-normal text-sm">
-            <span class="font-normal text-sm w-24">Role:</span>
-            <span>${log.actorRole || '—'}</span>
-          </div>
-          <div class="flex pb-1 font-normal text-sm">
-            <span class="font-normal text-sm w-24">Action:</span>
-            <span class="font-normal text-sm">${formatAction(log.action)}</span>
-          </div>
-          <div class="flex pb-1 font-normal text-sm">
-            <span class="font-normal text-sm w-24">Entity:</span>
-            <span class="font-normal text-sm">${log.entityType || '—'}</span>
-          </div>
-          <div class="flex pb-1 font-normal text-sm">
-            <span class="font-normal text-sm w-24">Timestamp:</span>
-            <span>${new Date(log.createdAt).toLocaleString()}</span>
-          </div>
-          <div class="flex pt-1">
-            <span class="font-normal text-sm w-24">Details:</span>
-           <span class="flex-1 break-words font-normal text-sm word-spaced">
-  ${formatLabel(detailsText)}
-</span>
-          </div>
-        </div>
-      `,
+      title: '<span style="font-size:1.1rem;font-weight:700;">Activity Details</span>',
+      html: buildDetailsHtml(log),
       confirmButtonText: 'Close',
-      width: '500px',
-      heightAuto: true,
-      confirmButtonColor:'#1e3f6e'
+      width: '480px',
+      confirmButtonColor: '#1e3f6e',
     });
   };
 
@@ -191,15 +285,15 @@ const AuditLog = () => {
           </div>
         </div>
 
-        <div className="w-full overflow-x-auto">
+        <div className="-mx-6 overflow-x-auto" style={{ width: 'calc(100% + 3rem)' }}>
           <table className="w-full text-sm">
             <thead className="border-b border-gray-100">
-              <tr>
-                <th className="text-left pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">User</th>
-                <th className="text-left pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Role</th>
-                <th className="text-left pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Timestamp</th>
-                <th className="text-left pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Action</th>
-                <th className="text-left pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">View more</th>
+              <tr className="bg-gray-50 text-gray-500 text-xs uppercase">
+                <th className="text-left py-3 px-4 font-semibold tracking-wide whitespace-nowrap">S/N</th>
+                <th className="text-left py-3 px-4 font-semibold tracking-wide whitespace-nowrap">User</th>
+                <th className="text-left py-3 px-4 font-semibold tracking-wide whitespace-nowrap">Timestamp</th>
+                <th className="text-left py-3 px-4 font-semibold tracking-wide whitespace-nowrap">Action</th>
+                <th className="text-left py-3 px-4 font-semibold tracking-wide whitespace-nowrap">View</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -210,27 +304,30 @@ const AuditLog = () => {
               ) : pageItems.length === 0 ? (
                 <tr><td colSpan="5" className="py-8 text-center text-gray-400">No activity logs found.</td></tr>
               ) : (
-                pageItems.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50">
-                    <td className="py-3 text-gray-700">{log.actorEmail || 'System'}</td>
-                    <td className="py-3 text-gray-700">{log.actorRole || '—'}</td>
-                    <td className="py-3 text-gray-700">{new Date(log.createdAt).toLocaleString()}</td>
-                    <td className="py-3 text-gray-700">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getActionBadgeClass(log.action)}`}>
-                        {formatAction(log.action)}
-                      </span>
-                    </td>
-                    <td className="py-3 text-gray-700">
-                      <button
-                        onClick={() => showDetails(log)}
-                        className="text-blue-600 hover:text-blue-800 transition-colors"
-                        title="View details"
-                      >
-                        <Eye size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                pageItems.map((log, index) => {
+                  const serial = startIdx + index + 1;
+                  return (
+                    <tr key={log.id ?? index} className={`transition-colors hover:bg-blue-50 ${index % 2 === 0 ? 'bg-white' : 'bg-[#F8F9FC]'}`}>
+                      <td className="py-3 px-4 text-gray-500 whitespace-nowrap">{serial}</td>
+                      <td className="py-3 px-4 text-gray-700 whitespace-nowrap">{log.actorEmail || 'System'}</td>
+                      <td className="py-3 px-4 text-gray-700 whitespace-nowrap">{new Date(log.createdAt).toLocaleString()}</td>
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getActionBadgeClass(log.action)}`}>
+                          {formatAction(log.action)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <button
+                          onClick={() => showDetails(log)}
+                          className="text-blue-600 hover:text-blue-800 transition-colors"
+                          title="View details"
+                        >
+                          <Eye size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

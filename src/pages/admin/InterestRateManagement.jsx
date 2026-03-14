@@ -118,69 +118,60 @@ const InterestRateManagement = () => {
   return (
     <div className="p-8 w-full">
       {/* Page Header */}
-      <h1 className="text-2xl font-bold text-gray-900">Interest Rate Management</h1>
+      <h1 className="text-sm md:text-lg font-bold text-gray-900">Interest Rate Management</h1>
       <p className="text-sm text-gray-500 mt-1 mb-6">
         Set, modify, and track interest rates for car products in one centralized dashboard.
       </p>
 
       {/* Update Card */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-        <form
-          className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4"
-          onSubmit={handleUpdateSubmit}
-        >
-          <div>
-            <p className="font-semibold text-gray-900">Update Interest Rate</p>
-            <p className="text-sm text-gray-400 mt-0.5">Input the details to modify interest rate</p>
-          </div>
-          {/* Update button for desktop */}
-          <div className="hidden md:flex flex-col items-end gap-2">
+      <div className="bg-white rounded-xl border border-gray-200 mb-6 overflow-hidden">
+        <form onSubmit={handleUpdateSubmit}>
+          {/* Top row: title + button (button hidden on mobile) */}
+          <div className="flex items-start justify-between px-4 sm:px-6 py-4 sm:py-5">
+            <div>
+              <p className="font-semibold text-gray-900 text-sm md:text-sm">Update Interest Rate</p>
+              <p className="text-xs sm:text-sm text-gray-400 mt-0.5">Input the details below to modify interest rate</p>
+            </div>
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-normal px-2 py-2.5 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="hidden md:flex bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 items-center gap-2 shrink-0"
               disabled={updateLoading}
             >
-              {updateLoading && <span className="animate-spin h-5 w-5 border-2 border-white border-t-blue-600 rounded-full inline-block"></span>}
-              {updateLoading ? 'Updating...' : 'Update Rate'}
+              {updateLoading && <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full inline-block"></span>}
+              {updateLoading ? 'Updating...' : 'Update Rates'}
             </button>
-            {(updateError || updateSuccess) && (
-              <div className={`mt-4 text-sm font-medium ${updateError ? 'text-red-600' : 'text-green-600'}`}>{updateError || updateSuccess}</div>
-            )}
           </div>
-          {/* Input and mobile button inside form */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-[200px_1fr] md:gap-8">
-            <p className="text-sm font-medium text-gray-700 pt-2">Input rate details</p>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Interest Rate (%)</label>
+
+          {/* Divider */}
+          <div className="border-t border-gray-100" />
+
+          {/* Centered input */}
+          <div className="flex flex-col items-center py-6 sm:py-8 px-4 sm:px-6">
+            <div className="w-full max-w-lg">
+              <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2 text-center">
+                Input rate details Interest Rate (%)
+              </label>
               <input
                 type="text"
-                min="1"
-                max="100"
-                step="0.01"
                 placeholder="Input interest rate"
                 value={interestRate}
                 onChange={(e) => setInterestRate(e.target.value)}
-                className={`w-full border rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400 ${updateError ? 'border-red-500' : 'border-gray-200'}`}
+                className={`w-full border rounded-lg px-4 py-2.5 sm:py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-400 ${updateError ? 'border-red-500' : 'border-gray-200'}`}
               />
-              {/* Update button for mobile (bottom, full width) */}
+              {/* Mobile submit button */}
               <button
                 type="submit"
                 disabled={updateLoading}
-                className={`md:hidden w-full mt-4 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-center transition-colors
-                  ${updateLoading ? 'bg-blue-400 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}
-                  ${updateError ? 'border-red-500' : 'border-gray-200'}`}
+                className="md:hidden w-full mt-4 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-blue-500 hover:bg-blue-600 text-white transition-colors disabled:opacity-50"
               >
-                {updateLoading && (
-                  <span className="animate-spin h-5 w-5 border-2 border-white border-t-blue-600 rounded-full inline-block"></span>
-                )}
-                {updateLoading ? 'Updating...' : 'Update Rate'}
+                {updateLoading && <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full inline-block"></span>}
+                {updateLoading ? 'Updating...' : 'Update Rates'}
               </button>
-              {/* Feedback messages for mobile */}
-              <div className="block md:hidden">
-                {(updateError || updateSuccess) && (
-                  <div className={`mt-4 text-sm font-medium ${updateError ? 'text-red-600' : 'text-green-600'}`}>{updateError || updateSuccess}</div>
-                )}
-              </div>
+              {(updateError || updateSuccess) && (
+                <p className={`mt-3 text-sm font-medium text-center ${updateError ? 'text-red-600' : 'text-green-600'}`}>
+                  {updateError || updateSuccess}
+                </p>
+              )}
             </div>
           </div>
         </form>
@@ -191,7 +182,7 @@ const InterestRateManagement = () => {
         {/* History Header */}
         <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4">
           <div>
-            <p className="font-semibold text-gray-900">Interest Rate Update History</p>
+            <p className="font-semibold text-gray-900 text-xs md:text-sm">Interest Rate Update History</p>
             <p className="text-sm text-gray-400 mt-0.5">View and track all previous interest rate changes</p>
           </div>
           <div className="flex gap-3">
@@ -221,22 +212,26 @@ const InterestRateManagement = () => {
         </div>
 
         {/* Table */}
-        <div className="w-full">
+        <div className="w-full -mx-6 overflow-x-auto" style={{width: 'calc(100% + 3rem)'}}>
+          <div className="min-w-[480px]">
           {/* Table Head */}
-          <div className="grid grid-cols-3 border-b border-gray-100 pb-3 mb-1">
-            <button className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide text-left">
+          <div className="grid border-b border-gray-100 pb-3 mb-1 px-6" style={{gridTemplateColumns: '3rem 1fr 1fr 1fr'}}>
+            <button className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide text-left whitespace-nowrap">
+              S/N
+            </button>
+            <button className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide text-left whitespace-nowrap">
               Date Modified <ArrowDownUp size={12} className="text-gray-400" />
             </button>
-            <button className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide text-left">
+            <button className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide text-left whitespace-nowrap px-6">
               Previous Rate <ArrowDownUp size={12} className="text-gray-400" />
             </button>
-            <button className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide text-left">
+            <button className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide text-left whitespace-nowrap">
               Updated Rate <ArrowDownUp size={12} className="text-gray-400" />
             </button>
           </div>
 
           {/* Rows */}
-          <div className="flex flex-col divide-y divide-gray-50">
+          <div className="flex flex-col">
             {loading ? (
               <div className="py-8 text-center text-gray-400 text-sm">Loading...</div>
             ) : error ? (
@@ -245,29 +240,31 @@ const InterestRateManagement = () => {
               <div className="py-8 text-center text-gray-400 text-sm">No history found.</div>
             ) : (
               historyData.map((row) => (
-                <div key={row.id} className="grid grid-cols-3 py-4">
-                  <span className="text-sm text-gray-700">{row.date}</span>
-                  <span className="text-sm text-gray-700">{row.prevRate}</span>
-                  <span className="text-sm text-gray-700">{row.updatedRate}</span>
+                <div key={row.id} className={`grid py-4 px-6 border-b border-gray-50 ${historyData.indexOf(row) % 2 !== 0 ? 'bg-[#F8F9FC]' : 'bg-white'}`} style={{gridTemplateColumns: '3rem 1fr 1fr 1fr'}}>
+                  <span className="text-sm text-gray-700 whitespace-nowrap">{(page - 1) * pageSize + historyData.indexOf(row) + 1}</span>
+                  <span className="text-sm text-gray-700 whitespace-nowrap">{row.date}</span>
+                  <span className="text-sm text-gray-700 whitespace-nowrap px-6">{row.prevRate}</span>
+                  <span className="text-sm text-gray-700 whitespace-nowrap">{row.updatedRate}</span>
                 </div>
               ))
             )}
           </div>
+          </div>
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
-          <p className="text-sm text-gray-500">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-6 pt-4 border-t border-gray-100">
+          <p className="text-xs sm:text-sm text-gray-500">
             {historyData.length === 0
               ? 'Showing 0 entries'
               : `Showing ${(page - 1) * pageSize + 1}–${(page - 1) * pageSize + historyData.length} of ${totalEntries != null ? totalEntries : 'many'} entries${totalEntries == null ? ' (approx.)' : ''}`}
           </p>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">Show</span>
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <span className="text-xs sm:text-sm text-gray-500">Show</span>
             <div className="relative">
               <button
                 onClick={() => setPageSizeOpen((o) => !o)}
-                className="flex items-center gap-1.5 border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+                className="flex items-center gap-1.5 border border-gray-200 rounded-md px-3 py-1.5 text-xs sm:text-sm text-gray-700 hover:bg-gray-50"
               >
                 {pageSize}
                 <ChevronDown size={13} />
@@ -290,7 +287,7 @@ const InterestRateManagement = () => {
                 </div>
               )}
             </div>
-            <span className="text-sm text-gray-500">entries</span>
+            <span className="text-xs sm:text-sm text-gray-500">entries</span>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -299,7 +296,7 @@ const InterestRateManagement = () => {
               >
                 <ChevronLeft size={14} />
               </button>
-              <span className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-sm text-gray-700 font-medium bg-white">
+              <span className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-md text-xs sm:text-sm text-gray-700 font-medium bg-white">
                 {safePage}
               </span>
               <button

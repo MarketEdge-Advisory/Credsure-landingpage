@@ -12,6 +12,7 @@ import AdminLogin from './pages/admin/AdminLogin';
 import { useAuth } from './context/AuthContext';
 import ProfileSettings from './pages/admin/ProfileSettings';
 import CarDetailsPage from "./pages/CarDetailsPage";
+import AuditLog from './pages/admin/AuditLog';
 
 
 /** Redirect to login if not authenticated. Optionally restrict to a specific role. */
@@ -103,6 +104,14 @@ function App() {
             element={
               <ProtectedRoute allowedRole="credsure">
                 <LoanTermManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="audit-log"
+            element={
+              <ProtectedRoute allowedRole="credsure">
+                <AuditLog />
               </ProtectedRoute>
             }
           />

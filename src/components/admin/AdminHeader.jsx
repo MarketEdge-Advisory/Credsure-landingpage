@@ -39,7 +39,7 @@ const AdminHeader = ({ onHamburgerClick }) => {
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
-    <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex items-center justify-between relative z-30">
+    <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex items-center justify-between relative z-30 rounded-t-xl">
       {/* Left: Hamburger (mobile) + Breadcrumb */}
       <div className="flex items-center gap-2 text-sm">
         {/* Hamburger icon for mobile */}
@@ -54,7 +54,7 @@ const AdminHeader = ({ onHamburgerClick }) => {
         </button>
         <span className="text-gray-400 font-medium">Pages</span>
         <span className="text-gray-300">/</span>
-        <span className="text-gray-800 font-semibold">{pageLabel}</span>
+        <span className="text-gray-800 font-normal text-xs md:text-sm">{pageLabel}</span>
       </div>
 
       {/* Right side */}

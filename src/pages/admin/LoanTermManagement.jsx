@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getLoanTenures, addLoanTenure, deleteLoanTenure, getActivityLogs } from '../../api/adminConfig';
 import { Plus, Trash2, X, CalendarDays, History, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { MdWarning } from 'react-icons/md';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
@@ -16,6 +17,10 @@ const LoanTermManagement = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [duration, setDuration] = useState('');
+
+  // Edit state: maps original id → new month value string
+  const [editValues, setEditValues] = useState({});
+  const [saving, setSaving] = useState(false);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
@@ -38,6 +43,14 @@ const LoanTermManagement = () => {
         tenuresArray = [];
       }
       setTerms(tenuresArray);
+      // Initialise edit values from freshly loaded terms
+      const initialEdits = {};
+      tenuresArray.forEach(t => {
+        const id = t?.id ?? t?._id ?? t?.months ?? t;
+        const mv = t?.months ?? t?.duration ?? (typeof t === 'number' ? t : t?.id);
+        initialEdits[String(id)] = String(mv ?? '');
+      });
+      setEditValues(initialEdits);
     } catch (e) {
       setError(e.message || 'Failed to load loan tenures');
       setTerms([]);
@@ -52,8 +65,14 @@ const LoanTermManagement = () => {
     try {
       const data = await getActivityLogs({ page: 1, pageSize: 500 });
       const items = Array.isArray(data?.items) ? data.items : [];
-      const tenureCreations = items.filter(log => log?.action === 'ADD_LOAN_TENURE');
-      setHistoryLogs(tenureCreations);
+      // Debug: log all unique actions to identify exact delete action string
+      const uniqueActions = [...new Set(items.map(l => l?.action).filter(Boolean))];
+      console.log('[LoanTermManagement] All activity actions:', uniqueActions);
+      const tenureLogs = items.filter(log =>
+        typeof log?.action === 'string' && log.action.toUpperCase().includes('TENURE')
+      );
+      console.log('[LoanTermManagement] Filtered tenure logs:', tenureLogs);
+      setHistoryLogs(tenureLogs);
     } catch (e) {
       setHistoryError(e.message || 'Failed to load history');
       setHistoryLogs([]);
@@ -70,6 +89,61 @@ const LoanTermManagement = () => {
   const handleCancel = () => {
     setShowModal(false);
     setDuration('');
+  };
+
+  const handleSaveAll = async () => {
+    setSaving(true);
+    try {
+      const changed = safeTerms.filter(term => {
+        const id = String(term?.id ?? term?._id ?? term?.months ?? term);
+        const originalVal = String(term?.months ?? term?.duration ?? (typeof term === 'number' ? term : term?.id));
+        return editValues[id] !== undefined && editValues[id] !== originalVal;
+      });
+
+      if (changed.length === 0) {
+        Swal.fire({ icon: 'info', title: 'No Changes', text: 'No loan terms were modified.', confirmButtonColor: '#1e3f6e' });
+        setSaving(false);
+        return;
+      }
+
+      // Validate all changed values first
+      for (const term of changed) {
+        const id = String(term?.id ?? term?._id ?? term?.months ?? term);
+        const newMonths = parseInt(editValues[id], 10);
+        if (isNaN(newMonths) || newMonths < 1) {
+          Swal.fire({ icon: 'error', title: 'Invalid Value', text: `Please enter a valid number greater than 0.`, confirmButtonColor: '#1e3f6e' });
+          setSaving(false);
+          return;
+        }
+        // Duplicate check against unchanged terms
+        const alreadyExists = safeTerms.some(t => {
+          const tId = String(t?.id ?? t?._id ?? t?.months ?? t);
+          const tVal = t?.months ?? t?.duration ?? (typeof t === 'number' ? t : t?.id);
+          return tId !== id && tVal === newMonths;
+        });
+        if (alreadyExists) {
+          Swal.fire({ icon: 'warning', title: 'Duplicate Term', text: `${newMonths} months already exists.`, confirmButtonColor: '#1e3f6e' });
+          setSaving(false);
+          return;
+        }
+      }
+
+      // Backend has no PATCH: delete the old value then add the new one
+      for (const term of changed) {
+        const id = term?.id ?? term?._id ?? term?.months ?? term;
+        const newMonths = parseInt(editValues[String(id)], 10);
+        await deleteLoanTenure(id);
+        await addLoanTenure(newMonths);
+      }
+
+      await refreshTenures();
+      await fetchHistory();
+      Swal.fire({ icon: 'success', title: 'Saved!', text: 'Loan terms updated successfully.', confirmButtonColor: '#1e3f6e', timer: 1500, showConfirmButton: false });
+    } catch (e) {
+      Swal.fire({ icon: 'error', title: 'Save Failed', text: e.message || 'Failed to update loan terms.', confirmButtonColor: '#1e3f6e' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -182,41 +256,59 @@ const LoanTermManagement = () => {
         </button>
       </div>
 
-      {/* Terms Card (read‑only) */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-        <div className="mb-6">
-          <p className="font-semibold text-gray-900">Current Loan Terms</p>
-          <p className="text-sm text-gray-400 mt-0.5">Existing loan terms (read‑only). Use the delete button to remove a term.</p>
+      {/* Terms Card */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
+        {/* Top row */}
+        <div className="flex items-start justify-between px-6 pt-6 pb-5">
+          <div>
+            <p className="font-semibold text-gray-900">Update Loan Term</p>
+            <p className="text-sm text-gray-400 mt-0.5">Input the details below to modify loan term</p>
+          </div>
+          <button
+            onClick={handleSaveAll}
+            disabled={saving}
+            className="hidden md:flex items-center gap-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors flex-shrink-0"
+          >
+            {saving ? 'Saving...' : 'Save Details'}
+          </button>
+        </div>
+
+        <div className="border-t border-gray-100" />
+
+        {/* Body */}
+        <div className="px-6 py-6">
           {showTermsWarning && (
-            <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
-              ⚠️ The list of terms is empty, but history shows that terms have been created. 
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+              ⚠️ The list of terms is empty, but history shows that terms have been created.
               This may indicate a problem with the API response. Check the browser console for details.
             </div>
           )}
-        </div>
 
-        <div className="grid grid-cols-[200px_1fr] gap-8">
-          <p className="text-sm font-medium text-gray-700 pt-2">Term (months)</p>
-          <div className="flex flex-col gap-3">
-            {loading ? (
-              <div className="text-center py-4 text-gray-500">Loading...</div>
-            ) : error ? (
-              <div className="text-center py-4 text-red-500">{error}</div>
-            ) : safeTerms.length === 0 ? (
-              <div className="text-center py-4 text-gray-400">No loan terms found. Add one using the button above.</div>
-            ) : (
-              safeTerms.map((term) => {
-                // Determine a unique key
+          <p className="text-sm font-medium text-gray-700 mb-4">Edit loan term</p>
+
+          {loading ? (
+            <div className="text-center py-4 text-gray-500">Loading...</div>
+          ) : error ? (
+            <div className="text-center py-4 text-red-500">{error}</div>
+          ) : safeTerms.length === 0 ? (
+            <div className="text-center py-4 text-gray-400">No loan terms found. Add one using the button above.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {safeTerms.map((term) => {
                 const itemId = term?.id ?? term?._id ?? term?.months ?? term;
-                const monthValue = getMonthValue(term);
+                const key = String(itemId);
                 return (
-                  <div key={String(itemId)} className="flex items-center gap-3">
-                    <input
-                      type="number"
-                      value={monthValue}
-                      readOnly
-                      className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 bg-gray-100 cursor-not-allowed focus:outline-none"
-                    />
+                  <div key={key} className="flex items-center gap-3">
+                    <div className="flex-1 flex items-center border border-gray-200 rounded-xl overflow-hidden bg-white relative">
+                      <input
+                        type="number"
+                        min="1"
+                        value={editValues[key] ?? ''}
+                        onChange={e => setEditValues(prev => ({ ...prev, [key]: e.target.value }))}
+                        className="w-full pl-4 pr-20 py-2.5 text-sm text-gray-700 bg-transparent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                      <span className="absolute right-4 text-sm text-gray-500 whitespace-nowrap pointer-events-none">Months</span>
+                    </div>
                     <button
                       onClick={() => handleDelete(itemId)}
                       className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
@@ -225,9 +317,18 @@ const LoanTermManagement = () => {
                     </button>
                   </div>
                 );
-              })
-            )}
-          </div>
+              })}
+            </div>
+          )}
+
+          {/* Mobile save button */}
+          <button
+            onClick={handleSaveAll}
+            disabled={saving}
+            className="md:hidden mt-5 w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+          >
+            {saving ? 'Saving...' : 'Save Details'}
+          </button>
         </div>
       </div>
 
@@ -237,34 +338,59 @@ const LoanTermManagement = () => {
           <History size={20} className="text-gray-500" />
           <p className="font-semibold text-gray-900">Creation History</p>
         </div>
-        <p className="text-sm text-gray-400 mt-0.5 mb-6">Timeline of when loan terms were created</p>
+        <p className="text-sm text-gray-400 mt-0.5 mb-6">Timeline of when loan terms were created or deleted.</p>
 
-        <div className="w-full overflow-x-auto">
+        <div className="-mx-6 overflow-x-auto" style={{ width: 'calc(100% + 3rem)' }}>
           <table className="w-full text-sm">
             <thead className="border-b border-gray-100">
-              <tr>
-                <th className="text-left pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Date Created</th>
-                <th className="text-left pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Created By</th>
-                <th className="text-left pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Duration (months)</th>
+              <tr className="bg-gray-50 text-gray-500 text-xs uppercase">
+                <th className="text-left py-3 px-4 font-semibold tracking-wide whitespace-nowrap">S/N</th>
+                <th className="text-left py-3 px-4 font-semibold tracking-wide whitespace-nowrap">Date Created/deleted</th>
+                <th className="text-left py-3 px-4 font-semibold tracking-wide whitespace-nowrap">Action</th>
+                <th className="text-left py-3 px-4 font-semibold tracking-wide whitespace-nowrap">Duration (months)</th>
+                <th className="text-left py-3 px-4 font-semibold tracking-wide whitespace-nowrap">User</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {historyLoading ? (
-                <tr><td colSpan="3" className="py-8 text-center text-gray-400">Loading history...</td></tr>
+                <tr><td colSpan="5" className="py-8 text-center text-gray-400">Loading history...</td></tr>
               ) : historyError ? (
-                <tr><td colSpan="3" className="py-8 text-center text-red-500">{historyError}</td></tr>
+                <tr><td colSpan="5" className="py-8 text-center text-red-500">{historyError}</td></tr>
               ) : pageItems.length === 0 ? (
-                <tr><td colSpan="3" className="py-8 text-center text-gray-400">No creation history found.</td></tr>
+                <tr><td colSpan="5" className="py-8 text-center text-gray-400">No creation history found.</td></tr>
               ) : (
-                pageItems.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50">
-                    <td className="py-3 text-gray-700">{new Date(log.createdAt).toLocaleString()}</td>
-                    <td className="py-3 text-gray-700">{log.actorEmail || 'System'}</td>
-                    <td className="py-3 text-gray-700">
-                      {log.metadata?.months || log.entityId || '—'} months
-                    </td>
-                  </tr>
-                ))
+                pageItems.map((log, index) => {
+                  const serial = (safePage - 1) * pageSize + index + 1;
+                  const actionRaw = (log.action || log.type || '').toUpperCase();
+                  const isCreated = actionRaw.includes('ADD') || actionRaw.includes('CREATE');
+                  const isDeleted = actionRaw.includes('DELETE') || actionRaw.includes('REMOVE');
+                  const actionLabel = isCreated ? 'Created' : isDeleted ? 'Deleted' : actionRaw || '-';
+                  const actionClass = isCreated
+                    ? 'bg-green-100 text-green-700'
+                    : isDeleted
+                    ? 'bg-red-100 text-red-700'
+                    : 'bg-gray-100 text-gray-600';
+
+                  return (
+                    <tr key={log.id} className={`transition-colors hover:bg-blue-50 ${index % 2 === 0 ? 'bg-white' : 'bg-[#F8F9FC]'}`}>
+                      <td className="py-3 px-4 text-gray-500 whitespace-nowrap">{serial}</td>
+                      <td className="py-3 px-4 text-gray-700 whitespace-nowrap">{new Date(log.createdAt).toLocaleString()}</td>
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        {actionRaw ? (
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${actionClass}`}>
+                            {actionLabel}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-gray-700 whitespace-nowrap">
+                        {log.metadata?.months || log.entityId || '—'} months
+                      </td>
+                      <td className="py-3 px-4 text-gray-700 whitespace-nowrap">{log.actorEmail || 'System'}</td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

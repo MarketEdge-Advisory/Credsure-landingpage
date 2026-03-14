@@ -10,6 +10,7 @@ import {
   Tooltip, ResponsiveContainer,
 } from 'recharts';
 import financeApplicationsApi from '../../api/financeApplications';
+import { getInterestRateHistory } from '../../api/adminConfig';
 import { convertToCSV, downloadCSV } from '../../utils/csvExport';
 
 const PAGE_SIZES = [10, 20, 50];
@@ -41,7 +42,7 @@ const Dashboard = () => {
     <div className="p-8 min-w-0 w-full">
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
+          <h1 className="text-sm md:text-lg font-bold text-gray-900">Dashboard Overview</h1>
         </div>
       </div>
       <RecentApplications />
@@ -57,6 +58,7 @@ const statusStyle = {
 
 const RecentApplications = () => {
   const [applications, setApplications] = useState([]);
+  const [rateHistory, setRateHistory] = useState([]); // sorted ascending by createdAt
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [pageSize, setPageSize] = useState(10);
@@ -106,6 +108,47 @@ const RecentApplications = () => {
     fetchApplications();
   }, [page, pageSize, status]);
 
+  // Fetch ALL interest rate history pages (backend max is 50 per page)
+  React.useEffect(() => {
+    const fetchAllRateHistory = async () => {
+      const LIMIT = 50;
+      let currentPage = 1;
+      let allItems = [];
+      while (true) {
+        try {
+          const res = await getInterestRateHistory(currentPage, LIMIT);
+          const items = Array.isArray(res?.data?.items) ? res.data.items
+            : Array.isArray(res?.items) ? res.items
+            : [];
+          allItems = allItems.concat(items);
+          if (items.length < LIMIT) break; // last page
+          currentPage++;
+        } catch {
+          break;
+        }
+      }
+      const sorted = [...allItems].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      setRateHistory(sorted);
+    };
+    fetchAllRateHistory();
+  }, []);
+
+  // Returns the interest rate that was active at a given ISO date string
+  const getRateAtTime = (createdAt) => {
+    if (!rateHistory.length || !createdAt) return null;
+    const appTime = new Date(createdAt).getTime();
+    // The rate before any recorded change
+    let activeRate = rateHistory[0].previousRatePct;
+    for (const entry of rateHistory) {
+      if (new Date(entry.createdAt).getTime() <= appTime) {
+        activeRate = entry.newRatePct;
+      } else {
+        break;
+      }
+    }
+    return activeRate;
+  };
+
   const handleSort = (key) => {
     if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
     else { setSortKey(key); setSortDir('asc'); }
@@ -123,6 +166,8 @@ const RecentApplications = () => {
     vehicle: a.selectedVehicle,
     amount: a.vehicleAmount ? `₦${Number(a.vehicleAmount).toLocaleString()}` : '',
     down: a.downPayment != null ? `₦${Number(a.downPayment).toLocaleString()}` : '',
+    interestRate: getRateAtTime(a.createdAt),
+    createdAt: a.createdAt,
     status: a.status === 'PENDING' ? 'Pending' : a.status === 'APPROVED' ? 'Approved' : a.status === 'UNDER_REVIEW' ? 'Under Review' : a.status,
   }));
 
@@ -169,7 +214,44 @@ const RecentApplications = () => {
     <span className={`ml-1 text-gray-400 ${sortKey === k ? 'text-gray-700' : ''}`}>↓</span>
   );
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
+    // Fetch rate history fresh at download time to ensure it's available
+    let history = rateHistory;
+    if (!history.length) {
+      try {
+        const LIMIT = 50;
+        let currentPage = 1;
+        let allItems = [];
+        while (true) {
+          const res = await getInterestRateHistory(currentPage, LIMIT);
+          const items = Array.isArray(res?.data?.items) ? res.data.items
+            : Array.isArray(res?.items) ? res.items
+            : [];
+          allItems = allItems.concat(items);
+          if (items.length < LIMIT) break;
+          currentPage++;
+        }
+        history = [...allItems].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        setRateHistory(history);
+      } catch {
+        history = [];
+      }
+    }
+
+    const resolveRate = (createdAt) => {
+      if (!history.length || !createdAt) return '';
+      const appTime = new Date(createdAt).getTime();
+      let activeRate = history[0].previousRatePct;
+      for (const entry of history) {
+        if (new Date(entry.createdAt).getTime() <= appTime) {
+          activeRate = entry.newRatePct;
+        } else {
+          break;
+        }
+      }
+      return activeRate != null ? `${activeRate}%` : '';
+    };
+
     const headers = [
       'Full Name',
       'Email',
@@ -179,7 +261,7 @@ const RecentApplications = () => {
       'Vehicle Selected',
       'Vehicle Amount',
       'Down Payment',
-      // 'Status',
+      'Interest Rate (%)',
     ];
 
     const dataForExport = paginated.map(row => ({
@@ -191,12 +273,12 @@ const RecentApplications = () => {
       'Vehicle Selected': row.vehicle,
       'Vehicle Amount': row.amount,
       'Down Payment': row.down,
-      // 'Status': row.status,
+      'Interest Rate (%)': resolveRate(row.createdAt),
     }));
 
     const csv = convertToCSV(dataForExport, headers);
     downloadCSV(csv, 'dashboard-applications.csv');
-  };
+  };;
 
   const toggleRow = (id) => {
     const newExpanded = new Set(expandedRows);
@@ -213,7 +295,7 @@ const RecentApplications = () => {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-5 border-b border-gray-100">
         <div>
-          <h2 className="text-base font-bold text-gray-900">Recent Pre-Approval Applications</h2>
+          <h2 className="text-sm md:text-base font-semibold text-gray-900">Recent Pre-Approval Applications</h2>
           {/* <p className="text-gray-400 text-sm mt-0.5">Latest processed pre-approval applications</p> */}
         </div>
         <div className="w-full flex items-center justify-between flex-wrap gap-4">
@@ -243,24 +325,24 @@ const RecentApplications = () => {
             </div>
           </div>
         </div>
-      {/* Table + footer in shared horizontal scroll */}
+      {/* Table + footer */}
       <div className="overflow-x-auto">
-        <div className="min-w-max">
-          <table className="w-full text-sm">
+        <div>
+          <table className="w-full text-xs table-fixed min-w-[700px]">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="px-2 py-4 text-left text-xs font-semibold text-gray-500 w-8"></th> {/* Expand column */}
+                <th className="px-2 py-4 text-left text-xs font-semibold text-gray-500 w-8">{/* Expand column */}</th>
                 {[
-                  { label: 'Full Name',        key: 'name' },
-                  { label: 'Phone Number',     key: 'phone' },
-                  { label: 'Vehicle Selected', key: 'vehicle' },
-                  { label: 'Vehicle Amount',   key: 'amount' },
-                  { label: 'Down Payment',     key: 'down' },
-                ].map(({ label, key }) => (
+                  { label: 'Full Name',        key: 'name',    cls: 'w-1/4' },
+                  { label: 'Phone Number',     key: 'phone',   cls: 'w-36' },
+                  { label: 'Vehicle Selected', key: 'vehicle', cls: '' },
+                  { label: 'Vehicle Amount',   key: 'amount',  cls: 'w-32' },
+                  { label: 'Down Payment',     key: 'down',    cls: 'w-32' },
+                ].map(({ label, key, cls }) => (
                   <th
                     key={key}
                     onClick={() => handleSort(key)}
-                    className="px-6 py-4 text-left text-xs font-semibold text-gray-500 cursor-pointer hover:text-gray-800 select-none"
+                    className={`px-6 py-4 text-left text-xs font-semibold text-gray-500 cursor-pointer hover:text-gray-800 select-none whitespace-nowrap ${cls}`}
                   >
                     {label}<SortIcon k={key} />
                   </th>
@@ -278,7 +360,7 @@ const RecentApplications = () => {
                 </tr>
               ) : paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-gray-400 text-sm">
+                  <td colSpan={7} className="px-6 py-10 text-center text-gray-400">
                     No results found.
                   </td>
                 </tr>
@@ -299,11 +381,13 @@ const RecentApplications = () => {
                           )}
                         </button>
                       </td>
-                      <td className="px-6 py-4 text-blue-500 font-medium">{row.name}</td>
+                      <td className="px-6 py-4 text-blue-500 font-medium">
+                        <span className="block text-xs" title={row.name}>{row.name}</span>
+                      </td>
                       <td className="px-6 py-4 text-gray-700 whitespace-nowrap">{row.phone}</td>
                       <td className="px-6 py-4 text-gray-700">{row.vehicle}</td>
-                      <td className="px-6 py-4 text-gray-700">{row.amount}</td>
-                      <td className="px-6 py-4 text-gray-700">{row.down}</td>
+                      <td className="px-6 py-4 text-gray-700 whitespace-nowrap">{row.amount}</td>
+                      <td className="px-6 py-4 text-gray-700 whitespace-nowrap">{row.down}</td>
                     </tr>
                     {/* Expanded row - aligned under columns */}
                     {expandedRows.has(row.id) && (
@@ -311,15 +395,15 @@ const RecentApplications = () => {
                         <td className="px-2 py-3" />
                         <td className="px-6 py-3">
                           <p className="text-xs font-normal text-gray-500 tracking-wider">Email</p>
-                          <p className="text-sm text-gray-800 font-normal">{row.email || '—'}</p>
+                          <p className="text-gray-800 font-normal break-all">{row.email || '—'}</p>
                         </td>
                         <td className="px-6 py-3">
                           <p className="text-xs font-normal text-gray-500 tracking-wider">Employment</p>
-                          <p className="text-sm text-gray-800 font-normal">{row.employment || '—'}</p>
+                          <p className="text-gray-800 font-normal">{row.employment || '—'}</p>
                         </td>
                         <td className="px-6 py-3">
                           <p className="text-xs font-normal text-gray-500 tracking-wider">Monthly Income</p>
-                          <p className="text-sm text-gray-800 font-normal">{row.income || '—'}</p>
+                          <p className="text-gray-800 font-normal">{row.income || '—'}</p>
                         </td>
                         <td colSpan={2} />
                       </tr>
@@ -365,8 +449,8 @@ const RecentApplications = () => {
               </div>
             </div>
           </div>
-        </div>{/* /min-w-max */}
-      </div>{/* /overflow-x-auto */}
+        </div>{/* /div */}
+      </div>{/* /div */}
     </div>
   );
 };
