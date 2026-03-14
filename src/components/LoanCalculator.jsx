@@ -330,17 +330,17 @@ const LoanCalculator = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 max-w-6xl mx-auto">
           {/* Left Column - Form */}
           <div className="bg-[#FFFFFF0D] rounded-none p-4 sm:p-6 md:p-8 shadow-xl">
-            <h3 className="text-white text-lg sm:text-xl font-bold mb-4 sm:mb-6 uppercase tracking-wider">
+            <h3 className="text-white text-lg sm:text-md font-medium mb-4 sm:mb-6 uppercase tracking-wider">
               Loan Calculator
             </h3>
 
             {/* Vehicle Select */}
             <div className="mb-4 sm:mb-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-1 sm:gap-0">
-                <label className="text-gray-300 text-xs sm:text-sm font-medium">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-0.5 sm:gap-2">
+                <label className="text-gray-300 text-xs font-medium">
                   Select Vehicle Model
                 </label>
-                <span className="text-[#3FA9F5] text-xs sm:text-sm font-semibold">
+                <span className="text-[#3FA9F5] text-xs font-semibold whitespace-nowrap">
                   Vehicle Price : ₦{formatCurrency(vehiclePrice)}
                 </span>
               </div>
