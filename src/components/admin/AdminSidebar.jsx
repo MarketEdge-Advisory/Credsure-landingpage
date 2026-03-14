@@ -21,6 +21,7 @@ const ALL_SECTIONS = [
     roles: ['credsure', 'suzuki', 'super'],
     items: [
       { name: 'Dashboard', icon: Home, path: '/admin/dashboard' },
+      { name: 'Audit Log', icon: ClipboardList, path: '/admin/audit-log' },
     ],
   },
   {
@@ -37,7 +38,6 @@ const ALL_SECTIONS = [
       { name: 'Interest Rate Management', icon: CirclePercentIcon, path: '/admin/interest-rate' },
       { name: 'Calculator Input Management', icon: Calculator, path: '/admin/calculator-input' },
       { name: 'Loan Term Management', icon: FileText, path: '/admin/loan-term' },
-      { name: 'Audit Log', icon: ClipboardList, path: '/admin/audit-log' },
     ],
   },
   // {

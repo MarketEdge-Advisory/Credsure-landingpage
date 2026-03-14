@@ -251,7 +251,7 @@ const AuditLog = () => {
 
   return (
     <div className="p-8 w-full">
-      <h1 className="text-2xl font-bold text-gray-900">Activity Log</h1>
+      <h1 className="text-sm md:text-lg font-bold text-gray-900">Activity Log</h1>
       <p className="text-sm text-gray-500 mt-1 mb-6">
         Track all changes made to platform settings, including who changed what and when.
       </p>

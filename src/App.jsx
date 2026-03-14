@@ -110,7 +110,7 @@ function App() {
           <Route
             path="audit-log"
             element={
-              <ProtectedRoute allowedRole="credsure">
+              <ProtectedRoute>
                 <AuditLog />
               </ProtectedRoute>
             }

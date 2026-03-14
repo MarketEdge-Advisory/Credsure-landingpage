@@ -390,7 +390,7 @@ const CalculatorInputMgt = () => {
                   <th className="py-3 px-4 font-medium">Down Payment (%)</th>
                   <th className="py-3 px-4 font-medium">Processing Fee (₦)</th>
                   <th className="py-3 px-4 font-medium">Insurance Cost (%)</th>
-                  <th className="py-3 px-4 font-medium">Changed By</th>
+                  <th className="py-3 px-4 font-medium">User</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
