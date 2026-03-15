@@ -5,7 +5,7 @@ import { uploadImagesToCloudinary } from '../../api/upload';
 import {
   Plus, Search, Pencil, Trash2, Download, CalendarDays, ChevronDown,
   ChevronLeft, ChevronRight, ArrowLeft, UploadCloud, Minus, FileSpreadsheet,
-  Loader2
+  Loader2, Archive, Eye
 } from 'lucide-react';
 import DateRangePicker from '../../components/admin/DateRangePicker';
 import { useCarContext } from '../../context/CarContext';
@@ -378,6 +378,7 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
   const fileInputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [archivedNewImageIndexes, setArchivedNewImageIndexes] = useState(new Set());
   const [form, setForm] = useState({
     carName: '',
     description: '',
@@ -424,8 +425,22 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
     });
   };
 
+  const handleArchiveNewImage = (idx) => {
+    setArchivedNewImageIndexes(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  };
+
   const handleRemoveImage = (idx) => {
     setImagePreviews((prev) => prev.filter((_, i) => i !== idx));
+    setArchivedNewImageIndexes(prev => {
+      const next = new Set();
+      prev.forEach(i => { if (i < idx) next.add(i); else if (i > idx) next.add(i - 1); });
+      return next;
+    });
     if (fileInputRef.current) {
       const dt = new DataTransfer();
       Array.from(fileInputRef.current.files).forEach((file, i) => {
@@ -451,8 +466,9 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
         }
 
         // ✅ Check imagePreviews instead of fileInputRef
-        if (imagePreviews.length === 0) {
-            Swal.fire({ icon: 'error', title: 'No Images', text: 'Please upload at least one image.' });
+        const activeImages = imagePreviews.filter((_, i) => !archivedNewImageIndexes.has(i));
+        if (activeImages.length === 0) {
+            Swal.fire({ icon: 'error', title: 'No Images', text: 'Please upload at least one image (unarchived).' });
             return;
         }
 
@@ -461,7 +477,7 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
             let imageUrls = [];
 
             // ✅ Always use imagePreviews files — works for both click and drag-and-drop
-            const filesToUpload = imagePreviews.map(img => img.file).filter(Boolean);
+            const filesToUpload = activeImages.map(img => img.file).filter(Boolean);
 
             if (filesToUpload.length > 0) {
                 const uploadResult = await uploadImagesToCloudinary(filesToUpload);
@@ -522,7 +538,7 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
       )}
       <button
         onClick={onBack}
-        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 mb-4 transition-colors"
+        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-300 mb-4 transition-colors cursor-pointer"
       >
         <ArrowLeft size={15} />
         Go back
@@ -544,8 +560,8 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
             <div className="w-full">
               <p className="text-sm text-gray-500 mb-2">Click to upload or drag and drop multiple images</p>
               <div
-                className={`border-2 border-dashed rounded-xl p-6 sm:p-8 md:p-10 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
-                  dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                className={`border-2 border-dashed rounded-xl p-6 sm:p-6 md:p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
+                  dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-[#EBF1FF] hover:bg-gray-100'
                 }`}
                 onClick={() => fileInputRef.current?.click()}
                 onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -553,18 +569,75 @@ const AddVehicleForm = ({ onBack, fetchVehicles }) => {
                 onDrop={handleDrop}
               >
                 {imagePreviews.length > 0 ? (
-                  <div className="flex flex-wrap gap-4">
+                  <div className="flex flex-wrap gap-3">
                     {imagePreviews.map((img, idx) => (
-                      <div key={idx} className="relative group">
-                        <img src={img.src} alt={`Preview ${idx + 1}`} className="max-h-40 rounded-lg object-contain" />
-                        <button
-                          type="button"
-                          onClick={e => { e.stopPropagation(); handleRemoveImage(idx); }}
-                          title="Remove image"
-                          className="absolute top-1 right-1 w-6 h-6 grid place-items-center bg-white/80 rounded-full shadow hover:bg-red-500 hover:text-white transition z-10"
-                        >
-                          <span className="leading-none">×</span>
-                        </button>
+                      <div
+                        key={idx}
+                        className={`relative group w-36 h-36 rounded-xl overflow-hidden border-2 transition-all duration-200 ${
+                          archivedNewImageIndexes.has(idx)
+                            ? 'border-amber-400 opacity-60'
+                            : 'border-transparent hover:border-blue-300'
+                        }`}
+                      >
+                        <img
+                          src={img.src}
+                          alt={`Preview ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        {archivedNewImageIndexes.has(idx) && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-amber-400/20">
+                            <span className="text-[10px] font-bold text-amber-800 bg-white/90 px-2 py-0.5 rounded-full uppercase tracking-wide">Archived</span>
+                          </div>
+                        )}
+                        {/* Hover action overlay */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 rounded-xl transition-all duration-200 flex items-end justify-center pb-2">
+                          <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <button
+                              type="button"
+                              onClick={e => { e.stopPropagation(); window.open(img.src, '_blank'); }}
+                              title="Preview"
+                              className="w-7 h-7 grid place-items-center bg-white/90 rounded-full shadow hover:bg-blue-500 hover:text-white transition text-gray-700"
+                            >
+                              <Eye size={13} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={e => {
+                                e.stopPropagation();
+                                const a = document.createElement('a');
+                                a.href = img.src;
+                                a.download = `car-image-${idx + 1}`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                              }}
+                              title="Download"
+                              className="w-7 h-7 grid place-items-center bg-white/90 rounded-full shadow hover:bg-green-500 hover:text-white transition text-gray-700"
+                            >
+                              <Download size={13} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={e => { e.stopPropagation(); handleArchiveNewImage(idx); }}
+                              title={archivedNewImageIndexes.has(idx) ? 'Unarchive' : 'Archive'}
+                              className={`w-7 h-7 grid place-items-center rounded-full shadow transition ${
+                                archivedNewImageIndexes.has(idx)
+                                  ? 'bg-amber-400 text-white'
+                                  : 'bg-white/90 text-gray-700 hover:bg-amber-400 hover:text-white'
+                              }`}
+                            >
+                              <Archive size={13} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={e => { e.stopPropagation(); handleRemoveImage(idx); }}
+                              title="Remove"
+                              className="w-7 h-7 grid place-items-center bg-white/90 rounded-full shadow hover:bg-red-500 hover:text-white transition text-gray-700"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -729,8 +802,10 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
   const fileInputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
   const [existingImageUrls, setExistingImageUrls] = useState([]);
+  const [archivedImageIndexes, setArchivedImageIndexes] = useState(new Set());
   const [newImageFiles, setNewImageFiles] = useState([]);
   const [newImagePreviews, setNewImagePreviews] = useState([]);
+  const [archivedNewPreviewIndexes, setArchivedNewPreviewIndexes] = useState(new Set());
   const [form, setForm] = useState({
     carName: '',
     description: '',
@@ -787,10 +862,38 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
   const handleRemoveNewImage = (idx) => {
     setNewImageFiles(prev => prev.filter((_, i) => i !== idx));
     setNewImagePreviews(prev => prev.filter((_, i) => i !== idx));
+    setArchivedNewPreviewIndexes(prev => {
+      const next = new Set();
+      prev.forEach(i => { if (i < idx) next.add(i); else if (i > idx) next.add(i - 1); });
+      return next;
+    });
   };
 
   const handleRemoveExistingImage = (idx) => {
     setExistingImageUrls(prev => prev.filter((_, i) => i !== idx));
+    setArchivedImageIndexes(prev => {
+      const next = new Set();
+      prev.forEach(i => { if (i < idx) next.add(i); else if (i > idx) next.add(i - 1); });
+      return next;
+    });
+  };
+
+  const handleArchiveExistingImage = (idx) => {
+    setArchivedImageIndexes(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  };
+
+  const handleArchiveNewPreview = (idx) => {
+    setArchivedNewPreviewIndexes(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
   };
 
   const handleDrop = (e) => {
@@ -805,10 +908,12 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
  const handleEditVehicle = async () => {
   setSaving(true);
   try {
-    // 1. Upload new images to Cloudinary
-    let finalImageUrls = [...existingImageUrls];
-    if (newImageFiles.length > 0) {
-      const uploadResult = await uploadImagesToCloudinary(newImageFiles);
+    // 1. Exclude archived existing images, then upload new non-archived images
+    const nonArchivedExisting = existingImageUrls.filter((_, i) => !archivedImageIndexes.has(i));
+    let finalImageUrls = [...nonArchivedExisting];
+    const activeNewFiles = newImageFiles.filter((_, i) => !archivedNewPreviewIndexes.has(i));
+    if (activeNewFiles.length > 0) {
+      const uploadResult = await uploadImagesToCloudinary(activeNewFiles);
       const resultData = uploadResult?.data || uploadResult;
       let newUrls = [];
       if (resultData.imageUrls && Array.isArray(resultData.imageUrls)) {
@@ -901,34 +1006,13 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
         {/* Upload Images Section */}
         <div className="grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] gap-4 md:gap-8 py-6 w-full border-b border-gray-100">
           <div className="w-full">
-            <p className="text-sm font-medium text-gray-700">Vehicle Images</p>
+            <p className="text-sm font-medium text-gray-700">Upload Vehicle Images</p>
           </div>
-          <div className="w-full">
-            {existingImageUrls.length > 0 && (
-              <div className="mb-4">
-                <p className="text-sm text-gray-500 mb-2">Current Images</p>
-                <div className="flex flex-wrap gap-4">
-                  {existingImageUrls.map((url, idx) => (
-                    <div key={`existing-${idx}`} className="relative group">
-                      <img src={url} alt={`Existing ${idx + 1}`} className="max-h-40 rounded-lg object-contain" />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveExistingImage(idx)}
-                        className="absolute top-1 right-1 w-6 h-6 grid place-items-center bg-white/80 rounded-full shadow hover:bg-red-500 hover:text-white transition z-10"
-                        title="Remove image"
-                      >
-                        <span className="leading-none">×</span>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <p className="text-sm text-gray-500 mb-2">Add more images (optional)</p>
+          <div className="w-full flex flex-col gap-2">
+            <p className="text-sm text-gray-500 m-0">Click to upload more images</p>
             <div
-              className={`border-2 border-dashed rounded-xl p-6 sm:p-8 md:p-10 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
-                dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+              className={`border-2 border-dashed rounded-xl p-6 sm:p-8 md:p-6 md:max-w-[500px] flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
+                dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-[#EBF1FF] hover:bg-gray-100'
               }`}
               onClick={() => fileInputRef.current?.click()}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -936,18 +1020,69 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
               onDrop={handleDrop}
             >
               {newImagePreviews.length > 0 ? (
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-3">
                   {newImagePreviews.map((src, idx) => (
-                    <div key={`new-${idx}`} className="relative group">
-                      <img src={src} alt={`New Preview ${idx + 1}`} className="max-h-40 rounded-lg object-contain" />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveNewImage(idx)}
-                        className="absolute top-1 right-1 w-6 h-6 grid place-items-center bg-white/80 rounded-full shadow hover:bg-red-500 hover:text-white transition z-10"
-                        title="Remove image"
-                      >
-                        <span className="leading-none">×</span>
-                      </button>
+                    <div
+                      key={`new-${idx}`}
+                      className={`relative group w-36 h-36 rounded-xl overflow-hidden border-2 transition-all duration-200 ${
+                        archivedNewPreviewIndexes.has(idx)
+                          ? 'border-amber-400 opacity-60'
+                          : 'border-transparent hover:border-blue-300'
+                      }`}
+                    >
+                      <img src={src} alt={`New Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                      {archivedNewPreviewIndexes.has(idx) && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-amber-400/20">
+                          <span className="text-[10px] font-bold text-amber-800 bg-white/90 px-2 py-0.5 rounded-full uppercase tracking-wide">Archived</span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 rounded-xl transition-all duration-200 flex items-end justify-center pb-2">
+                        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <button
+                            type="button"
+                            onClick={() => window.open(src, '_blank')}
+                            title="Preview"
+                            className="w-7 h-7 grid place-items-center bg-white/90 rounded-full shadow hover:bg-blue-500 hover:text-white transition text-gray-700"
+                          >
+                            <Eye size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const a = document.createElement('a');
+                              a.href = src;
+                              a.download = `car-image-new-${idx + 1}`;
+                              document.body.appendChild(a);
+                              a.click();
+                              document.body.removeChild(a);
+                            }}
+                            title="Download"
+                            className="w-7 h-7 grid place-items-center bg-white/90 rounded-full shadow hover:bg-green-500 hover:text-white transition text-gray-700"
+                          >
+                            <Download size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleArchiveNewPreview(idx)}
+                            title={archivedNewPreviewIndexes.has(idx) ? 'Unarchive' : 'Archive'}
+                            className={`w-7 h-7 grid place-items-center rounded-full shadow transition ${
+                              archivedNewPreviewIndexes.has(idx)
+                                ? 'bg-amber-400 text-white'
+                                : 'bg-white/90 text-gray-700 hover:bg-amber-400 hover:text-white'
+                            }`}
+                          >
+                            <Archive size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveNewImage(idx)}
+                            title="Remove"
+                            className="w-7 h-7 grid place-items-center bg-white/90 rounded-full shadow hover:bg-red-500 hover:text-white transition text-gray-700"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -969,7 +1104,80 @@ const EditVehicleForm = ({ vehicle, onBack, fetchVehicles }) => {
               className="hidden"
               onChange={(e) => handleNewImageFiles(e.target.files)}
             />
+
+            {existingImageUrls.length > 0 && (
+              <div className="mt-4">
+                <p className="text-sm text-gray-500 mb-2">Uploaded Images</p>
+                <div className="flex flex-wrap gap-3">
+                  {existingImageUrls.map((url, idx) => (
+                    <div
+                      key={`existing-${idx}`}
+                      className={`relative group w-36 h-36 rounded-xl overflow-hidden border-2 transition-all duration-200 ${
+                        archivedImageIndexes.has(idx)
+                          ? 'border-amber-400 opacity-60'
+                          : 'border-transparent hover:border-blue-300'
+                      }`}
+                    >
+                      <img src={url} alt={`Existing ${idx + 1}`} className="w-full h-full object-cover" />
+                      {archivedImageIndexes.has(idx) && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-amber-400/20">
+                          <span className="text-[10px] font-bold text-amber-800 bg-white/90 px-2 py-0.5 rounded-full uppercase tracking-wide">Archived</span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 rounded-xl transition-all duration-200 flex items-end justify-center pb-2">
+                        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <button
+                            type="button"
+                            onClick={() => window.open(url, '_blank')}
+                            title="Preview"
+                            className="w-7 h-7 grid place-items-center bg-white/90 rounded-full shadow hover:bg-blue-500 hover:text-white transition text-gray-700"
+                          >
+                            <Eye size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = `car-image-${idx + 1}`;
+                              document.body.appendChild(a);
+                              a.click();
+                              document.body.removeChild(a);
+                            }}
+                            title="Download"
+                            className="w-7 h-7 grid place-items-center bg-white/90 rounded-full shadow hover:bg-green-500 hover:text-white transition text-gray-700"
+                          >
+                            <Download size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleArchiveExistingImage(idx)}
+                            title={archivedImageIndexes.has(idx) ? 'Unarchive' : 'Archive'}
+                            className={`w-7 h-7 grid place-items-center rounded-full shadow transition ${
+                              archivedImageIndexes.has(idx)
+                                ? 'bg-amber-400 text-white'
+                                : 'bg-white/90 text-gray-700 hover:bg-amber-400 hover:text-white'
+                            }`}
+                          >
+                            <Archive size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveExistingImage(idx)}
+                            title="Remove"
+                            className="w-7 h-7 grid place-items-center bg-white/90 rounded-full shadow hover:bg-red-500 hover:text-white transition text-gray-700"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+          
         </div>
 
         {/* Car Details Row */}
@@ -1267,19 +1475,19 @@ const CarManagement = () => {
             Effortlessly control vehicle details, pricing, listings, and media in one centralized dashboard.
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <button
             onClick={() => setShowImportForm(true)}
-            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-2 py-2 rounded-lg transition-colors w-full sm:w-auto justify-center"
+            className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-normal px-2 py-2 rounded-lg transition-colors w-full sm:w-auto justify-center whitespace-nowrap"
           >
-            <FileSpreadsheet size={16} />
+            <FileSpreadsheet size={14} />
             Import from Excel
           </button>
           <button
             onClick={() => setShowAddForm(true)}
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-2 py-2 rounded-lg transition-colors w-full sm:w-auto justify-center"
+            className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-normal px-2 py-2 rounded-lg transition-colors w-full sm:w-auto justify-center whitespace-nowrap"
           >
-            <Plus size={16} />
+            <Plus size={14} />
             Add New Vehicle
           </button>
         </div>
