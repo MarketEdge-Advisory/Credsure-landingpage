@@ -47,18 +47,18 @@ const AuthShell = ({ children }) => (
                 backgroundSize: '120px 120px',
             }}
         />
-        <header className="relative z-10 flex items-center justify-between px-6 py-3 bg-black/20">
-            <div className="flex items-center gap-3">
-                <img src="/suzuki-by-cfao-logo.png" alt="Suzuki" className="h-7 w-auto object-contain brightness-0 invert" />
-                <img src="/credsure-real-logo.svg" alt="CredSure Loans" className="h-6 w-auto object-contain brightness-0 invert" />
+        <header className="relative z-10 flex items-center justify-between px-4 sm:px-6 py-3 bg-black/20 gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <img src="/suzuki-by-cfao-logo.png" alt="Suzuki" className="h-5 sm:h-7 w-auto object-contain brightness-0 invert shrink-0" />
+                <img src="/credsure-real-logo.svg" alt="CredSure Loans" className="h-4 sm:h-6 w-auto object-contain brightness-0 invert shrink-0" />
             </div>
-            <span className="text-white/70 text-xs">© 2026 Suzuki X Credsure Loans. All Rights Reserved.</span>
+            <span className="text-white/70 text-[9px] sm:text-xs text-right leading-tight">© 2026 Suzuki X Credsure Loans.<span className="hidden sm:inline"> All Rights Reserved.</span></span>
         </header>
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4">
-            <p className="text-white text-xl font-semibold mb-5 text-center">
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-2">
+            <p className="text-white text-base sm:text-xl font-semibold mb-3 sm:mb-5 text-center">
                 Hi Admin, welcome back 👋
             </p>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md px-8 py-8">
+            <div className="bg-white rounded-[10px] border border-gray-200 shadow-2xl w-full max-w-[420px] px-5 py-5 sm:px-7 sm:py-6 flex flex-col gap-1 sm:gap-2">
                 {children}
             </div>
         </div>
@@ -67,7 +67,7 @@ const AuthShell = ({ children }) => (
 
 /* ─── text input ─── */
 const TextInput = ({ label, type = 'text', placeholder, value, onChange, icon: Icon }) => (
-    <div className="mb-3 sm:mb-4">
+    <div className="mb-2 sm:mb-3">
         <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{label}</label>
         <div className="relative">
             <input
@@ -90,7 +90,7 @@ const TextInput = ({ label, type = 'text', placeholder, value, onChange, icon: I
 const PasswordInput = ({ label, placeholder, value, onChange }) => {
     const [show, setShow] = useState(false);
     return (
-        <div className="mb-3 sm:mb-4">
+        <div className="mb-2 sm:mb-3">
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{label}</label>
             <div className="relative">
                 <input
@@ -160,8 +160,8 @@ const LoginStep = ({ onForgot, onSuccess }) => {
 
     return (
         <>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-1">Log In</h2>
-            <p className="text-xs sm:text-sm text-gray-500 text-center mb-5">Enter your credentials to access your account</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-0.5">Log In</h2>
+            <p className="text-xs sm:text-sm text-gray-500 text-center mb-3 sm:mb-5">Enter your credentials to access your account</p>
 
             <ErrorBox message={error} />
 
@@ -180,8 +180,8 @@ const LoginStep = ({ onForgot, onSuccess }) => {
                 onChange={(e) => setPassword(e.target.value)}
             />
 
-            <div className="flex items-center justify-between mb-4 mt-1">
-                <label className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-600 cursor-pointer select-none">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 sm:mb-4 mt-0.5 gap-1.5 sm:gap-2">
+                <label className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-600 cursor-pointer select-none whitespace-nowrap shrink-0">
                     <input
                         type="checkbox"
                         checked={remember}
@@ -193,7 +193,7 @@ const LoginStep = ({ onForgot, onSuccess }) => {
                 <button
                     type="button"
                     onClick={onForgot}
-                    className="text-xs sm:text-sm text-[#2d9de5] hover:underline font-medium"
+                    className="text-xs sm:text-sm text-[#2d9de5] hover:underline font-medium whitespace-nowrap shrink-0"
                 >
                     Forgot Password?
                 </button>
