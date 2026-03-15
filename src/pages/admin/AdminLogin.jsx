@@ -38,27 +38,27 @@ const getFriendlyForgotPasswordError = (rawMessage) => {
 
 /* ─── background wrapper ─── */
 const AuthShell = ({ children }) => (
-    <div className="min-h-screen flex flex-col relative" style={{ background: 'linear-gradient(180deg,#193d61 0%,#2d8ecf 100%)' }}>
+    <div className="h-screen overflow-hidden flex flex-col relative" style={{ background: 'linear-gradient(180deg,#193d61 0%,#2d8ecf 100%)' }}>
         <div
             className="absolute inset-0 pointer-events-none"
             style={{
                 backgroundImage:
-                    'linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px)',
-                backgroundSize: '40px 40px',
+                    'linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px)',
+                backgroundSize: '120px 120px',
             }}
         />
-        <header className="relative z-10 flex items-center justify-between px-4 py-2 bg-black/20">
-            <div className="flex items-center gap-2">
-                <img src="/credsure-real-logo.svg" alt="CredSure Loans" className="h-5 sm:h-6 w-auto object-contain brightness-0 invert" />
-                <img src="/suzuki-by-cfao-logo.png" alt="Suzuki" className="h-6 sm:h-7 w-auto object-contain brightness-0 invert" />
+        <header className="relative z-10 flex items-center justify-between px-6 py-3 bg-black/20">
+            <div className="flex items-center gap-3">
+                <img src="/suzuki-by-cfao-logo.png" alt="Suzuki" className="h-7 w-auto object-contain brightness-0 invert" />
+                <img src="/credsure-real-logo.svg" alt="CredSure Loans" className="h-6 w-auto object-contain brightness-0 invert" />
             </div>
-            <span className="text-white/70 text-[9px] sm:text-xs">© 2026 CredSure Loans X Suzuki.</span>
+            <span className="text-white/70 text-xs">© 2026 Suzuki X Credsure Loans. All Rights Reserved.</span>
         </header>
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4">
-            <p className="text-white text-lg sm:text-xl font-semibold mb-4 text-center">
+            <p className="text-white text-xl font-semibold mb-5 text-center">
                 Hi Admin, welcome back 👋
             </p>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md px-5 py-6 sm:px-8 sm:py-8">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md px-8 py-8">
                 {children}
             </div>
         </div>
